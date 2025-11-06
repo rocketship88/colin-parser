@@ -1,6 +1,6 @@
 # Expression Evaluator with Array Support
 
-This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added support for array references.
+This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added support for array references and caching.
 
 ## What's New
 
