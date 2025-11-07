@@ -738,7 +738,7 @@ verify "fib100 < fib101" [expr {$fib100 < $fib101}] [= fib100 < fib101]
 puts "\n========== CACHE CONTENTS =========="
 parray cache
 puts "\n========== CACHE hit count =========="
-parray cachehits
+catch {parray cachehits}
 
 puts "\n=========================================="
 if {$failures == 0} {
