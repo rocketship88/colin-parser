@@ -1,5 +1,5 @@
 # Tcl prototype of a next-generation concise expression evaluator '=' from Colin Macleod 
-#
+# milestone 7 before adding =
 # Bare words are treated as variable references.
 # Only numeric and boolean values and operations are supported.
 catch {console show}
@@ -9,24 +9,72 @@ proc deb2 s {}
 #proc deb1 s {puts $s}
 #proc deb2 s {puts $s}
 
+# original code here
+if 0 {
 proc = args {
     set exp [join $args]
-    if { [info exist ::cache($exp)] } {
-#       puts "exp= |$exp| code= |$::cache($exp)| ifexist: [info exist ::cache($exp)]"
-		incr ::cachehits($exp) ;# count reuse of cache
+    if { [info exist ::cache($exp)]  } {
+#       incr ::cachehits($exp)
         tailcall  ::tcl::unsupported::assemble $::cache($exp)
     }
-    set tokens [tokenise $exp]
-    deb1 "TOKENS = '$tokens'"
-    set code [compile $tokens]
-    deb1 "GENERATED CODE:\n$code\n" 
-#   puts "exp= |$exp| code= |$code| ifexist: [info exist ::cache($exp)]"
-    set ::cache($exp) $code
-    tailcall ::tcl::unsupported::assemble $code
-}
+    tailcall ::tcl::unsupported::assemble  [set ::cache($exp) [compile0 $exp]]
+#
+# experiment with using ? operator for possible speedup
+#
+#    expr { ![info exist ::cache($exp)] ?  \
+#    [tailcall ::tcl::unsupported::assemble  [set ::cache($exp) [compile [tokenise $exp]]] ] : \
+#    [tailcall  ::tcl::unsupported::assemble $::cache($exp)] }
 
+}
+}
+# make : the command and alias =, or other way around, alias is actually a performance hit
+# this version is optimized for either bracing or a single argument, just to avoid the costly join
+# which is needed since args could include the actual braces witchh would trigger a syntax error
+# and otherwise it's likely more costly to remove the pair with string ops
+proc : {arg args} {
+    if { [llength $args] != 0 } {
+        set arg [join "$arg $args"] 
+    }
+    if { [info exist ::cache($arg)]  } {
+        tailcall  ::tcl::unsupported::assemble $::cache($arg)
+#       incr ::cachehits($arg) ;# keep here, who knows, might be faster than being above, needed to actually count hits
+    }
+    tailcall ::tcl::unsupported::assemble  [set ::cache($arg) [compile0 $arg]]
+}
+interp alias {} = {} : ;# shorthands 
+
+
+# breakup compile into 2 parts to handle ; up front, 
+# also allow for ' and newline aliases, ' needs no bracing
+# but newline does, and then requires no semicolon (probably can have the semi then)
+proc compile0 exp {
+    set exp [string map {"'" ";" "\n" ";"} $exp]
+    # Fast path: no semicolons
+    if {[string first ";" $exp] == -1} {
+        return [compile [tokenise $exp]]
+    }
+    
+    # Has semicolons - split and compile each
+    set statements [split $exp ";"]
+    set bytecode ""
+    set count 0
+    foreach stmt $statements {
+        set stmt [string trim $stmt]
+        if {$stmt eq ""} continue
+        
+        if {$count > 0} {
+            append bytecode "pop; "
+        }
+        append bytecode [compile [tokenise $stmt]]
+        incr count
+    }
+    return $bytecode
+}
 proc tokenise input {
-    set op_re {\*\*|%|/|\*|-|\+|>>|<<|>=|<=|>|<|!=|==|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}
+    set op_re  {\*\*|%|/|\*|-|\+|>>|<<|>=|<=|>|<|!=|==|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}
+    #                                                  ^ added = here (after ==)
+    # ... rest stayed the same
+
     set pos 0
     set output {}
     foreach ind [regexp -indices -all -inline -- $op_re $input] {
@@ -56,6 +104,7 @@ proc compile toks {
 foreach {op prec code} {
     )  0 -
     ,  0 -
+    =  0 -
     ?  1 -
     :  1 -
     || 2 lor
@@ -99,14 +148,28 @@ set preprec 13
 # The current position in the input is in global var tokpos.
 # Returns the TAL bytecode to evaluate the expression.
 proc parse min_prec {
-
     set token [lindex $::tokens $::tokpos]
     set dep [incr ::depth]
     deb2 "[string repeat {  } $dep]PARSE min_prec=$min_prec tokpos=$::tokpos token='$token'"
     incr ::tokpos
+    
+    # NEW: Check for assignment
+    set nextop [lindex $::tokens $::tokpos]
+    if {$nextop eq "=" && [regexp {^[a-zA-Z_:][a-zA-Z0-9_:]*$} $token]} {
+        incr ::tokpos  ;# skip the '='
+        # Left side: just the variable name
+        set opcodes "push $token; "
+        # Right side: parse expression (recursive, handles a = b = c)
+        append opcodes [parse 0]
+        # Store the result
+        append opcodes "storeStk; "
+        set ::depth [expr {$dep - 1}]
+        return $opcodes
+    }
+    
+    # EXISTING CODE: Normal expression parsing
     set opcodes [parsePrefix $token]
     set ::depth $dep
-
     while {$::tokpos < [llength $::tokens]} {
         
         set token [lindex $::tokens $::tokpos]
@@ -136,7 +199,7 @@ proc parse min_prec {
     set ::depth [expr {$dep - 1}]
     return $opcodes
 }
-
+#instrument+  parse  
 # Parse expression up to the first operator at the same level of parentheses.
 # Returns the bytecode to evaluate the subexpression.
 proc parsePrefix token {
@@ -257,6 +320,10 @@ proc parseTernary {} {
     append opcodes "label $end; nop; "
     return $opcodes
 }
+
+
+
+
 
 # globals to change if we go to a namespace, such as ::Calc::
 #::depth
