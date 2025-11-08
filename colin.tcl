@@ -726,6 +726,58 @@ set fib100 [= fibonacci(100)]
 set fib101 [= fibonacci(101)]
 verify "fib100 < fib101" [expr {$fib100 < $fib101}] [= fib100 < fib101]
 
+puts "\n========== Assignment Operator =========="
+set x 0
+set y 0
+: x = 10
+verify "x = 10" [expr {$x}] 10
+
+: y = x + 5
+verify "y = x + 5" [expr {$y}] 15
+
+: z = x * 2
+verify "z = x * 2" [set z] 20
+
+puts "\n========== Self Assignment =========="
+set counter 5
+: counter = counter + 1
+verify "counter = counter + 1" [expr {$counter}] 6
+
+set val 100
+: val = val * 2
+verify "val = val * 2" [expr {$val}] 200
+
+puts "\n========== Chained Assignment =========="
+: {a = b = c = 50}
+verify "a = b = c (a)" [expr {$a}] 50
+verify "a = b = c (b)" [expr {$b}] 50
+verify "a = b = c (c)" [expr {$c}] 50
+
+puts "\n========== Multiple Statements =========="
+: {p = 10 ; q = 20 ; p + q}
+verify "p + q after assignment" [expr {$p + $q}] 30
+
+puts "\n========== Multiple Statements with Newlines =========="
+: {m = 5
+   n = 7
+   m * n}
+verify "m * n after multiline" [expr {$m * $n}] 35
+
+puts "\n========== Gather Function =========="
+proc tcl::mathfunc::gather {args} { list {*}$args }
+
+set result [: gather(10, 20, 30)]
+verify "gather(10, 20, 30)" [list 10 20 30] $result
+
+set x 5
+set y 10
+set coords [: gather(x*2, y*2)]
+verify "gather(x*2, y*2)" [list [expr {$x*2}] [expr {$y*2}]] $coords
+
+puts "\n========== Complex: Assignment + Gather =========="
+: {px = 100 ; py = 200}
+set points [: gather(px, py, px+10, py+10)]
+verify "gather with assigned vars" [list 100 200 110 210] $points
 
 
 
