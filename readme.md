@@ -8,7 +8,7 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 - fixes for boolean literals and multi-character function names (log10, atan2)
 - Comprehensive test suite with 100+ verification tests
 
-- Support for multiple expressions separated by ; or newline.
+- Support for multiple expressions separated by ` ' ` ` ; ` or `newline`.
 - Assignment operator, right associative, `a = b = c` possible too
 
 ## Usage
@@ -28,11 +28,11 @@ The file will run all tests automatically and display results.
 - Boolean operations: `= a < 10 && b > 5`
 - Bignum support: `= 2 ** 1000`
 - Bytecode caching for performance
-- New, assignment with `=` multiple statements with `;` or `newline` separators
+- New, assignment with `=` multiple statements with `'`  `;` or `newline` separators
 - Right associative assignment, `= a = b = (3 + 4) * 2` ;# produces 14 -> a and b
 - Can now cross lines if inside braces, no `;` needed
-- For on line multiple statements, can use `'` separator
-- Command alias, `'='` or `':'` 
+- For on line multiple statements without braces, can use `'` separator
+- Command alias, `=` or `:` 
 ## Requirements
 
 - Tcl 8.6 or 9.x
