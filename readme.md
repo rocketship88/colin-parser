@@ -10,14 +10,15 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 
 - Support for multiple expressions separated by ` ' ` ` ; ` or `newline`.
 - Assignment operator, right associative, `a = b = c` possible too
-
+- Finish up with wrapping in Calc:: namespace and some code cleanup
+  
 ## Usage
 
 ```tcl
 tclsh colin.tcl
 ```
 
-The file will run all tests automatically and display results.
+The file will run all tests automatically and display results. At about line 342 there are some knobs for testing. To use w/o tests, just remove all code below that point.
 
 ## Features
 
