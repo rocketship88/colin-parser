@@ -1,5 +1,9 @@
 # Tcl prototype of a next-generation concise expression evaluator '=' from Colin Macleod 
+# milestone 11 after knobs and cleanup 
+# milestone 10 after namespace 
+# milestone 9 before namespace 
 # milestone 8 after adding =
+# milestone 7 before adding =
 # Bare words are treated as variable references.
 # Only numeric and boolean values and operations are supported.
 catch {console show}
@@ -9,24 +13,7 @@ proc deb2 s {}
 #proc deb1 s {puts $s}
 #proc deb2 s {puts $s}
 
-# original code here
-if 0 {
-proc = args {
-    set exp [join $args]
-    if { [info exist ::cache($exp)]  } {
-#       incr ::cachehits($exp)
-        tailcall  ::tcl::unsupported::assemble $::cache($exp)
-    }
-    tailcall ::tcl::unsupported::assemble  [set ::cache($exp) [compile0 $exp]]
-#
-# experiment with using ? operator for possible speedup
-#
-#    expr { ![info exist ::cache($exp)] ?  \
-#    [tailcall ::tcl::unsupported::assemble  [set ::cache($exp) [compile [tokenise $exp]]] ] : \
-#    [tailcall  ::tcl::unsupported::assemble $::cache($exp)] }
 
-}
-}
 # make : the command and alias =, or other way around, alias is actually a performance hit
 # this version is optimized for either bracing or a single argument, just to avoid the costly join
 # which is needed since args could include the actual braces witchh would trigger a syntax error
@@ -39,10 +26,11 @@ proc : {arg args} {
         tailcall  ::tcl::unsupported::assemble $::cache($arg)
 #       incr ::cachehits($arg) ;# keep here, who knows, might be faster than being above, needed to actually count hits
     }
-    tailcall ::tcl::unsupported::assemble  [set ::cache($arg) [compile0 $arg]]
+    tailcall ::tcl::unsupported::assemble  [set ::cache($arg) [Calc::compile0 $arg]]
 }
 interp alias {} = {} : ;# shorthands 
 
+namespace eval Calc {
 
 # breakup compile into 2 parts to handle ; up front, 
 # also allow for ' and newline aliases, ' needs no bracing
@@ -90,25 +78,29 @@ proc tokenise input {
 }
 
 proc compile toks {
+    variable depth
+    variable tokens
+    variable tokpos
 
     if {[llength $toks] == 0} {error "Calc: nothing to calculate"}
-    set ::tokens $toks
-    set ::tokpos 0
-    set ::depth 0
+    set tokens $toks
+    set tokpos 0
+    set depth 0
     return [parse 0] 
 }
 
 # Pratt Parser loosely based on https://www.rosettacode.org/wiki/Arithmetic_evaluation#Nim
 
 # Define infix operators, their precedences and bytecodes
+# with chatgpt providing the bytecode to replace the lor/land codes
 foreach {op prec code} {
     )  0 -
     ,  0 -
     =  0 -
     ?  1 -
     :  1 -
-    || 2 lor
-    && 3 land
+    || 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}
+    && 3 {jumpFalse pop_A; jumpFalse false_res; push 1; jump end_res; label pop_A; pop; label false_res; push 0; label end_res}
     |  4 bitor
     ^  5 bitxor
     &  6 bitand
@@ -148,33 +140,38 @@ set preprec 13
 # The current position in the input is in global var tokpos.
 # Returns the TAL bytecode to evaluate the expression.
 proc parse min_prec {
-    set token [lindex $::tokens $::tokpos]
-    set dep [incr ::depth]
-    deb2 "[string repeat {  } $dep]PARSE min_prec=$min_prec tokpos=$::tokpos token='$token'"
-    incr ::tokpos
+    variable depth
+    variable incode
+    variable inprec
+    variable tokens
+    variable tokpos
+    set token [lindex $tokens $tokpos]
+    set dep [incr depth]
+    deb2 "[string repeat {  } $dep]PARSE min_prec=$min_prec tokpos=$tokpos token='$token'"
+    incr tokpos
     
     # NEW: Check for assignment
-    set nextop [lindex $::tokens $::tokpos]
+    set nextop [lindex $tokens $tokpos]
     if {$nextop eq "=" && [regexp {^[a-zA-Z_:][a-zA-Z0-9_:]*$} $token]} {
-        incr ::tokpos  ;# skip the '='
+        incr tokpos  ;# skip the '='
         # Left side: just the variable name
         set opcodes "push $token; "
         # Right side: parse expression (recursive, handles a = b = c)
         append opcodes [parse 0]
         # Store the result
         append opcodes "storeStk; "
-        set ::depth [expr {$dep - 1}]
+        set depth [expr {$dep - 1}]
         return $opcodes
     }
     
     # EXISTING CODE: Normal expression parsing
     set opcodes [parsePrefix $token]
-    set ::depth $dep
-    while {$::tokpos < [llength $::tokens]} {
+    set depth $dep
+    while {$tokpos < [llength $tokens]} {
         
-        set token [lindex $::tokens $::tokpos]
-        if {[info exists ::inprec($token)]} {
-            set tok_prec $::inprec($token)
+        set token [lindex $tokens $tokpos]
+        if {[info exists inprec($token)]} {
+            set tok_prec $inprec($token)
         } else {
             error "Calc: expected operator but found '$token'"
         }
@@ -187,24 +184,30 @@ proc parse min_prec {
             break
         }
         # if-then-else needs special handling
-        incr ::tokpos
+        incr tokpos
         if {$token eq "?"} {
             append opcodes [parseTernary]
             continue
     }
         # Infix operator
-        append opcodes [parse $tok_prec] "$::incode($token); "
+        append opcodes [parse $tok_prec] "$incode($token); "
     }
     deb2 "[string repeat {  } $dep]PARSE opcodes='$opcodes'"
-    set ::depth [expr {$dep - 1}]
+    set depth [expr {$dep - 1}]
     return $opcodes
 }
+
 #instrument+  parse  
 # Parse expression up to the first operator at the same level of parentheses.
 # Returns the bytecode to evaluate the subexpression.
 proc parsePrefix token {
-    set dep [incr ::depth]
-    deb2 "[string repeat {  } $dep]PARSEPREFIX token=`$token` tokpos=$::tokpos"
+    variable depth
+    variable precode
+    variable preprec
+    variable tokens
+    variable tokpos
+    set dep [incr depth]
+    deb2 "[string repeat {  } $dep]PARSEPREFIX token=`$token` tokpos=$tokpos"
 
     # Is it a number? In C might use Tcl_GetNumberFromObj() here
     if {[string is entier $token] || [string is double $token]} {
@@ -217,40 +220,40 @@ proc parsePrefix token {
     # Parenthesised subexpression?
     if {$token eq "("} {
         set opcodes [parse 0]
-        set token [lindex $::tokens $::tokpos]
+        set token [lindex $tokens $tokpos]
         if {$token eq ")"} {
-            incr ::tokpos
+            incr tokpos
             return $opcodes
     }
         error "Calc: expected ')' but found '$token'"
     }
     # Unary operator?
     if {$token in {+ - ! ~}} {
-        return "[parse $::preprec]$::precode($token); "
+        return "[parse $preprec]$precode($token); "
     }
     # Function call or array reference?
-    set nexttok [lindex $::tokens $::tokpos]
+    set nexttok [lindex $tokens $tokpos]
     if {$nexttok eq "(" && [regexp {^[[:alpha:]]} $token]} {
         set fun [namespace which tcl::mathfunc::$token]
         if {$fun ne {}} {
             # It's a function
-            incr ::tokpos
+            incr tokpos
             set opcodes "push $fun; "
             append opcodes [parseFuncArgs]
             return $opcodes
         } else {
             # Not a function, assume array reference
-            incr ::tokpos
+            incr tokpos
             set opcodes "push $token; "
             # Parse the index expression - leaves VALUE on stack
             append opcodes [parse 0]
             # Expect closing paren
-            set closing [lindex $::tokens $::tokpos]
+            set closing [lindex $tokens $tokpos]
             if {$closing ne ")"} {
                 error "Calc: expected ')' but found '$closing'"
             }
             # Stack now has: [arrayname, indexvalue]
-            incr ::tokpos     
+            incr tokpos     
             append opcodes "loadArrayStk; "
             return $opcodes
         }
@@ -259,11 +262,11 @@ proc parsePrefix token {
     set name {}
     while {$token eq {::} || [regexp {^[[:alpha:]][[:alnum:]_]*$} $token]} {
         append name $token
-        set token [lindex $::tokens $::tokpos]
-        incr ::tokpos
+        set token [lindex $tokens $tokpos]
+        incr tokpos
     }
     if {$name ne {}} {
-        incr ::tokpos -1
+        incr tokpos -1
         set opcodes "push $name; "
         append opcodes "loadStk; "
         return $opcodes
@@ -274,23 +277,26 @@ proc parsePrefix token {
 # expressions separated by commas and terminated by a closing parenthesis.
 # Returns the bytecode to evaluate the arguments and call the function.
 proc parseFuncArgs {} {
-    set dep [incr ::depth]
-    deb2 "[string repeat {  } $dep]PARSEFUNCARGS tokpos=$::tokpos"
+    variable depth
+    variable tokens
+    variable tokpos
+    set dep [incr depth]
+    deb2 "[string repeat {  } $dep]PARSEFUNCARGS tokpos=$tokpos"
 
-    set token [lindex $::tokens $::tokpos]
+    set token [lindex $tokens $tokpos]
     set arg_num 1
     while 1 {
         if {$token eq ")"} {
-            incr ::tokpos
+            incr tokpos
             append opcodes "invokeStk $arg_num; "
             return $opcodes
         }
         append opcodes [parse 0]
         incr arg_num
 
-        set token [lindex $::tokens $::tokpos]
+        set token [lindex $tokens $tokpos]
         switch $token {
-            , { incr ::tokpos }
+            , { incr tokpos }
             ) {}
             default {
                 error "Calc: expected ')' or ',' but found '$token'"
@@ -303,45 +309,43 @@ proc parseFuncArgs {} {
 # Returns the bytecode to check the previous condition, then evaluate the
 # appropriate branch.
 proc parseTernary {} {
-    set dep [incr ::depth]
-    deb2 "[string repeat {  } $dep]PARSETERNARY tokpos=$::tokpos"
+    variable depth
+    variable inprec
+    variable tokens
+    variable tokpos
+    set dep [incr depth]
+    deb2 "[string repeat {  } $dep]PARSETERNARY tokpos=$tokpos"
 
     set else else[incr ::labelcount]
     set end end$::labelcount
-    append opcodes "jumpFalse $else; [parse $::inprec(:)]"
+    append opcodes "jumpFalse $else; [parse $inprec(:)]"
 
-    set token [lindex $::tokens $::tokpos]
+    set token [lindex $tokens $tokpos]
     if {$token ne ":"} {
         error "Calc: expected ':' but found '$token'"
     }
-    incr ::tokpos
+    incr tokpos
 
-    append opcodes "jump $end; label $else; [parse $::inprec(:)]"
+    append opcodes "jump $end; label $else; [parse $inprec(:)]"
     append opcodes "label $end; nop; "
     return $opcodes
 }
 
-
-
-
-
-# globals to change if we go to a namespace, such as ::Calc::
-#::depth
-#::incode
-#::inprec
-#::precode
-#::preprec
-#::tokens
-#::tokpos
-#
-
-
-if [catch {
-
+} ;############### end namespace Calc
 
 # ============================================================================
 # TEST SUITE
 # ============================================================================
+
+
+# --------------------------- knobs -------------------------------------------
+set doAllTests        true   ;# all verify tests
+set putsAllTests      false  ;# puts on each verify test
+set doTimingCompare   false  ;# compare competing methods with timing
+# -----------------------------------------------------------------------------
+
+if [catch {
+if {$doAllTests} { 
 
 
 
@@ -352,7 +356,11 @@ set failures 0
 set tests 0
 proc verify {description expr_result calc_result} {
     global failures
-    puts "[incr ::tests]) description= |$description| expr_result= |$expr_result| calc_result= |$calc_result| " ;update
+    if { $::putsAllTests } {
+        puts "[incr ::tests]) description= |$description| expr_result= |$expr_result| calc_result= |$calc_result| " ;update
+    } else {
+        incr ::tests
+    }
     if {$expr_result ne $calc_result} {
         puts stderr "FAILED: $description"
         puts stderr "  expr returned: $expr_result"
@@ -371,12 +379,12 @@ verify "17 % 5" [expr {17 % 5}] [= 17 % 5]
 verify "2 ** 10" [expr {2 ** 10}] [= 2 ** 10]
 
 
-puts " 7 ========== Operator Precedence =========="
+puts "7 ========== Operator Precedence =========="
 verify "2 + 3 * 4" [expr {2 + 3 * 4}] [= 2 + 3 * 4]
 verify "(2 + 3) * 4" [expr {(2 + 3) * 4}] [= (2 + 3) * 4]
 verify "2 ** 3 ** 2" [expr {2 ** 3 ** 2}] [= 2 ** 3 ** 2]
 
-puts " 10 ========== Variables =========="
+puts "10 ========== Variables =========="
 set x 10
 set y 20
 set z 5
@@ -393,7 +401,7 @@ verify "256 >> 4" [expr {256 >> 4}] [= 256 >> 4]
 
 puts "18 ========== Boolean Operations =========="
 
-if {[string match 8.6* [info pa]]} {
+if {[string match \n* [info pa]] || 1} {
 verify "true && true" [expr {true && true}] [= true && true]
 verify "true && false" [expr {true && false}] [= true && false]
 verify "false || true" [expr {false || true}] [= false || true]
@@ -455,7 +463,7 @@ verify "-num" [expr {-$num}] [= -num]
 verify "~num" [expr {~$num}] [= ~num]
 
 puts "42 ========== Boolean with Variables =========="
-if { [string match 8.6* [info pa]] } {
+if { [string match 8.6* [info pa]] || 1} {
 set flag true
 verify "flag && true" [expr {$flag && true}] [= flag && true]
 set flag false
@@ -525,7 +533,7 @@ set b2 [expr {2 ** 66}]
 verify "b1 | b2" [expr {$b1 | $b2}] [= b1 | b2]
 verify "b1 & b2" [expr {$b1 & $b2}] [= b1 & b2]
 
-puts "\n63 ========== Single Argument Math Functions =========="
+puts "63 ========== Single Argument Math Functions =========="
 verify "sqrt(144)" [expr {sqrt(144)}] [= sqrt(144)]
 verify "abs(-99)" [expr {abs(-99)}] [= abs(-99)]
 verify "floor(3.7)" [expr {floor(3.7)}] [= floor(3.7)]
@@ -630,12 +638,7 @@ verify "min(abs(-a), abs(-b), abs(-z))" [expr {min(abs(-$a), abs(-$b), abs(-$z))
 verify "max(sqrt(a), sqrt(b), sqrt(z))" [expr {max(sqrt($a), sqrt($b), sqrt($z))}] [= max(sqrt(a), sqrt(b), sqrt(z))]
 
 
-
-
-
-
-
-puts "\n========== Variable Scoping Tests =========="
+puts "118 ========== Variable Scoping Tests =========="
 
 # Test 118: Local variables with functions
 proc test_locals {} {
@@ -684,7 +687,7 @@ namespace eval ::myns {
 
 
 
-puts "\n========== Custom Math Functions (using math library) =========="
+puts "123 ========== Custom Math Functions (using math library) =========="
 
 # Load math library
 package require math
@@ -726,7 +729,9 @@ set fib100 [= fibonacci(100)]
 set fib101 [= fibonacci(101)]
 verify "fib100 < fib101" [expr {$fib100 < $fib101}] [= fib100 < fib101]
 
-puts "\n========== Assignment Operator =========="
+
+
+puts "134 ========== Assignment Operator =========="
 set x 0
 set y 0
 : x = 10
@@ -738,7 +743,7 @@ verify "y = x + 5" [expr {$y}] 15
 : z = x * 2
 verify "z = x * 2" [set z] 20
 
-puts "\n========== Self Assignment =========="
+puts "137 ========== Self Assignment =========="
 set counter 5
 : counter = counter + 1
 verify "counter = counter + 1" [expr {$counter}] 6
@@ -747,23 +752,23 @@ set val 100
 : val = val * 2
 verify "val = val * 2" [expr {$val}] 200
 
-puts "\n========== Chained Assignment =========="
+puts "139 ========== Chained Assignment =========="
 : {a = b = c = 50}
 verify "a = b = c (a)" [expr {$a}] 50
 verify "a = b = c (b)" [expr {$b}] 50
 verify "a = b = c (c)" [expr {$c}] 50
 
-puts "\n========== Multiple Statements =========="
+puts "142 ========== Multiple Statements =========="
 : {p = 10 ; q = 20 ; p + q}
 verify "p + q after assignment" [expr {$p + $q}] 30
 
-puts "\n========== Multiple Statements with Newlines =========="
+puts "143 ========== Multiple Statements with Newlines =========="
 : {m = 5
    n = 7
    m * n}
 verify "m * n after multiline" [expr {$m * $n}] 35
 
-puts "\n========== Gather Function =========="
+puts "144 ========== Gather Function =========="
 proc tcl::mathfunc::gather {args} { list {*}$args }
 
 set result [: gather(10, 20, 30)]
@@ -774,10 +779,41 @@ set y 10
 set coords [: gather(x*2, y*2)]
 verify "gather(x*2, y*2)" [list [expr {$x*2}] [expr {$y*2}]] $coords
 
-puts "\n========== Complex: Assignment + Gather =========="
+puts "146 ========== Complex: Assignment + Gather =========="
 : {px = 100 ; py = 200}
 set points [: gather(px, py, px+10, py+10)]
 verify "gather with assigned vars" [list 100 200 110 210] $points
+
+
+
+
+puts "147 ========== Logical AND (&&) Operator =========="
+verify "true && true" [expr {true && true}] [: true && true]
+verify "true && false" [expr {true && false}] [: true && false]
+verify "false && true" [expr {false && true}] [: false && true]
+verify "false && false" [expr {false && false}] [: false && false]
+
+set a true
+set b false
+verify "a && b with variables" [expr {$a && $b}] [: a && b]
+
+set x 10
+set y 5
+verify "x > 5 && y < 10" [expr {$x > 5 && $y < 10}] [: x > 5 && y < 10]
+
+puts "153 ========== Logical OR (||) Operator =========="
+verify "true || true" [expr {true || true}] [: true || true]
+verify "true || false" [expr {true || false}] [: true || false]
+verify "false || true" [expr {false || true}] [: false || true]
+verify "false || false" [expr {false || false}] [: false || false]
+
+set c false
+set d true
+verify "c || d with variables" [expr {$c || $d}] [: c || d]
+
+set p 3
+set q 20
+verify "p < 5 || q > 15" [expr {$p < 5 || $q > 15}] [: p < 5 || q > 15]
 
 
 
@@ -788,9 +824,17 @@ verify "gather with assigned vars" [list 100 200 110 210] $points
 
 
 puts "\n========== CACHE CONTENTS =========="
-parray cache
+if [catch {
+#   parray cache
+} err_code] {
+    puts $err_code 
+}
 puts "\n========== CACHE hit count =========="
-catch {parray cachehits}
+if [catch {
+    #parray cachehits
+} err_code] {
+    puts $err_code 
+}
 
 puts "\n=========================================="
 if {$failures == 0} {
@@ -801,7 +845,125 @@ if {$failures == 0} {
 puts "=========================================="
 
 
+} ;# end doalltests
 
 } err_code details] {
-	puts "$err_code \n\n\n$details"
+    puts "$err_code \n\n\n$details"
 }
+    unset -nocomplain details
+    unset -nocomplain err_code
+
+
+
+if { $doTimingCompare } {
+
+proc let {args} {
+      if {[llength $args] == 2} {
+        lassign $args mySwitch myList
+        if {$mySwitch ne {-local}} {
+          error "wrong switch: $mySwitch"
+        }
+      } elseif {[llength $args] == 1} {
+        lassign $args myList mySwitch
+      } else {
+        error {wrong #args, should be: let ?-local? "var expr .."}
+      }
+      set myRet {}
+      set myVars {}
+      foreach {var exp} $myList {
+        if {$var eq {=}} {
+          lappend myRet [uplevel 1 expr [list $exp]]
+        } else {
+          uplevel 1 set $var \[expr [list $exp]\]
+          lappend myVars $var
+        }
+        if {$mySwitch eq {-local}} {
+          uplevel 1 unset -nocomplain {*}$myVars
+        }
+      }
+      return $myRet
+    }
+
+
+proc nop2 arg {
+    set result 1
+    set i 2
+    return [= i*result]
+}
+nop2 {i*result} ;# force one into cache
+
+
+proc factorial1 {arg} {
+    global result
+    set result 1
+    while {[incr i] <= $arg} {
+        let {result $i*$result}
+    }
+    return $result
+}
+
+proc factorial2 {arg} {
+    global result
+    set result 1
+    while {[incr i] <= $arg} {
+        set result [expr {$i*$result}]
+    }
+    return $result
+}
+proc factorial3 {arg} {
+    global result
+    set result 1
+    while {[incr i] <= $arg} {
+        set result [: i*result]
+    }
+    return $result
+}
+
+
+proc nop {arg args} {    
+    return 0
+}
+
+proc factorial4 {arg} {
+    global result
+    set result 1
+    while {[incr i] <= $arg} {
+        set result [nop i*result]
+    }
+    return $result
+}
+
+set fcount 100
+
+foreach which {1 2 3 4} {
+    if       { $which == 1 } {
+        puts "factorial $which [factorial1 $fcount]    "
+    } elseif { $which == 2  } {
+        puts "factorial $which [factorial2 $fcount]    "
+    } elseif { $which == 3  } {
+        puts "factorial $which [factorial3 $fcount]    "
+    } else {
+        puts "factorial $which [factorial4 $fcount]    "
+    }
+    set thisone factorial$which
+#   puts "factorial $which [$thisone 50]    "
+}
+
+puts "\n===========  Compare let, expr, =, and a nop for 100 factorial =============\n"
+
+puts 1-let-|[time {factorial1 $fcount} 1000] ;# using let tcl code
+puts 2-exp-|[time {factorial2 $fcount} 1000] ;# using expr
+puts 3-eq=-|[time {factorial3 $fcount} 1000] ;# using =
+puts 4-nop-|[time {factorial4 $fcount} 1000] ;# just calling a nop proc
+
+} ;# end timing comparisons
+
+if [catch {
+#   parray cache
+#    parray cachehits
+} err_code] {
+    puts $err_code 
+}
+unset -nocomplain err_code
+
+
