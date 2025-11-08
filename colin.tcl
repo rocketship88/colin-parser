@@ -1,5 +1,5 @@
 # Tcl prototype of a next-generation concise expression evaluator '=' from Colin Macleod 
-# milestone 7 before adding =
+# milestone 8 after adding =
 # Bare words are treated as variable references.
 # Only numeric and boolean values and operations are supported.
 catch {console show}
