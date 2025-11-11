@@ -10,6 +10,7 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 
 - Support for multiple expressions separated by ` ' ` ` ; ` or `newline`.
 - Assignment operator, right associative, `a = b = c` possible too
+- Allow for on-line comments without or without preceding ;
 - Finish up with wrapping in Calc:: namespace and some code cleanup
   
 ## Usage
@@ -43,7 +44,7 @@ The file will run all tests automatically and display results. At about line 342
 ```tcl
 : {a = 1 ; b = 2}        ;# semicolon
 : a = 1 ' b = 2          ;# single quote (no braces!)
-: {a = 1                 ;# newline
+: {a = 1                 ;# newline - note comment allowed here
    b = 2}
 
 # custom functions
