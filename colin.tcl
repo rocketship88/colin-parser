@@ -36,6 +36,12 @@ namespace eval Calc {
 # also allow for ' and newline aliases, ' needs no bracing
 # but newline does, and then requires no semicolon (probably can have the semi then)
 proc compile0 exp {
+    if { [array size ::cache] > 1000 } {
+        error "Calc: Cache exhausted with expression: $exp" ;# this is a programmer error, is using $sub in a Calc expression
+    }
+    # remove all comments that begin with the # character to the end of the line, but don't consume the newline
+    # we can also support ;# since many will be used to that. In addition, the below code works with multiple ;
+    regsub -all  {#[^\n]*}  $exp {} exp
     set exp [string map {"'" ";" "\n" ";"} $exp]
     # Fast path: no semicolons
     if {[string first ";" $exp] == -1} {
