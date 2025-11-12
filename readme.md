@@ -13,7 +13,7 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 - Allow for on-line comments with or without preceding ; as #... end of line
 - Include check for more than 1000 expressions in cache, to catch $var in expressions
 - Finish up with wrapping in Calc:: namespace and some code cleanup
-  
+- Preliminary upload of C extension for : command, 30% faster
 ## Usage
 
 ```tcl
