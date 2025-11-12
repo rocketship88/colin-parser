@@ -65,6 +65,39 @@ set glist [: { x = sin(rad(90))**2
 puts $glist
 0.9999999999998932 1.0679490440337123e-13 1.0000003267948432  # output
 ```
+## Building The C extension
+
+### Windows (Visual Studio 2022)
+
+Open "x64 Native Tools Command Prompt for VS 2022" and run:
+
+**For Tcl 8.6:**
+```batch
+cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS -IC:\Path\To\Tcl\include myext.c expression.c ^
+   /link -dll C:\Path\To\Tcl\lib\tclstub86.lib /OUT:myext.dll
+```
+
+**For Tcl 9.x:**
+```batch
+cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS /DTCL9 -IC:\Path\To\Tcl\include myext.c expression.c ^
+   /link -dll C:\Path\To\Tcl\lib\tclstub.lib /OUT:myext9.dll
+```
+
+**Note:** 
+- Replace `C:\Path\To\Tcl` with your Tcl installation path
+- Tcl 9.x uses `tclstub.lib` (no version number) instead of `tclstub86.lib`
+
+### Linux
+```bash
+gcc -O3 -march=native -flto -shared -fPIC -o myext.so myext.c expression.c \
+    -I/usr/include/tcl8.6 -ltclstub8.6
+```
+
+If Tcl headers are in a different location:
+```bash
+gcc -O3 -march=native -flto -shared -fPIC -o myext.so myext.c expression.c \
+    $(pkg-config --cflags tcl) -ltclstub8.6
+```
 
 
 ## Testing
