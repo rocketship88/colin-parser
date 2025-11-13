@@ -26,15 +26,17 @@ static Tcl_Obj* JoinArgs(int objc, Tcl_Obj *const objv[]) {
 
 // Helper: Compile expression to TAL (calls your Tcl code for now)
 static Tcl_Obj* CompileExpression(Tcl_Interp *interp, Tcl_Obj *expr) {
-    Tcl_Obj *cmd = Tcl_NewStringObj("Calc::compile0", -1);
-    Tcl_IncrRefCount(cmd);
+    static Tcl_Obj *compileCmd = NULL;
+    if (compileCmd == NULL) {
+        compileCmd = Tcl_NewStringObj("Calc::compile0", -1);
+        Tcl_IncrRefCount(compileCmd);
+    }
     
     Tcl_Obj *objv[2];
-    objv[0] = cmd;
+    objv[0] = compileCmd;
     objv[1] = expr;
     
     int result = Tcl_EvalObjv(interp, 2, objv, 0);
-    Tcl_DecrRefCount(cmd);
     
     if (result != TCL_OK) {
         return NULL;
@@ -47,16 +49,17 @@ static Tcl_Obj* CompileExpression(Tcl_Interp *interp, Tcl_Obj *expr) {
 
 // Helper: Execute assembled code
 static int ExecuteAssemble(Tcl_Interp *interp, Tcl_Obj *talCode) {
-    // Call tcl::unsupported::assemble
-    Tcl_Obj *cmd = Tcl_NewStringObj("::tcl::unsupported::assemble", -1);
-    Tcl_IncrRefCount(cmd);
+    static Tcl_Obj *assembleCmd = NULL;
+    if (assembleCmd == NULL) {
+        assembleCmd = Tcl_NewStringObj("::tcl::unsupported::assemble", -1);
+        Tcl_IncrRefCount(assembleCmd);
+    }
     
     Tcl_Obj *objv[2];
-    objv[0] = cmd;
+    objv[0] = assembleCmd;
     objv[1] = talCode;
     
     int result = Tcl_EvalObjv(interp, 2, objv, 0);
-    Tcl_DecrRefCount(cmd);
     
     return result;
 }
