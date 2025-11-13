@@ -73,13 +73,13 @@ Open "x64 Native Tools Command Prompt for VS 2022" and run:
 
 **For Tcl 8.6:**
 ```batch
-cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS -IC:\Path\To\Tcl\include myext.c expression.c ^
+cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS -IC:\Path\To\Tcl\include myext.c  ^
    /link -dll C:\Path\To\Tcl\lib\tclstub86.lib /OUT:myext.dll
 ```
 
 **For Tcl 9.x:**
 ```batch
-cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS /DTCL9 -IC:\Path\To\Tcl\include myext.c expression.c ^
+cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS /DTCL9 -IC:\Path\To\Tcl\include myext.c  ^
    /link -dll C:\Path\To\Tcl\lib\tclstub.lib /OUT:myext9.dll
 ```
 
@@ -89,13 +89,13 @@ cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS /DTCL9 -IC:\Path\To\Tcl\include myext.c
 
 ### Linux
 ```bash
-gcc -O3 -march=native -flto -shared -fPIC -o myext.so myext.c expression.c \
+gcc -O3 -march=native -flto -shared -fPIC -o myext.so myext.c  \
     -I/usr/include/tcl8.6 -ltclstub8.6
 ```
 
 If Tcl headers are in a different location:
 ```bash
-gcc -O3 -march=native -flto -shared -fPIC -o myext.so myext.c expression.c \
+gcc -O3 -march=native -flto -shared -fPIC -o myext.so myext.c  \
     $(pkg-config --cflags tcl) -ltclstub8.6
 ```
 
