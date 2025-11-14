@@ -1,4 +1,6 @@
 # Tcl prototype of a next-generation concise expression evaluator '=' from Colin Macleod 
+# milestone 13 after native function calling and multi-dimensional arrays
+# milestone 12 after first mods at native function calling
 # milestone 11 after knobs and cleanup 
 # milestone 10 after namespace 
 # milestone 9 before namespace 
@@ -23,8 +25,8 @@ proc : {arg args} {
         set arg [join "$arg $args"] 
     }
     if { [info exist ::cache($arg)]  } {
+#       incr ::cachehits($arg) 
         tailcall  ::tcl::unsupported::assemble $::cache($arg)
-#       incr ::cachehits($arg) ;# keep here, who knows, might be faster than being above, needed to actually count hits
     }
     tailcall ::tcl::unsupported::assemble  [set ::cache($arg) [Calc::compile0 $arg]]
 }
@@ -34,7 +36,10 @@ namespace eval Calc {
 
 # breakup compile into 2 parts to handle ; up front, 
 # also allow for ' and newline aliases, ' needs no bracing
-# but newline does, and then requires no semicolon (probably can have the semi then)
+# but newline does, and then requires no semicolon 
+# multiple ;;; are ignored and treated as one
+# comments can be #... or ;# it doesn't matter
+# empty lines are also allowed
 proc compile0 exp {
     if { [array size ::cache] > 1000 } {
         error "Calc: Cache exhausted with expression: $exp" ;# this is a programmer error, is using $sub in a Calc expression
@@ -138,6 +143,17 @@ foreach {op code} {
 } {
     set precode($op) $code
 }
+# our name, vs. inline bytecode name and arg count, negative arg count means variable with minimum abs(count)
+array set nativeFunc {
+    strlen      {strlen 1}
+    llength     {listLength 1}
+    lindex		 {lindexMulti -2}
+    xstrcat      {strcat 2}
+    xtoupper     {strcaseUpper 1}
+    xtolower     {strcaseLower 1}
+    xstrindex    {strindex 2}
+    xstrrange    {strrange 3}
+}
 # Prefix ops all have the same precedence
 set preprec 13
 
@@ -153,7 +169,7 @@ proc parse min_prec {
     variable tokpos
     set token [lindex $tokens $tokpos]
     set dep [incr depth]
-    deb2 "[string repeat {  } $dep]PARSE min_prec=$min_prec tokpos=$tokpos token='$token'"
+    #deb2 "[string repeat {  } $dep]PARSE min_prec=$min_prec tokpos=$tokpos token='$token'"
     incr tokpos
     
     # NEW: Check for assignment
@@ -181,7 +197,7 @@ proc parse min_prec {
         } else {
             error "Calc: expected operator but found '$token'"
         }
-        deb2 "[string repeat {  } $dep]PARSE token=$token tok_prec=$tok_prec"
+        #deb2 "[string repeat {  } $dep]PARSE token=$token tok_prec=$tok_prec"
         if {$tok_prec < $min_prec} {
             break
         }
@@ -198,7 +214,7 @@ proc parse min_prec {
         # Infix operator
         append opcodes [parse $tok_prec] "$incode($token); "
     }
-    deb2 "[string repeat {  } $dep]PARSE opcodes='$opcodes'"
+    #deb2 "[string repeat {  } $dep]PARSE opcodes='$opcodes'"
     set depth [expr {$dep - 1}]
     return $opcodes
 }
@@ -212,8 +228,9 @@ proc parsePrefix token {
     variable preprec
     variable tokens
     variable tokpos
+    variable nativeFunc  ;# ADD THIS
     set dep [incr depth]
-    deb2 "[string repeat {  } $dep]PARSEPREFIX token=`$token` tokpos=$tokpos"
+    #deb2 "[string repeat {  } $dep]PARSEPREFIX token=`$token` tokpos=$tokpos"
 
     # Is it a number? In C might use Tcl_GetNumberFromObj() here
     if {[string is entier $token] || [string is double $token]} {
@@ -240,30 +257,62 @@ proc parsePrefix token {
     # Function call or array reference?
     set nexttok [lindex $tokens $tokpos]
     if {$nexttok eq "(" && [regexp {^[[:alpha:]]} $token]} {
-        set fun [namespace which tcl::mathfunc::$token]
-        if {$fun ne {}} {
-            # It's a function
-            incr tokpos
-            set opcodes "push $fun; "
-            append opcodes [parseFuncArgs]
-            return $opcodes
-        } else {
-            # Not a function, assume array reference
-            incr tokpos
-            set opcodes "push $token; "
-            # Parse the index expression - leaves VALUE on stack
-            append opcodes [parse 0]
-            # Expect closing paren
-            set closing [lindex $tokens $tokpos]
-            if {$closing ne ")"} {
-                error "Calc: expected ')' but found '$closing'"
-            }
-            # Stack now has: [arrayname, indexvalue]
-            incr tokpos     
-            append opcodes "loadArrayStk; "
+        incr tokpos
+        
+        # Check if it's a native function FIRST
+        if {[info exists nativeFunc($token)]} {
+            # Pass native instruction info as 2nd arg
+            set opcodes [parseFuncArgs $token $nativeFunc($token)]
             return $opcodes
         }
+        
+        # Check if it's a mathfunc SECOND
+        set fun [namespace which tcl::mathfunc::$token]
+        if {$fun ne {}} {
+            # It's a mathfunc - push function name, pass empty for native
+            set opcodes "push $fun; "
+            append opcodes [parseFuncArgs $token ""]
+            return $opcodes
+        }
+ 
+		# It's an array reference
+		set arrayName $token
+		
+		set opcodes "push $arrayName; "
+		
+		# Parse first index
+		append opcodes [parse 0]
+		
+		# Count indices for strcat
+		set indexCount 1
+		
+		# Check for additional indices
+		set token [lindex $tokens $tokpos]
+		while {$token eq ","} {
+		    incr tokpos
+		    incr indexCount
+		    append opcodes "push {,}; "
+		    append opcodes [parse 0]
+		    set token [lindex $tokens $tokpos]
+		}
+		
+		# Expect closing paren
+		if {$token ne ")"} {
+		    error "Calc: expected ')' but found '$token'"
+		}
+		incr tokpos
+		
+		# Concatenate indices if multiple
+		if {$indexCount > 1} {
+		    set strcatCount [expr {$indexCount * 2 - 1}]
+		    append opcodes "strcat $strcatCount; "
+		}
+		
+		append opcodes "loadArrayStk; "
+		return $opcodes 
+ 
     }
+    
     # Variable reference?
     set name {}
     while {$token eq {::} || [regexp {^[[:alpha:]][[:alnum:]_]*$} $token]} {
@@ -282,19 +331,46 @@ proc parsePrefix token {
 # Parse zero or more arguments to a math function. The arguments are
 # expressions separated by commas and terminated by a closing parenthesis.
 # Returns the bytecode to evaluate the arguments and call the function.
-proc parseFuncArgs {} {
+proc parseFuncArgs {funcname nativeInfo} {
     variable depth
     variable tokens
     variable tokpos
     set dep [incr depth]
-    deb2 "[string repeat {  } $dep]PARSEFUNCARGS tokpos=$tokpos"
-
     set token [lindex $tokens $tokpos]
     set arg_num 1
     while 1 {
         if {$token eq ")"} {
             incr tokpos
-            append opcodes "invokeStk $arg_num; "
+            # Check if we were passed native instruction info
+            if {$nativeInfo ne ""} {
+                lassign $nativeInfo instruction expectedArgs
+                
+			    set actualArgs [expr {$arg_num - 1}]
+			    if {$expectedArgs > 0} {
+			        # Positive: exact match required
+			        if {$actualArgs != $expectedArgs} {
+			            error "Calc: $funcname expects exactly $expectedArgs args, got $actualArgs"
+			        }
+			    } else {
+			        # Negative: at least abs(expectedArgs) required
+			        set minArgs [expr {abs($expectedArgs)}]
+			        if {$actualArgs < $minArgs} {
+			            error "Calc: $funcname expects at least $minArgs args, got $actualArgs"
+			        }
+			    }
+			    # Generate instruction
+			    if {$expectedArgs < 0} {
+			        # Variable args - instruction needs arg count, at least for lindexMulti, we don't have any other's to test right now
+			        append opcodes "$instruction $actualArgs; "
+			    } else {
+			        # Fixed args - static instruction
+			        append opcodes "$instruction; "
+			    }
+                
+            } else {
+                # Mathfunc call
+                append opcodes "invokeStk $arg_num; "
+            }
             return $opcodes
         }
         append opcodes [parse 0]
@@ -320,7 +396,7 @@ proc parseTernary {} {
     variable tokens
     variable tokpos
     set dep [incr depth]
-    deb2 "[string repeat {  } $dep]PARSETERNARY tokpos=$tokpos"
+    #deb2 "[string repeat {  } $dep]PARSETERNARY tokpos=$tokpos"
 
     set else else[incr ::labelcount]
     set end end$::labelcount
@@ -346,7 +422,7 @@ proc parseTernary {} {
 
 # --------------------------- knobs -------------------------------------------
 set doAllTests        true   ;# all verify tests
-set putsAllTests      false  ;# puts on each verify test
+set putsAllTests      true   ;# puts on each verify test
 set doTimingCompare   false  ;# compare competing methods with timing
 # -----------------------------------------------------------------------------
 
@@ -822,6 +898,37 @@ set q 20
 verify "p < 5 || q > 15" [expr {$p < 5 || $q > 15}] [: p < 5 || q > 15]
 
 
+puts "159 ========== Multi-Dimensional Arrays =========="
+array set arr2 {
+    0,0 100  0,1 101  0,2 102
+    1,0 200  1,1 201  1,2 202
+    2,0 300  2,1 301  2,2 302
+}
+set i 0
+set j 1
+verify "arr2(i,j)" [expr {$arr2($i,$j)}] [= arr2(i,j)]
+set i 1
+set j 2
+verify "arr2(i,j) after change" [expr {$arr2($i,$j)}] [= arr2(i,j)]
+verify "arr2(0,0) + arr2(1,1)" [expr {$arr2(0,0) + $arr2(1,1)}] [= arr2(0,0) + arr2(1,1)]
+verify "arr2(i,j) * 2" [expr {$arr2($i,$j) * 2}] [= arr2(i,j) * 2]
+puts "164 ========== 3D Arrays =========="
+array set cube {
+    0,0,0 1000  0,0,1 1001  0,1,0 1010  0,1,1 1011
+    1,0,0 2000  1,0,1 2001  1,1,0 2010  1,1,1 2011
+}
+set i 1
+set j 0
+set k 1
+verify "cube(i,j,k)" [expr {$cube($i,$j,$k)}] [= cube(i,j,k)]
+verify "cube(0,0,0) + cube(1,1,1)" [expr {$cube(0,0,0) + $cube(1,1,1)}] [= cube(0,0,0) + cube(1,1,1)]
+
+puts "166 ========== Multi-Dim with Expressions =========="
+set row 1
+set col 0
+verify "arr2(row*1, col+1)" [expr {$arr2([expr {$row*1}],[expr {$col+1}])}] [= arr2(row*1, col+1)]
+verify "arr2(i+1, j-1 + 2)" [expr {$arr2([expr {$i+1}],[expr {$j-1+2}])}] [= arr2(i+1, j-1 + 2)]
+verify "cube(i-1, j, k)" [expr {$cube([expr {$i-1}],$j,$k)}] [= cube(i-1, j, k)]
 
 
 
