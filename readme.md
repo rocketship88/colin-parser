@@ -98,8 +98,20 @@ If Tcl headers are in a different location:
 gcc -O3 -march=native -flto -shared -fPIC -o myext.so myext.c  \
     $(pkg-config --cflags tcl) -ltclstub8.6
 ```
+### Using the C extension
+Depending on which of the tcl or C extension one uses, the command is `:` or `::` in order to be able to compare the performance of pure tcl vs. the C extension.  Otherwise, the two commands produce the same results and both use the same `::cache` variable and call on the same compile and assemble commands for parsing and execution. The `::` name defined in the C code is easily changed to anything desired. The same goes for the tcl source. However, the test cases all expect the command to be `=`, and so there is an alias command just following the `:` proc definition at the top of the file to equate the two.
+```tcl
+interp alias {} = {} : ;# alias to = for test suite
 
+load myext.dll   # windows 8.6
+load myext9.dll  # windows 9.x
 
+load myext.so    # linux
+
+:: expression # uses the C extension 
+:  expression # uses tcl command
+=  expression # alias which all the test code uses
+```
 ## Testing
 
 All tests verify `=` command results against `expr` to ensure correctness.
