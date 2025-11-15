@@ -171,9 +171,6 @@ set key apple
 : data(key) + 5
 # Returns: 15
 
-# Literal indices work too
-: data(banana) * 2
-# Returns: 40
 ```
 
 ### Multi-Dimensional Arrays
