@@ -341,17 +341,20 @@ set y 20
 
 Calc supports multiple statements separated by:
 - Semicolon (`;`)
+- Single quote (`'`)
 - Newline
 - Both
 
-### Using Semicolons
+Note that the normal tcl processing will treat a ; as the command terminator. If it is to be used, then the expression must be in braces. For the simple case where just a few statements are desired, the `'` can be used and then braces are not required.
+
+### Using Semicolons or Single quotes
 
 ```tcl
-: x = 10 ; y = 20 ; x + y
+: {x = 10 ; y = 20 ; x + y}
 # Returns: 30 (result of last expression)
 
-# Each statement is executed in order
-: a = 5 ; b = a * 2 ; c = a + b
+# Each statement is executed in order and braces are not requred
+: a = 5 ' b = a * 2 ' c = a + b
 # a=5, b=10, c=15, returns 15
 ```
 
@@ -392,12 +395,13 @@ Comments can be added using `#`:
 : {
     x = 10      # Initialize x
     y = 20      # Initialize y
-    z = x + y   # Calculate sum
+    z = x + y   ;# Calculate sum
 }
 
 # Inline comments after statements need ;# in some contexts since tcl will process the ; in this case
 : a = 5 ;# Set a to 5
 ```
+The Calc parser ignores blank lines and empty statements (e.g. a=2 ;; b = 3) 
 
 ## Non-Numeric Results
 
@@ -454,7 +458,7 @@ Calc caches compiled bytecode for extremely fast re-execution:
 
 # Subsequent executions use cached bytecode
 # (even with different values of x and y)
-: x * 2 + y / 3  # Very fast!
+: x * 2 + y / 3  ;# Very fast!
 ```
 
 ### Cache Overflow Detection
