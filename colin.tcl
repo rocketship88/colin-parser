@@ -25,11 +25,11 @@ proc : {arg args} {
     if { [llength $args] != 0 } {
         set arg [join "$arg $args"] 
     }
-    if { [info exist ::cache($arg)]  } {
+    if { [info exist Calc::cache($arg)]  } {
 #       incr ::cachehits($arg) 
-        tailcall  ::tcl::unsupported::assemble $::cache($arg)
+        tailcall  ::tcl::unsupported::assemble $Calc::cache($arg)
     }
-    tailcall ::tcl::unsupported::assemble  [set ::cache($arg) [Calc::compile0 $arg]]
+    tailcall ::tcl::unsupported::assemble  [set Calc::cache($arg) [Calc::compile0 $arg]]
 }
 interp alias {} = {} : ;# shorthands 
 
@@ -42,7 +42,7 @@ namespace eval Calc {
 # comments can be #... or ;# it doesn't matter
 # empty lines are also allowed
 proc compile0 exp {
-    if { [array size ::cache] > 1000 } {
+    if { [array size Calc::cache] > 1000 } {
         error "Calc: Cache exhausted with expression: $exp" ;# this is a programmer error, is using $sub in a Calc expression
     }
     # remove all comments that begin with the # character to the end of the line, but don't consume the newline
