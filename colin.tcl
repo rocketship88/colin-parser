@@ -1,4 +1,5 @@
 # Tcl prototype of a next-generation concise expression evaluator '=' from Colin Macleod 
+# milestone 14 after fixing ::ns::var and problems with = assigning to numbers e.g. a = 5 = 10
 # milestone 13 after native function calling and multi-dimensional arrays
 # milestone 12 after first mods at native function calling
 # milestone 11 after knobs and cleanup 
@@ -172,20 +173,6 @@ proc parse min_prec {
     #deb2 "[string repeat {  } $dep]PARSE min_prec=$min_prec tokpos=$tokpos token='$token'"
     incr tokpos
     
-    # NEW: Check for assignment
-    set nextop [lindex $tokens $tokpos]
-    if {$nextop eq "=" && [regexp {^[a-zA-Z_:][a-zA-Z0-9_:]*$} $token]} {
-        incr tokpos  ;# skip the '='
-        # Left side: just the variable name
-        set opcodes "push $token; "
-        # Right side: parse expression (recursive, handles a = b = c)
-        append opcodes [parse 0]
-        # Store the result
-        append opcodes "storeStk; "
-        set depth [expr {$dep - 1}]
-        return $opcodes
-    }
-    
     # EXISTING CODE: Normal expression parsing
     set opcodes [parsePrefix $token]
     set depth $dep
@@ -234,10 +221,18 @@ proc parsePrefix token {
 
     # Is it a number? In C might use Tcl_GetNumberFromObj() here
     if {[string is entier $token] || [string is double $token]} {
+	    set nexttok [lindex $tokens $tokpos]
+	    if {$nexttok eq "="} {
+	        error "Calc: cannot assign to number literal '$token'"
+	    }
         return "push $token; "
     }
     # Is it boolean? In C might use Tcl_GetBoolean() here
     if {$token eq "false" || $token eq "true"} {
+	    set nexttok [lindex $tokens $tokpos]
+	    if {$nexttok eq "="} {
+	        error "Calc: cannot assign to boolean literal '$token'"
+	    }
         return "push $token; "
     }
     # Parenthesised subexpression?
@@ -254,78 +249,86 @@ proc parsePrefix token {
     if {$token in {+ - ! ~}} {
         return "[parse $preprec]$precode($token); "
     }
-    # Function call or array reference?
-    set nexttok [lindex $tokens $tokpos]
-    if {$nexttok eq "(" && [regexp {^[[:alpha:]]} $token]} {
-        incr tokpos
-        
-        # Check if it's a native function FIRST
-        if {[info exists nativeFunc($token)]} {
-            # Pass native instruction info as 2nd arg
-            set opcodes [parseFuncArgs $token $nativeFunc($token)]
-            return $opcodes
-        }
-        
-        # Check if it's a mathfunc SECOND
-        set fun [namespace which tcl::mathfunc::$token]
-        if {$fun ne {}} {
-            # It's a mathfunc - push function name, pass empty for native
-            set opcodes "push $fun; "
-            append opcodes [parseFuncArgs $token ""]
-            return $opcodes
-        }
- 
-		# It's an array reference
-		set arrayName $token
-		
-		set opcodes "push $arrayName; "
-		
-		# Parse first index
-		append opcodes [parse 0]
-		
-		# Count indices for strcat
-		set indexCount 1
-		
-		# Check for additional indices
-		set token [lindex $tokens $tokpos]
-		while {$token eq ","} {
-		    incr tokpos
-		    incr indexCount
-		    append opcodes "push {,}; "
-		    append opcodes [parse 0]
-		    set token [lindex $tokens $tokpos]
-		}
-		
-		# Expect closing paren
-		if {$token ne ")"} {
-		    error "Calc: expected ')' but found '$token'"
-		}
-		incr tokpos
-		
-		# Concatenate indices if multiple
-		if {$indexCount > 1} {
-		    set strcatCount [expr {$indexCount * 2 - 1}]
-		    append opcodes "strcat $strcatCount; "
-		}
-		
-		append opcodes "loadArrayStk; "
-		return $opcodes 
- 
-    }
-    
-    # Variable reference?
-    set name {}
+    # Try to build a name (may include ::)
+    set name ""
     while {$token eq {::} || [regexp {^[[:alpha:]][[:alnum:]_]*$} $token]} {
         append name $token
         set token [lindex $tokens $tokpos]
         incr tokpos
     }
+    
     if {$name ne {}} {
+        # We have a name, check what follows
         incr tokpos -1
-        set opcodes "push $name; "
-        append opcodes "loadStk; "
-        return $opcodes
+        set token [lindex $tokens $tokpos]
+        
+        # Is it followed by (? Then it's a function or array
+        if {$token eq "("} {
+            incr tokpos  ;# Skip the (
+            
+            # Check if it's a native function FIRST
+            if {[info exists nativeFunc($name)]} {
+                set opcodes [parseFuncArgs $name $nativeFunc($name)]
+                return $opcodes
+            }
+            
+            # Check if it's a mathfunc SECOND
+            set fun [namespace which tcl::mathfunc::$name]
+            if {$fun ne {}} {
+                set opcodes "push $fun; "
+                append opcodes [parseFuncArgs $name ""]
+                return $opcodes
+            }
+            
+            # It's an array reference
+            set opcodes "push $name; "
+            
+            # Parse first index
+            append opcodes [parse 0]
+            
+            # Count indices for strcat
+            set indexCount 1
+            
+            # Check for additional indices
+            set token [lindex $tokens $tokpos]
+            while {$token eq ","} {
+                incr tokpos
+                incr indexCount
+                append opcodes "push {,}; "
+                append opcodes [parse 0]
+                set token [lindex $tokens $tokpos]
+            }
+            
+            # Expect closing paren
+            if {$token ne ")"} {
+                error "Calc: expected ')' but found '$token'"
+            }
+            incr tokpos
+            
+            # Concatenate indices if multiple
+            if {$indexCount > 1} {
+                set strcatCount [expr {$indexCount * 2 - 1}]
+                append opcodes "strcat $strcatCount; "
+            }
+            
+            append opcodes "loadArrayStk; "
+            return $opcodes
+        } else {
+		    # Check if this is an assignment
+		    if {$token eq "="} {
+		        incr tokpos  ;# skip =
+		        set opcodes "push $name; "
+		        append opcodes [parse 0]
+		        append opcodes "storeStk; "
+		        return $opcodes
+		    }
+            # It's a variable reference
+            set opcodes "push $name; "
+            append opcodes "loadStk; "
+            return $opcodes
+        }
     }
+    
     error "Calc: expected start of expression but found '$token'"
 }
 # Parse zero or more arguments to a math function. The arguments are
