@@ -4,6 +4,8 @@
 
 Calc is a high-performance expression evaluator for Tcl that compiles expressions to Tcl Assembly Language (TAL) bytecode. It provides a clean syntax for mathematical calculations with support for variables, arrays, functions, and multiple statements.
 
+The code is contained in the file colin.tcl that in the delivered form is in two parts, the code at the top and a set of test cases at the bottom. The user should copy the top portion into a file, for example, Calc-1.1.tm and then it can be used as a module. Alternatively, it can simply be sourced into a program. If the C extension is used, then it must be built from source and then it is loaded using the tcl load command. The C extension is optional.
+
 ## Basic Usage
 
 ```tcl
