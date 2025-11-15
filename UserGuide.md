@@ -581,9 +581,8 @@ Calc provides:
 - ✅ Performance bug detection (cache overflow)
 
 **When to use Calc:**
-- Mathematical calculations with variables
+- Mathematical calculations with variables and no $
 - Multiple related calculations
-- Performance-critical expression evaluation
 - Clean, readable calculation code
 
 **When to use expr:**
