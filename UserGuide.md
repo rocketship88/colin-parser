@@ -426,8 +426,8 @@ array set data {
     name "Alice"
     age  30
 }
-
-: data(name)
+set field name
+: data(field)
 # Returns: "Alice"
 
 # Similarly, not useful for math operations
