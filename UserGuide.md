@@ -564,7 +564,7 @@ set years 10
 | Variable reference | `x` | `$x` |
 | Command substitution | Not supported | `[cmd]` |
 | Multiple statements | `;` or newline | Not supported |
-| Comments | `#` supported | Not in expression |
+| Comments | `#` supported | `#` also supported |
 | Array syntax | `arr(key)` | `$arr(key)` |
 | Performance | Cached bytecode | Compiled per call |
 | Assignment | `x = value` | `set x [expr ...]` |
