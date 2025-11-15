@@ -68,7 +68,7 @@ int CalcCmd(ClientData cd, Tcl_Interp *interp,
     
     static Tcl_Obj *cacheVar = NULL;
     if (cacheVar == NULL) {
-        cacheVar = Tcl_NewStringObj("::cache", -1);
+        cacheVar = Tcl_NewStringObj("::Calc::cache", -1);
         Tcl_IncrRefCount(cacheVar);
     }
     
