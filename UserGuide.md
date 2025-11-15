@@ -484,9 +484,6 @@ This is a **feature**, not a bug - it helps you identify performance problems ea
 ### Example 1: Quadratic Formula
 
 ```tcl
-proc tcl::mathfunc::sqrt {x} {
-    expr {sqrt($x)}
-}
 
 # Solve ax² + bx + c = 0
 set a 1
