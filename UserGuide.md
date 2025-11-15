@@ -502,13 +502,12 @@ set c 6
 ### Example 2: Statistical Calculations
 
 ```tcl
-proc tcl::mathfunc::sqrt {x} { expr {sqrt($x)} }
 
 set data {10 20 30 40 50}
 
 : {
-    n = listlen(data)
-    sum = lindex(data,0) + lindex(data,1) + lindex(data,2) + 
+    n = llength(data)
+    sum = lindex(data,0) + lindex(data,1) + lindex(data,2) + \
           lindex(data,3) + lindex(data,4)
     mean = sum / n
     gather(n, sum, mean)
@@ -536,13 +535,12 @@ set j 1
     right  = mat(i,j+1)
     sum = center + top + bottom + left + right
 }
-# Returns: 35 (5+2+8+4+6)
+# Returns: 25 (5+2+8+4+6)
 ```
 
 ### Example 4: Financial Calculation
 
 ```tcl
-proc tcl::mathfunc::pow {x y} { expr {pow($x,$y)} }
 
 # Compound interest: A = P(1 + r/n)^(nt)
 set principal 1000
