@@ -20,7 +20,7 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 tclsh colin.tcl
 ```
 
-The file will run all tests automatically and display results. At about line 342 there are some knobs for testing. To use w/o tests, just remove all code below that point.
+The file will run all tests automatically and display results. At about line 426 there are some knobs for testing. To use w/o tests, just remove all code below that point.
 
 ## Features
 
