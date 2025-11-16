@@ -4,23 +4,23 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 
 ## What's New
 
-- Array support: `= myarray(index) * 2`
+- Array support: `= myarray(index) * 2` and multi-dimensional matrix(i,j,k)
 - fixes for boolean literals and multi-character function names (log10, atan2)
 - Comprehensive test suite with 100+ verification tests
 
 - Support for multiple expressions separated by ` ' ` ` ; ` or `newline`.
 - Assignment operator, right associative, `a = b = c` possible too
 - Allow for on-line comments with or without preceding ; as #... end of line
-- Include check for more than 1000 expressions in cache, to catch $var in expressions
-- Finish up with wrapping in Calc:: namespace and some code cleanup
-- Preliminary upload of C extension for : command, 30% faster
+- Includes check for more than 1000 expressions in cache, to catch $var in expressions
+- Wrapping in Calc:: namespace and some code cleanup
+- Preliminary upload of C extension for : command, 30% faster - see build instructions below
 ## Usage
 
 ```tcl
 tclsh colin.tcl
 ```
 
-The file will run all tests automatically and display results. At about line 426 there are some knobs for testing. To use w/o tests, just remove all code below that point.
+The file will run all tests automatically and display results. At about line 426 there are some knobs for testing. To use w/o tests, just remove all code below that point and source into program (or create a package pkgIndex.tcl or use a module name colin-1.0.tm and then package require command).
 
 ## Features
 
@@ -31,11 +31,11 @@ The file will run all tests automatically and display results. At about line 426
 - Boolean operations: `= a < 10 && b > 5`
 - Bignum support: `= 2 ** 1000`
 - Bytecode caching for performance
-- New, assignment with `=` multiple statements with `'`  `;` or `newline` separators
+- Assignment with `=` multiple statements with `'`  `;` or `newline` separators
 - Right associative assignment, `= a = b = (3 + 4) * 2` ;# produces 14 -> a and b
 - Can now cross lines if inside braces, no `;` needed
 - For on line multiple statements without braces, can use `'` separator
-- Command alias, `=` or `:` 
+- Command alias, `=` or `:` or choose your own
 ## Requirements
 
 - Tcl 8.6 or 9.x
