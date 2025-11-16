@@ -4,7 +4,7 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 
 ## What's New
 
-- Array support: `= myarray(index) * 2` and multi-dimensional matrix(i,j,k)
+- Array support: `= myarray(index) * 2` and multi-dimensional `matrix(i,j,k)`
 - fixes for boolean literals and multi-character function names (log10, atan2)
 - Comprehensive test suite with 100+ verification tests
 
