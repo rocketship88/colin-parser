@@ -316,10 +316,11 @@ set qy 24
 
 ### The gather() Function
 
-The `gather()` function collects multiple values into a list:
+A `gather()` function collects multiple values into a list:
 
 ```tcl
-proc tcl::mathfunc::gather {args} {
+# this is NOT defined automatically, to use include this definition in your code
+proc tcl::mathfunc::gather {args} { 
     return [list {*}$args]
 }
 
