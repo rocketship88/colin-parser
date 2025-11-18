@@ -73,14 +73,14 @@ Open "x64 Native Tools Command Prompt for VS 2022" and run:
 
 **For Tcl 8.6:**
 ```batch
-cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS -IC:\Path\To\Tcl\include myext.c  ^
-   /link -dll C:\Path\To\Tcl\lib\tclstub86.lib /OUT:myext.dll
+cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS -IC:\Path\To\Tcl\include calc.c  ^
+   /link -dll C:\Path\To\Tcl\lib\tclstub86.lib /OUT:calc.dll
 ```
 
 **For Tcl 9.x:**
 ```batch
-cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS /DTCL9 -IC:\Path\To\Tcl\include myext.c  ^
-   /link -dll C:\Path\To\Tcl\lib\tclstub.lib /OUT:myext9.dll
+cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS /DTCL9 -IC:\Path\To\Tcl\include calc.c  ^
+   /link -dll C:\Path\To\Tcl\lib\tclstub.lib /OUT:calc9.dll
 ```
 
 **Note:** 
@@ -89,13 +89,13 @@ cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS /DTCL9 -IC:\Path\To\Tcl\include myext.c
 
 ### Linux
 ```bash
-gcc -O3 -march=native -flto -shared -fPIC -o myext.so myext.c  \
+gcc -O3 -march=native -flto -shared -fPIC -o calc.so calc.c  \
     -I/usr/include/tcl8.6 -ltclstub8.6
 ```
 
 If Tcl headers are in a different location:
 ```bash
-gcc -O3 -march=native -flto -shared -fPIC -o myext.so myext.c  \
+gcc -O3 -march=native -flto -shared -fPIC -o calc.so calc.c  \
     $(pkg-config --cflags tcl) -ltclstub8.6
 ```
 ### Using the C extension
@@ -103,10 +103,10 @@ Depending on which of the tcl or C extension one uses, the command is `:` or `::
 ```tcl
 interp alias {} = {} : ;# alias to = for test suite
 
-load myext.dll   # windows 8.6
-load myext9.dll  # windows 9.x
+load calc.dll   # windows 8.6
+load calc9.dll  # windows 9.x
 
-load myext.so    # linux
+load calc.so    # linux
 
 :: expression # uses the C extension 
 :  expression # uses tcl command
