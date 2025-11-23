@@ -1,0 +1,1262 @@
+# calc.test - Complete expression evaluator test suite
+# Assumes = is command name
+# Tests compatibility with expr behavior
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+
+    set calcCmd =
+    testConstraint hasCalcCmd 1
+
+
+# ============================================================================
+# FEATURE DETECTION - Test what features are supported
+# ============================================================================
+
+if {[testConstraint hasCalcCmd]} {
+    # Test for logical operators (&&, ||, !)
+    testConstraint hasLogicalOps [expr {
+        ![catch {$calcCmd 1 && 1}]
+    }]
+    
+    # Test for ternary operator (? :)
+    testConstraint hasTernary [expr {
+        ![catch {$calcCmd 1 ? 2 : 3}]
+    }]
+    
+    # Test for array support (note: may not be needed with mathfunc workaround)
+    testConstraint hasArrays [expr {
+        ![catch {
+            array set _test_arr {0 zero}
+            set _i 0
+            $calcCmd _test_arr(_i)
+        }]
+    }]
+    
+    puts "Feature support:"
+    puts "  Logical operators (&&, ||, !): [testConstraint hasLogicalOps]"
+    puts "  Ternary operator (? :):        [testConstraint hasTernary]"
+    puts "  Array access:                  [testConstraint hasArrays]"
+    puts ""
+}
+
+# ============================================================================
+# TESTS BEGIN
+# ============================================================================
+
+# ---------- Basic Arithmetic ----------
+
+test calc-1.1 {addition: 1 + 2} -constraints hasCalcCmd -body {
+    $calcCmd 1 + 2
+} -result [expr {1 + 2}]
+
+test calc-1.2 {subtraction: 10 - 3} -constraints hasCalcCmd -body {
+    $calcCmd 10 - 3
+} -result [expr {10 - 3}]
+
+test calc-1.3 {multiplication: 5 * 6} -constraints hasCalcCmd -body {
+    $calcCmd 5 * 6
+} -result [expr {5 * 6}]
+
+test calc-1.4 {division: 20 / 4} -constraints hasCalcCmd -body {
+    $calcCmd 20 / 4
+} -result [expr {20 / 4}]
+
+test calc-1.5 {modulo: 17 % 5} -constraints hasCalcCmd -body {
+    $calcCmd 17 % 5
+} -result [expr {17 % 5}]
+
+test calc-1.6 {exponentiation: 2 ** 10} -constraints hasCalcCmd -body {
+    $calcCmd 2 ** 10
+} -result [expr {2 ** 10}]
+
+# ---------- Operator Precedence ----------
+
+test calc-2.1 {precedence: 2 + 3 * 4} -constraints hasCalcCmd -body {
+    $calcCmd 2 + 3 * 4
+} -result [expr {2 + 3 * 4}]
+
+test calc-2.2 {precedence with parens: (2 + 3) * 4} -constraints hasCalcCmd -body {
+    $calcCmd (2 + 3) * 4
+} -result [expr {(2 + 3) * 4}]
+
+test calc-2.3 {right associativity: 2 ** 3 ** 2} -constraints hasCalcCmd -body {
+    $calcCmd 2 ** 3 ** 2
+} -result [expr {2 ** 3 ** 2}]
+
+# ---------- Variables ----------
+
+test calc-3.1 {variables: x + y} -constraints hasCalcCmd -setup {
+    set x 10
+    set y 20
+} -body {
+    expr {[$calcCmd x + y] == [expr {$x + $y}]}
+} -result 1 -cleanup {
+    unset x y
+}
+
+test calc-3.2 {variables: x * y + z} -constraints hasCalcCmd -setup {
+    set x 10
+    set y 20
+    set z 5
+} -body {
+    expr {[$calcCmd x * y + z] == [expr {$x * $y + $z}]}
+} -result 1 -cleanup {
+    unset x y z
+}
+
+test calc-3.3 {variables with parens: (x + y) * z} -constraints hasCalcCmd -setup {
+    set x 10
+    set y 20
+    set z 5
+} -body {
+    expr {[$calcCmd (x + y) * z] == [expr {($x + $y) * $z}]}
+} -result 1 -cleanup {
+    unset x y z
+}
+
+# ---------- Bitwise Operations ----------
+
+test calc-4.1 {bitwise AND: 15 & 7} -constraints hasCalcCmd -body {
+    $calcCmd 15 & 7
+} -result [expr {15 & 7}]
+
+test calc-4.2 {bitwise OR: 8 | 4} -constraints hasCalcCmd -body {
+    $calcCmd 8 | 4
+} -result [expr {8 | 4}]
+
+test calc-4.3 {bitwise XOR: 12 ^ 5} -constraints hasCalcCmd -body {
+    $calcCmd 12 ^ 5
+} -result [expr {12 ^ 5}]
+
+test calc-4.4 {left shift: 1 << 8} -constraints hasCalcCmd -body {
+    $calcCmd 1 << 8
+} -result [expr {1 << 8}]
+
+test calc-4.5 {right shift: 256 >> 4} -constraints hasCalcCmd -body {
+    $calcCmd 256 >> 4
+} -result [expr {256 >> 4}]
+
+# ---------- Boolean Operations ----------
+
+test calc-5.1 {logical AND: 1 && 1} -constraints {hasCalcCmd hasLogicalOps} -body {
+    $calcCmd 1 && 1
+} -result [expr {1 && 1}]
+
+test calc-5.2 {logical AND: 1 && 0} -constraints {hasCalcCmd hasLogicalOps} -body {
+    $calcCmd 1 && 0
+} -result [expr {1 && 0}]
+
+test calc-5.3 {logical OR: 0 || 1} -constraints {hasCalcCmd hasLogicalOps} -body {
+    $calcCmd 0 || 1
+} -result [expr {0 || 1}]
+
+test calc-5.4 {logical NOT: !1} -constraints {hasCalcCmd hasLogicalOps} -body {
+    $calcCmd !1
+} -result [expr {!1}]
+
+# ---------- Comparison ----------
+
+test calc-6.1 {less than: a < b} -constraints hasCalcCmd -setup {
+    set a 10
+    set b 20
+} -body {
+    expr {[$calcCmd a < b] == [expr {$a < $b}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+test calc-6.2 {greater than: a > b} -constraints hasCalcCmd -setup {
+    set a 10
+    set b 20
+} -body {
+    expr {[$calcCmd a > b] == [expr {$a > $b}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+test calc-6.3 {equality: a == 10} -constraints hasCalcCmd -setup {
+    set a 10
+} -body {
+    expr {[$calcCmd a == 10] == [expr {$a == 10}]}
+} -result 1 -cleanup {
+    unset a
+}
+
+test calc-6.4 {inequality: a != b} -constraints hasCalcCmd -setup {
+    set a 10
+    set b 20
+} -body {
+    expr {[$calcCmd a != b] == [expr {$a != $b}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+# ---------- Math Functions ----------
+
+test calc-7.1 {sqrt of literal} -constraints hasCalcCmd -body {
+    $calcCmd sqrt(25)
+} -result [expr {sqrt(25)}]
+
+test calc-7.2 {sqrt with expression} -constraints hasCalcCmd -setup {
+    set x 10
+} -body {
+    expr {[$calcCmd sqrt(x*x)] == [expr {sqrt($x*$x)}]}
+} -result 1 -cleanup {
+    unset x
+}
+
+test calc-7.3 {sin function} -constraints hasCalcCmd -setup {
+    set angle 90
+} -body {
+    expr {[$calcCmd sin(angle)] == [expr {sin($angle)}]}
+} -result 1 -cleanup {
+    unset angle
+}
+
+test calc-7.4 {abs function} -constraints hasCalcCmd -body {
+    $calcCmd abs(-42)
+} -result [expr {abs(-42)}]
+
+# ---------- Arrays (skipped - use mathfunc workaround) ----------
+
+test calc-8.1 {array access: data(idx)} -constraints {hasCalcCmd hasArrays} -setup {
+    array set data {10 ten 20 twenty}
+    set idx 10
+} -body {
+    expr {[$calcCmd data(idx)] eq [expr {$data($idx)}]}
+} -result 1 -cleanup {
+    unset data idx
+}
+
+test calc-8.2 {array access after index change} -constraints {hasCalcCmd hasArrays} -setup {
+    array set data {10 ten 20 twenty 30 thirty}
+    set idx 20
+} -body {
+    expr {[$calcCmd data(idx)] eq [expr {$data($idx)}]}
+} -result 1 -cleanup {
+    unset data idx
+}
+
+test calc-8.3 {array arithmetic} -constraints {hasCalcCmd hasArrays} -setup {
+    array set nums {5 100 10 200 15 300}
+    set i 5
+    set j 10
+} -body {
+    expr {[$calcCmd nums(i) + nums(j)] == [expr {$nums($i) + $nums($j)}]}
+} -result 1 -cleanup {
+    unset nums i j
+}
+
+# ---------- Complex Array Indices ----------
+
+test calc-9.1 {array with computed index: matrix(n*2)} -constraints {hasCalcCmd hasArrays} -setup {
+    array set matrix {0 10 1 20 2 30 3 40}
+    set n 1
+} -body {
+    expr {[$calcCmd matrix(n*2)] == [expr {$matrix([expr {$n*2}])}]}
+} -result 1 -cleanup {
+    unset matrix n
+}
+
+test calc-9.2 {array with computed index: matrix(n+1)} -constraints {hasCalcCmd hasArrays} -setup {
+    array set matrix {0 10 1 20 2 30 3 40}
+    set n 1
+} -body {
+    expr {[$calcCmd matrix(n+1)] == [expr {$matrix([expr {$n+1}])}]}
+} -result 1 -cleanup {
+    unset matrix n
+}
+
+# ---------- Ternary Operator ----------
+
+test calc-10.1 {ternary: val > 10 ? 100 : 200} -constraints {hasCalcCmd hasTernary} -setup {
+    set val 15
+} -body {
+    expr {[$calcCmd val > 10 ? 100 : 200] == [expr {$val > 10 ? 100 : 200}]}
+} -result 1 -cleanup {
+    unset val
+}
+
+test calc-10.2 {ternary with different value} -constraints {hasCalcCmd hasTernary} -setup {
+    set val 5
+} -body {
+    expr {[$calcCmd val > 10 ? 100 : 200] == [expr {$val > 10 ? 100 : 200}]}
+} -result 1 -cleanup {
+    unset val
+}
+
+# ---------- Mixed Expressions ----------
+
+test calc-11.1 {complex expression: (price * quantity) - discount} -constraints hasCalcCmd -setup {
+    set price 100
+    set quantity 5
+    set discount 10
+} -body {
+    expr {[$calcCmd (price * quantity) - discount] == [expr {($price * $quantity) - $discount}]}
+} -result 1 -cleanup {
+    unset price quantity discount
+}
+
+test calc-11.2 {complex expression: price * (quantity - 1)} -constraints hasCalcCmd -setup {
+    set price 100
+    set quantity 5
+} -body {
+    expr {[$calcCmd price * (quantity - 1)] == [expr {$price * ($quantity - 1)}]}
+} -result 1 -cleanup {
+    unset price quantity
+}
+
+# ---------- Unary Operators ----------
+
+test calc-12.1 {unary plus} -constraints hasCalcCmd -setup {
+    set num 42
+} -body {
+    expr {[$calcCmd +num] == [expr {+$num}]}
+} -result 1 -cleanup {
+    unset num
+}
+
+test calc-12.2 {unary minus} -constraints hasCalcCmd -setup {
+    set num 42
+} -body {
+    expr {[$calcCmd -num] == [expr {-$num}]}
+} -result 1 -cleanup {
+    unset num
+}
+
+test calc-12.3 {bitwise NOT} -constraints hasCalcCmd -setup {
+    set num 42
+} -body {
+    expr {[$calcCmd ~num] == [expr {~$num}]}
+} -result 1 -cleanup {
+    unset num
+}
+
+# ---------- Boolean with Variables ----------
+
+test calc-13.1 {logical AND with variables} -constraints {hasCalcCmd hasLogicalOps} -setup {
+    set flag 1
+} -body {
+    expr {[$calcCmd flag && 1] == [expr {$flag && 1}]}
+} -result 1 -cleanup {
+    unset flag
+}
+
+test calc-13.2 {logical AND with false flag} -constraints {hasCalcCmd hasLogicalOps} -setup {
+    set flag 0
+} -body {
+    expr {[$calcCmd flag && 1] == [expr {$flag && 1}]}
+} -result 1 -cleanup {
+    unset flag
+}
+
+# ---------- Nested Functions ----------
+
+test calc-14.1 {nested: sqrt(abs(-16))} -constraints hasCalcCmd -body {
+    $calcCmd sqrt(abs(-16))
+} -result [expr {sqrt(abs(-16))}]
+
+test calc-14.2 {nested: abs(sin(0))} -constraints hasCalcCmd -body {
+    $calcCmd abs(sin(0))
+} -result [expr {abs(sin(0))}]
+
+# ---------- Bignum Arithmetic ----------
+
+test calc-15.1 {bignum addition} -constraints hasCalcCmd -body {
+    $calcCmd 999999999999999999999 + 1
+} -result [expr {999999999999999999999 + 1}]
+
+test calc-15.2 {bignum exponentiation: 2 ** 100} -constraints hasCalcCmd -body {
+    $calcCmd 2 ** 100
+} -result [expr {2 ** 100}]
+
+test calc-15.3 {bignum: 10 ** 50} -constraints hasCalcCmd -body {
+    $calcCmd 10 ** 50
+} -result [expr {10 ** 50}]
+
+# ---------- Bignum Operations ----------
+
+test calc-16.1 {bignum addition with variables} -constraints hasCalcCmd -setup {
+    set big1 [expr {2 ** 100}]
+    set big2 [expr {3 ** 100}]
+} -body {
+    expr {[$calcCmd big1 + big2] == [expr {$big1 + $big2}]}
+} -result 1 -cleanup {
+    unset big1 big2
+}
+
+test calc-16.2 {bignum multiplication} -constraints hasCalcCmd -setup {
+    set big1 [expr {2 ** 100}]
+    set big2 [expr {3 ** 100}]
+} -body {
+    expr {[$calcCmd big1 * big2] == [expr {$big1 * $big2}]}
+} -result 1 -cleanup {
+    unset big1 big2
+}
+
+test calc-16.3 {bignum subtraction} -constraints hasCalcCmd -setup {
+    set big1 [expr {2 ** 100}]
+    set big2 [expr {3 ** 100}]
+} -body {
+    expr {[$calcCmd big2 - big1] == [expr {$big2 - $big1}]}
+} -result 1 -cleanup {
+    unset big1 big2
+}
+
+# ---------- Factorial-like ----------
+
+test calc-17.1 {factorial computation} -constraints hasCalcCmd -setup {
+    set n 1
+    set m 1
+    for {set i 1} {$i <= 50} {incr i} {
+        set n [expr {$n * $i}]
+        set m [$calcCmd m * i]
+    }
+} -body {
+    expr {[$calcCmd m + 1] == [expr {$n + 1}]}
+} -result 1 -cleanup {
+    unset n m i
+}
+
+# ---------- Mixed Bignum and Regular ----------
+
+test calc-18.1 {bignum mixed with small} -constraints hasCalcCmd -setup {
+    set small 42
+    set huge [expr {10 ** 100}]
+} -body {
+    expr {[$calcCmd huge + small] == [expr {$huge + $small}]}
+} -result 1 -cleanup {
+    unset small huge
+}
+
+test calc-18.2 {bignum cancellation} -constraints hasCalcCmd -setup {
+    set small 42
+    set huge [expr {10 ** 100}]
+} -body {
+    expr {[$calcCmd huge - huge + small] == [expr {$huge - $huge + $small}]}
+} -result 1 -cleanup {
+    unset small huge
+}
+
+# ---------- Bignum in Arrays ----------
+
+test calc-19.1 {bignum array values} -constraints {hasCalcCmd hasArrays} -setup {
+    array set bigdata {}
+    set bigdata(1) [expr {2 ** 200}]
+    set bigdata(2) [expr {3 ** 200}]
+    set idx1 1
+    set idx2 2
+} -body {
+    expr {[$calcCmd bigdata(idx1) + bigdata(idx2)] == [expr {$bigdata($idx1) + $bigdata($idx2)}]}
+} -result 1 -cleanup {
+    unset bigdata idx1 idx2
+}
+
+# ---------- Bignum Comparisons ----------
+
+test calc-20.1 {bignum less than} -constraints hasCalcCmd -setup {
+    set a [expr {10 ** 100}]
+    set b [expr {10 ** 100 + 1}]
+} -body {
+    expr {[$calcCmd a < b] == [expr {$a < $b}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+test calc-20.2 {bignum equality} -constraints hasCalcCmd -setup {
+    set a [expr {10 ** 100}]
+} -body {
+    expr {[$calcCmd a == a] == [expr {$a == $a}]}
+} -result 1 -cleanup {
+    unset a
+}
+
+test calc-20.3 {bignum greater than} -constraints hasCalcCmd -setup {
+    set a [expr {10 ** 100}]
+    set b [expr {10 ** 100 + 1}]
+} -body {
+    expr {[$calcCmd b > a] == [expr {$b > $a}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+# ---------- Bignum with Math Functions ----------
+
+test calc-21.1 {abs of negative bignum} -constraints hasCalcCmd -setup {
+    set bigneg [expr {-(2 ** 100)}]
+} -body {
+    expr {[$calcCmd abs(bigneg)] == [expr {abs($bigneg)}]}
+} -result 1 -cleanup {
+    unset bigneg
+}
+
+# ---------- Bignum Ternary ----------
+
+test calc-22.1 {ternary with bignums} -constraints {hasCalcCmd hasTernary} -setup {
+    set x [expr {10 ** 100}]
+    set y [expr {10 ** 50}]
+} -body {
+    expr {[$calcCmd x > y ? x : y] == [expr {$x > $y ? $x : $y}]}
+} -result 1 -cleanup {
+    unset x y
+}
+
+# ---------- Bignum Bitwise ----------
+
+test calc-23.1 {bignum bitwise OR} -constraints hasCalcCmd -setup {
+    set b1 [expr {2 ** 65}]
+    set b2 [expr {2 ** 66}]
+} -body {
+    expr {[$calcCmd b1 | b2] == [expr {$b1 | $b2}]}
+} -result 1 -cleanup {
+    unset b1 b2
+}
+
+test calc-23.2 {bignum bitwise AND} -constraints hasCalcCmd -setup {
+    set b1 [expr {2 ** 65}]
+    set b2 [expr {2 ** 66}]
+} -body {
+    expr {[$calcCmd b1 & b2] == [expr {$b1 & $b2}]}
+} -result 1 -cleanup {
+    unset b1 b2
+}
+
+# ---------- Single Argument Math Functions ----------
+
+test calc-24.1 {sqrt(144)} -constraints hasCalcCmd -body {
+    $calcCmd sqrt(144)
+} -result [expr {sqrt(144)}]
+
+test calc-24.2 {abs(-99)} -constraints hasCalcCmd -body {
+    $calcCmd abs(-99)
+} -result [expr {abs(-99)}]
+
+test calc-24.3 {floor(3.7)} -constraints hasCalcCmd -body {
+    $calcCmd floor(3.7)
+} -result [expr {floor(3.7)}]
+
+test calc-24.4 {ceil(3.2)} -constraints hasCalcCmd -body {
+    $calcCmd ceil(3.2)
+} -result [expr {ceil(3.2)}]
+
+test calc-24.5 {round(3.5)} -constraints hasCalcCmd -body {
+    $calcCmd round(3.5)
+} -result [expr {round(3.5)}]
+
+test calc-24.6 {int(7.9)} -constraints hasCalcCmd -body {
+    $calcCmd int(7.9)
+} -result [expr {int(7.9)}]
+
+test calc-24.7 {sqrt with variable} -constraints hasCalcCmd -setup {
+    set val 16
+} -body {
+    expr {[$calcCmd sqrt(val)] == [expr {sqrt($val)}]}
+} -result 1 -cleanup {
+    unset val
+}
+
+test calc-24.8 {abs with variable} -constraints hasCalcCmd -setup {
+    set neg -50
+} -body {
+    expr {[$calcCmd abs(neg)] == [expr {abs($neg)}]}
+} -result 1 -cleanup {
+    unset neg
+}
+
+# ---------- Trigonometric Functions ----------
+
+test calc-25.1 {sin(0)} -constraints hasCalcCmd -body {
+    $calcCmd sin(0)
+} -result [expr {sin(0)}]
+
+test calc-25.2 {cos(0)} -constraints hasCalcCmd -body {
+    $calcCmd cos(0)
+} -result [expr {cos(0)}]
+
+test calc-25.3 {tan(0)} -constraints hasCalcCmd -body {
+    $calcCmd tan(0)
+} -result [expr {tan(0)}]
+
+test calc-25.4 {sin(pi)} -constraints hasCalcCmd -setup {
+    set pi 3.14159265359
+} -body {
+    expr {[$calcCmd sin(pi)] == [expr {sin($pi)}]}
+} -result 1 -cleanup {
+    unset pi
+}
+
+test calc-25.5 {cos(pi)} -constraints hasCalcCmd -setup {
+    set pi 3.14159265359
+} -body {
+    expr {[$calcCmd cos(pi)] == [expr {cos($pi)}]}
+} -result 1 -cleanup {
+    unset pi
+}
+
+# ---------- Logarithmic and Exponential ----------
+
+test calc-26.1 {exp(0)} -constraints hasCalcCmd -body {
+    $calcCmd exp(0)
+} -result [expr {exp(0)}]
+
+test calc-26.2 {exp(1)} -constraints hasCalcCmd -body {
+    $calcCmd exp(1)
+} -result [expr {exp(1)}]
+
+test calc-26.3 {log(1)} -constraints hasCalcCmd -body {
+    $calcCmd log(1)
+} -result [expr {log(1)}]
+
+test calc-26.4 {log10(100)} -constraints hasCalcCmd -body {
+    $calcCmd log10(100)
+} -result [expr {log10(100)}]
+
+test calc-26.5 {log with variable} -constraints hasCalcCmd -setup {
+    set e 2.71828
+} -body {
+    expr {[$calcCmd log(e)] == [expr {log($e)}]}
+} -result 1 -cleanup {
+    unset e
+}
+
+# ---------- Two Argument Functions ----------
+
+test calc-27.1 {min(5, 10)} -constraints hasCalcCmd -body {
+    $calcCmd min(5, 10)
+} -result [expr {min(5, 10)}]
+
+test calc-27.2 {min(10, 5)} -constraints hasCalcCmd -body {
+    $calcCmd min(10, 5)
+} -result [expr {min(10, 5)}]
+
+test calc-27.3 {max(5, 10)} -constraints hasCalcCmd -body {
+    $calcCmd max(5, 10)
+} -result [expr {max(5, 10)}]
+
+test calc-27.4 {max(10, 5)} -constraints hasCalcCmd -body {
+    $calcCmd max(10, 5)
+} -result [expr {max(10, 5)}]
+
+test calc-27.5 {pow(2, 8)} -constraints hasCalcCmd -body {
+    $calcCmd pow(2, 8)
+} -result [expr {pow(2, 8)}]
+
+test calc-27.6 {pow(10, 3)} -constraints hasCalcCmd -body {
+    $calcCmd pow(10, 3)
+} -result [expr {pow(10, 3)}]
+
+test calc-27.7 {hypot(3, 4)} -constraints hasCalcCmd -body {
+    $calcCmd hypot(3, 4)
+} -result [expr {hypot(3, 4)}]
+
+test calc-27.8 {atan2(1, 1)} -constraints hasCalcCmd -body {
+    $calcCmd atan2(1, 1)
+} -result [expr {atan2(1, 1)}]
+
+# ---------- Two Argument Functions with Variables ----------
+
+test calc-28.1 {min with variables} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+} -body {
+    expr {[$calcCmd min(a, b)] == [expr {min($a, $b)}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+test calc-28.2 {max with variables} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+} -body {
+    expr {[$calcCmd max(a, b)] == [expr {max($a, $b)}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+test calc-28.3 {pow with variables} -constraints hasCalcCmd -setup {
+    set a 7
+} -body {
+    expr {[$calcCmd pow(a, 2)] == [expr {pow($a, 2)}]}
+} -result 1 -cleanup {
+    unset a
+}
+
+test calc-28.4 {hypot with variables} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+} -body {
+    expr {[$calcCmd hypot(a, b)] == [expr {hypot($a, $b)}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+# ---------- Multiple Argument Functions ----------
+
+test calc-29.1 {min with 3 args} -constraints hasCalcCmd -body {
+    $calcCmd min(5, 10, 3)
+} -result [expr {min(5, 10, 3)}]
+
+test calc-29.2 {min with 4 args} -constraints hasCalcCmd -body {
+    $calcCmd min(10, 5, 15, 2)
+} -result [expr {min(10, 5, 15, 2)}]
+
+test calc-29.3 {max with 3 args} -constraints hasCalcCmd -body {
+    $calcCmd max(5, 10, 3)
+} -result [expr {max(5, 10, 3)}]
+
+test calc-29.4 {max with 4 args} -constraints hasCalcCmd -body {
+    $calcCmd max(10, 5, 15, 2)
+} -result [expr {max(10, 5, 15, 2)}]
+
+test calc-29.5 {min with variables} -constraints hasCalcCmd -setup {
+    set x 8
+    set y 3
+    set z 15
+} -body {
+    expr {[$calcCmd min(x, y, z)] == [expr {min($x, $y, $z)}]}
+} -result 1 -cleanup {
+    unset x y z
+}
+
+test calc-29.6 {max with variables} -constraints hasCalcCmd -setup {
+    set x 8
+    set y 3
+    set z 15
+} -body {
+    expr {[$calcCmd max(x, y, z)] == [expr {max($x, $y, $z)}]}
+} -result 1 -cleanup {
+    unset x y z
+}
+
+# ---------- Mixed Expressions with Functions ----------
+
+test calc-30.1 {min + max} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+} -body {
+    expr {[$calcCmd min(a, b) + max(a, b)] == [expr {min($a, $b) + max($a, $b)}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+test calc-30.2 {pythagorean theorem} -constraints hasCalcCmd -body {
+    $calcCmd sqrt(pow(3, 2) + pow(4, 2))
+} -result [expr {sqrt(pow(3, 2) + pow(4, 2))}]
+
+test calc-30.3 {nested abs and max} -constraints hasCalcCmd -body {
+    $calcCmd max(abs(-5), abs(-3))
+} -result [expr {max(abs(-5), abs(-3))}]
+
+# ---------- Functions with Expressions as Arguments ----------
+
+test calc-31.1 {min with expression args} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+} -body {
+    expr {[$calcCmd min(a+1, b-1)] == [expr {min($a+1, $b-1)}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+test calc-31.2 {max with expression args} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+} -body {
+    expr {[$calcCmd max(a*2, b/2)] == [expr {max($a*2, $b/2)}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+test calc-31.3 {pow with sum} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+} -body {
+    expr {[$calcCmd pow(a+b, 2)] == [expr {pow($a+$b, 2)}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+test calc-31.4 {distance formula} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+} -body {
+    expr {[$calcCmd sqrt(a*a + b*b)] == [expr {sqrt($a*$a + $b*$b)}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+# ---------- Nested Multi-Argument Functions ----------
+
+test calc-32.1 {max of mins} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+    set y 3
+    set z 15
+} -body {
+    expr {[$calcCmd max(min(a, b), min(y, z))] == [expr {max(min($a, $b), min($y, $z))}]}
+} -result 1 -cleanup {
+    unset a b y z
+}
+
+test calc-32.2 {min of maxes} -constraints hasCalcCmd -body {
+    $calcCmd min(max(5, 10), max(3, 8))
+} -result [expr {min(max(5, 10), max(3, 8))}]
+
+# ---------- Functions with Bignums ----------
+
+test calc-33.1 {min with bignums} -constraints hasCalcCmd -setup {
+    set huge1 [expr {10 ** 50}]
+    set huge2 [expr {10 ** 51}]
+} -body {
+    expr {[$calcCmd min(huge1, huge2)] == [expr {min($huge1, $huge2)}]}
+} -result 1 -cleanup {
+    unset huge1 huge2
+}
+
+test calc-33.2 {max with bignums} -constraints hasCalcCmd -setup {
+    set huge1 [expr {10 ** 50}]
+    set huge2 [expr {10 ** 51}]
+} -body {
+    expr {[$calcCmd max(huge1, huge2)] == [expr {max($huge1, $huge2)}]}
+} -result 1 -cleanup {
+    unset huge1 huge2
+}
+
+test calc-33.3 {pow creating bignum} -constraints hasCalcCmd -body {
+    $calcCmd pow(2, 100)
+} -result [expr {pow(2, 100)}]
+
+# ---------- Functions in Arrays ----------
+
+test calc-34.1 {min with array values} -constraints {hasCalcCmd hasArrays} -setup {
+    array set results {1 10 2 20 3 5}
+    set k1 1
+    set k2 2
+} -body {
+    expr {[$calcCmd min(results(k1), results(k2))] == [expr {min($results($k1), $results($k2))}]}
+} -result 1 -cleanup {
+    unset results k1 k2
+}
+
+test calc-34.2 {max with 3 array values} -constraints {hasCalcCmd hasArrays} -setup {
+    array set results {1 10 2 20 3 5}
+    set k1 1
+    set k2 2
+    set k3 3
+} -body {
+    expr {[$calcCmd max(results(k1), results(k2), results(k3))] == [expr {max($results($k1), $results($k2), $results($k3))}]}
+} -result 1 -cleanup {
+    unset results k1 k2 k3
+}
+
+# ---------- Functions with Ternary ----------
+
+test calc-35.1 {function result in ternary} -constraints {hasCalcCmd hasTernary} -setup {
+    set test 100
+} -body {
+    expr {[$calcCmd min(test, 50) > 40 ? 1 : 0] == [expr {min($test, 50) > 40 ? 1 : 0}]}
+} -result 1 -cleanup {
+    unset test
+}
+
+test calc-35.2 {ternary with function in both branches} -constraints {hasCalcCmd hasTernary} -setup {
+    set a 7
+    set b 12
+} -body {
+    expr {[$calcCmd max(a, b) < 20 ? max(a,b) : 20] == [expr {max($a, $b) < 20 ? max($a,$b) : 20}]}
+} -result 1 -cleanup {
+    unset a b
+}
+
+# ---------- Combining Everything ----------
+
+test calc-36.1 {complex nested functions} -constraints hasCalcCmd -setup {
+    set base 3
+    set exp 4
+} -body {
+    expr {[$calcCmd sqrt(pow(base, exp))] == [expr {sqrt(pow($base, $exp))}]}
+} -result 1 -cleanup {
+    unset base exp
+}
+
+test calc-36.2 {min of abs values} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+    set z 15
+} -body {
+    expr {[$calcCmd min(abs(-a), abs(-b), abs(-z))] == [expr {min(abs(-$a), abs(-$b), abs(-$z))}]}
+} -result 1 -cleanup {
+    unset a b z
+}
+
+test calc-36.3 {max of sqrt values} -constraints hasCalcCmd -setup {
+    set a 7
+    set b 12
+    set z 15
+} -body {
+    expr {[$calcCmd max(sqrt(a), sqrt(b), sqrt(z))] == [expr {max(sqrt($a), sqrt($b), sqrt($z))}]}
+} -result 1 -cleanup {
+    unset a b z
+}
+
+# ---------- Variable Scoping Tests ----------
+
+test calc-37.1 {local variables in proc} -constraints hasCalcCmd -body {
+    proc test_locals {} {
+        set x 5
+        set y 12
+        global calcCmd
+        set result [$calcCmd sqrt(x*x + y*y)]
+        set expected [expr {sqrt($x*$x + $y*$y)}]
+        expr {$result == $expected}
+    }
+    test_locals
+} -result 1 -cleanup {
+    rename test_locals {}
+}
+
+test calc-37.2 {global with :: prefix} -constraints hasCalcCmd -setup {
+    set ::gx 100
+    set ::gy 200
+} -body {
+    proc test_global_colon {} {
+        global calcCmd
+        set result [$calcCmd max(::gx, ::gy)]
+        set expected [expr {max($::gx, $::gy)}]
+        expr {$result == $expected}
+    }
+    test_global_colon
+} -result 1 -cleanup {
+    rename test_global_colon {}
+    unset ::gx ::gy
+}
+
+test calc-37.3 {global with declaration} -constraints hasCalcCmd -setup {
+    set ::ga 50
+    set ::gb 75
+} -body {
+    proc test_global_declared {} {
+        global ga gb calcCmd
+        set result [$calcCmd min(ga, gb)]
+        set expected [expr {min($ga, $gb)}]
+        expr {$result == $expected}
+    }
+    test_global_declared
+} -result 1 -cleanup {
+    rename test_global_declared {}
+    unset ::ga ::gb
+}
+
+test calc-37.4 {mix of local and global} -constraints hasCalcCmd -setup {
+    set ::radius 10
+} -body {
+    proc test_mixed {} {
+        set height 20
+        global radius calcCmd
+        set result [$calcCmd pow(radius, 2) + height]
+        set expected [expr {pow($radius, 2) + $height}]
+        expr {$result == $expected}
+    }
+    test_mixed
+} -result 1 -cleanup {
+    rename test_mixed {}
+    unset ::radius
+}
+
+test calc-37.5 {namespace variables} -constraints hasCalcCmd -body {
+    namespace eval ::myns {
+        variable data 42
+        proc test_namespace {} {
+            variable data
+            global calcCmd
+            set result [$calcCmd sqrt(::myns::data)]
+            set expected [expr {sqrt($::myns::data)}]
+            expr {$result == $expected}
+        }
+    }
+    ::myns::test_namespace
+} -result 1 -cleanup {
+    namespace delete ::myns
+}
+
+# ---------- Custom Math Functions ----------
+
+test calc-38.1 {custom fibonacci function: fibonacci(10)} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+} -body {
+    expr {[$calcCmd fibonacci(10)] == [expr {fibonacci(10)}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+}
+
+test calc-38.2 {fibonacci(20)} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+} -body {
+    expr {[$calcCmd fibonacci(20)] == [expr {fibonacci(20)}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+}
+
+test calc-38.3 {fibonacci(30)} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+} -body {
+    expr {[$calcCmd fibonacci(30)] == [expr {fibonacci(30)}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+}
+
+test calc-38.4 {fibonacci with variable} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+    set n 15
+} -body {
+    expr {[$calcCmd fibonacci(n)] == [expr {fibonacci($n)}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+    unset n
+}
+
+test calc-38.5 {fibonacci bignum: fibonacci(100)} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+} -body {
+    expr {[$calcCmd fibonacci(100)] == [expr {fibonacci(100)}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+}
+
+test calc-38.6 {fibonacci(200)} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+} -body {
+    expr {[$calcCmd fibonacci(200)] == [expr {fibonacci(200)}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+}
+
+test calc-38.7 {fibonacci in expression} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+    set x 10
+    set y 12
+} -body {
+    expr {[$calcCmd fibonacci(x) + fibonacci(y)] == [expr {fibonacci($x) + fibonacci($y)}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+    unset x y
+}
+
+test calc-38.8 {max of fibonacci values} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+} -body {
+    expr {[$calcCmd max(fibonacci(8), fibonacci(9))] == [expr {max(fibonacci(8), fibonacci(9))}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+}
+
+test calc-38.9 {nested fibonacci and sqrt} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+} -body {
+    expr {[$calcCmd sqrt(fibonacci(10))] == [expr {sqrt(fibonacci(10))}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+}
+
+test calc-38.10 {abs(fibonacci(5) - 100)} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+} -body {
+    expr {[$calcCmd abs(fibonacci(5) - 100)] == [expr {abs(fibonacci(5) - 100)}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+}
+
+test calc-38.11 {fibonacci comparison} -constraints hasCalcCmd -setup {
+    namespace eval ::math {
+        proc fibonacci {n} {
+            if {$n == 0} {return 0}
+            set prev0 0
+            set prev1 1
+            for {set i 1} {$i < $n} {incr i} {
+                set tmp $prev1
+                incr prev1 $prev0
+                set prev0 $tmp
+            }
+            return $prev1
+        }
+    }
+    proc tcl::mathfunc::fibonacci {n} {
+        return [::math::fibonacci $n]
+    }
+    set fib100 [expr {fibonacci(100)}]
+    set fib101 [expr {fibonacci(101)}]
+} -body {
+    expr {[$calcCmd fib100 < fib101] == [expr {$fib100 < $fib101}]}
+} -result 1 -cleanup {
+    rename tcl::mathfunc::fibonacci {}
+    namespace delete ::math
+    unset fib100 fib101
+}
+
+# ============================================================================
+# CLEANUP
+# ============================================================================
+
+cleanupTests
