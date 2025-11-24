@@ -1255,6 +1255,35 @@ test calc-38.11 {fibonacci comparison} -constraints hasCalcCmd -setup {
     unset fib100 fib101
 }
 
+# ---------- Pre-Substitution in Procs (Runtime Fallback) ----------
+
+test calc-39.1 {variable substitution in proc} -constraints hasCalcCmd -body {
+    proc test_var_subst {a b} {
+        = $a + $b
+    }
+    test_var_subst 10 20
+} -result 30 -cleanup {
+    rename test_var_subst {}
+}
+
+test calc-39.2 {mixed literal and substitution} -constraints hasCalcCmd -body {
+    proc test_mixed {n} {
+        = $n * 2 + 5
+    }
+    test_mixed 10
+} -result 25 -cleanup {
+    rename test_mixed {}
+}
+
+test calc-39.3 {command substitution in proc} -constraints hasCalcCmd -body {
+    proc test_cmd_subst {x} {
+        = [expr {$x * 2}] + 10
+    }
+    test_cmd_subst 5
+} -result 20 -cleanup {
+    rename test_cmd_subst {}
+}
+
 # ============================================================================
 # CLEANUP
 # ============================================================================
