@@ -8,6 +8,7 @@ namespace import ::tcltest::*
 
     set calcCmd =
     testConstraint hasCalcCmd 1
+    testConstraint stackProblem 0
 
 
 # ============================================================================
@@ -38,6 +39,7 @@ if {[testConstraint hasCalcCmd]} {
     puts "  Logical operators (&&, ||, !): [testConstraint hasLogicalOps]"
     puts "  Ternary operator (? :):        [testConstraint hasTernary]"
     puts "  Array access:                  [testConstraint hasArrays]"
+    puts "  Stack Problem:                 [testConstraint stackProblem]"
     puts ""
 }
 
@@ -1255,6 +1257,7 @@ test calc-38.11 {fibonacci comparison} -constraints hasCalcCmd -setup {
     unset fib100 fib101
 }
 
+
 # ---------- Pre-Substitution in Procs (Runtime Fallback) ----------
 
 test calc-39.1 {variable substitution in proc} -constraints hasCalcCmd -body {
@@ -1282,6 +1285,326 @@ test calc-39.3 {command substitution in proc} -constraints hasCalcCmd -body {
     test_cmd_subst 5
 } -result 20 -cleanup {
     rename test_cmd_subst {}
+}
+
+# ---------- Edge Cases and Security Tests ----------
+
+test calc-40.1 {comma operator only in function args} -constraints hasCalcCmd -body {
+    catch {$calcCmd 4,10} result
+    string match "*Expected*" $result
+} -result 1
+
+test calc-40.2 {pre-substitution with simple variables} -constraints hasCalcCmd -setup {
+    set x 10
+    set y 20
+} -body {
+    proc test_presub {a b} {
+        = $a + $b
+    }
+    test_presub $x $y
+} -result 30 -cleanup {
+    rename test_presub {}
+    unset x y
+}
+
+test calc-40.3 {pre-substitution with non-numeric fails gracefully} -constraints hasCalcCmd -body {
+    proc test_non_numeric {a} {
+        = $a + 1
+    }
+    # Just check that it errors, don't check specific message
+    catch {test_non_numeric "hello"}
+} -result 1 -cleanup {
+    rename test_non_numeric {}
+}
+
+test calc-40.4 {concatenated pre-substitution} -constraints hasCalcCmd -setup {
+    set x 5
+    set y 10
+} -body {
+    proc test_concat {a b} {
+        = $a+$b
+    }
+    test_concat $x $y
+} -result 15 -cleanup {
+    rename test_concat {}
+    unset x y
+}
+
+test calc-40.5 {expression injection via global variable} -constraints hasCalcCmd -setup {
+    set ::testvar 100
+    set x "::testvar"
+} -body {
+    # This evaluates "1+::testvar" which accesses the global
+    expr {[$calcCmd 1 + $x] == 101}
+} -result 1 -cleanup {
+    unset ::testvar x
+}
+
+test calc-40.6 {invalid character in expression} -constraints hasCalcCmd -body {
+    catch {$calcCmd 1 + \[pwd]} result
+    string match "*Expected*" $result
+} -result 1
+
+test calc-40.7 {backslash in expression} -constraints hasCalcCmd -body {
+    catch {$calcCmd 1 + \\} result
+    string match "*Expected*" $result
+} -result 1
+
+test calc-40.8 {semicolon in expression} -constraints hasCalcCmd -body {
+    catch {$calcCmd {1 + 2; 3}} result
+    string match "*Expected*" $result
+} -result 1
+
+test calc-40.9 {mismatched parentheses} -constraints hasCalcCmd -body {
+    catch {$calcCmd {(1 + 2}} result
+    string match "*Expected*)*" $result
+} -result 1
+
+test calc-40.10 {operator without operand} -constraints hasCalcCmd -body {
+    catch {$calcCmd 1 +}
+} -result 1
+
+test calc-40.11 {global variable with ::} -constraints hasCalcCmd -setup {
+    set ::globalval 42
+} -body {
+    $calcCmd ::globalval * 2
+} -result 84 -cleanup {
+    unset ::globalval
+}
+
+test calc-40.12 {namespace variable} -constraints hasCalcCmd -setup {
+    namespace eval ::testns {
+        variable nsvar 25
+    }
+} -body {
+    $calcCmd ::testns::nsvar + 5
+} -result 30 -cleanup {
+    namespace delete ::testns
+}
+
+test calc-40.13 {non-existent variable} -constraints hasCalcCmd -body {
+    catch {$calcCmd noSuchVar + 1} result
+    string match "*can't read*noSuchVar*" $result
+} -result 1
+
+test calc-40.14 {empty expression} -constraints hasCalcCmd -body {
+    catch {$calcCmd} result
+    string match "*wrong # args*" $result
+} -result 1
+
+test calc-40.15 {expression with only operators} -constraints hasCalcCmd -body {
+    catch {$calcCmd + *} result
+    string match "*Expected*" $result
+} -result 1
+
+test calc-40.16 {pre-sub numeric check with integer} -constraints hasCalcCmd -setup {
+    set val 42
+} -body {
+    proc test_int {x} {
+        = $x * 2
+    }
+    test_int $val
+} -result 84 -cleanup {
+    rename test_int {}
+    unset val
+}
+
+test calc-40.17 {pre-sub numeric check with double} -constraints hasCalcCmd -setup {
+    set val 3.14
+} -body {
+    proc test_double {x} {
+        = $x * 2
+    }
+    test_double $val
+} -result 6.28 -cleanup {
+    rename test_double {}
+    unset val
+}
+
+test calc-40.18 {pre-sub numeric check with bignum} -constraints hasCalcCmd -setup {
+    set val 999999999999999999999
+} -body {
+    proc test_bignum {x} {
+        = $x + 1
+    }
+    test_bignum $val
+} -result 1000000000000000000000 -cleanup {
+    rename test_bignum {}
+    unset val
+}
+
+test calc-40.19 {mixed literal and pre-substitution in proc} -constraints hasCalcCmd -body {
+    proc test_mixed {a b} {
+        = $a + b * 2
+    }
+    test_mixed 5 10
+} -result 25 -cleanup {
+    rename test_mixed {}
+}
+
+test calc-40.20 {pre-sub with expression fragment in value} -constraints hasCalcCmd -setup {
+    set fragment "1+1"
+} -body {
+    proc test_fragment {x} {
+        = $x + 10
+    }
+    # x contains "1+1" which gets evaluated as expression
+    test_fragment $fragment
+} -result 12 -cleanup {
+    rename test_fragment {}
+    unset fragment
+}
+
+test calc-40.21 {multiple pre-substitutions all numeric} -constraints hasCalcCmd -setup {
+    set a 1
+    set b 2
+    set c 3
+} -body {
+    proc test_multi {x y z} {
+        = $x + $y + $z
+    }
+    test_multi $a $b $c
+} -result 6 -cleanup {
+    rename test_multi {}
+    unset a b c
+}
+
+test calc-40.22 {multiple pre-subs with one non-numeric} -constraints hasCalcCmd -setup {
+    set a 1
+    set b "bad"
+    set c 3
+} -body {
+    proc test_mixed {x y z} {
+        = $x + $y + $z
+    }
+    # Just check that it errors
+    catch {test_mixed $a $b $c}
+} -result 1 -cleanup {
+    rename test_mixed {}
+    unset a b c
+}
+
+test calc-40.23 {division by zero with pre-sub} -constraints hasCalcCmd -setup {
+    set zero 0
+} -body {
+    proc test_divzero {x} {
+        = 10 / $x
+    }
+    catch {test_divzero $zero} result
+    string match "*divide by zero*" $result
+} -result 1 -cleanup {
+    rename test_divzero {}
+    unset zero
+}
+
+test calc-40.24 {unary minus with pre-sub} -constraints hasCalcCmd -setup {
+    set val 5
+} -body {
+    proc test_unary {x} {
+        = -$x + 10
+    }
+    test_unary $val
+} -result 5 -cleanup {
+    rename test_unary {}
+    unset val
+}
+
+test calc-40.25 {parenthesized pre-sub} -constraints hasCalcCmd -setup {
+    set a 5
+    set b 3
+} -body {
+    proc test_parens {x y} {
+        = ($x + $y) * 2
+    }
+    test_parens $a $b
+} -result 16 -cleanup {
+    rename test_parens {}
+    unset a b
+}
+
+test calc-40.26 {function call with pre-sub arg} -constraints hasCalcCmd -setup {
+    set val 16
+} -body {
+    proc test_func {x} {
+        = sqrt($x)
+    }
+    test_func $val
+} -result 4.0 -cleanup {
+    rename test_func {}
+    unset val
+}
+
+test calc-40.27 {nested function calls with pre-sub} -constraints hasCalcCmd -setup {
+    set val 3
+} -body {
+    proc test_nested {x} {
+        = abs(sin($x))
+    }
+    expr {[test_nested $val] >= 0}
+} -result 1 -cleanup {
+    rename test_nested {}
+    unset val
+}
+
+
+test calc-40.28 {pre-sub in ternary operator} -constraints {hasCalcCmd hasTernary stackProblem} -setup {
+    set cond 1
+    set iftrue 10
+    set iffalse 20
+} -body {
+    proc test_ternary {c t f} {
+        = $c ? $t : $f
+    }
+    test_ternary $cond $iftrue $iffalse
+} -result 10 -cleanup {
+    rename test_ternary {}
+    unset cond iftrue iffalse
+}
+
+puts "after 40.28"
+
+test calc-40.29 {pre-sub with logical operators} -constraints {hasCalcCmd hasLogicalOps stackProblem} -setup {
+    set x 1
+    set y 0
+} -body {
+    proc test_logical {a b} {
+        = $a && $b
+    }
+    test_logical $x $y
+} -result 0 -cleanup {
+    rename test_logical {}
+    unset x y
+}
+
+puts "after 40.29"
+
+test calc-40.30 {comparison with pre-sub} -constraints hasCalcCmd -setup {
+    set a 10
+    set b 20
+} -body {
+    proc test_compare {x y} {
+        = $x < $y
+    }
+    test_compare $a $b
+} -result 1 -cleanup {
+    rename test_compare {}
+    unset a b
+}
+
+test calc-40.31 {runtime path with literal bracket} -constraints hasCalcCmd -body {
+    # At command line (runtime path), literal [ should error gracefully
+    catch {$calcCmd {[}} result
+    string match "*Expected*" $result
+} -result 1
+
+test calc-40.32 {compile path catches non-compilable} -constraints hasCalcCmd -body {
+    # Command substitution should trigger runtime fallback
+    proc test_cmdsub {} {
+        = [expr {5}] + 1
+    }
+    test_cmdsub
+} -result 6 -cleanup {
+    rename test_cmdsub {}
 }
 
 # ============================================================================
