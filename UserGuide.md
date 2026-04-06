@@ -321,8 +321,10 @@ A `gather()` function collects multiple values into a list:
 ```tcl
 # this is NOT defined automatically, to use include this definition in your code
 proc tcl::mathfunc::gather {args} { 
-    return [list {*}$args]
+    return [::list {*}$args]
 }
+
+# Note: tcl::mathfunc::list could also be defined and then list(.,.,.) could be used.
 
 : gather(1, 2, 3)
 # Returns: {1 2 3}
@@ -373,7 +375,7 @@ Note that the normal tcl processing will treat a ; as the command terminator. If
 
 ```tcl
 : {
-    x = 10 ; y = 20
+    x = 10 ; y = 20;
     z = x + y;
     
     result = z * 2
@@ -507,10 +509,10 @@ set c 6
 set data {10 20 30 40 50}
 
 : {
-    n = llength(data)
+    n = llength(data);
     sum = lindex(data,0) + lindex(data,1) + lindex(data,2) + \
-          lindex(data,3) + lindex(data,4)
-    mean = sum / n
+          lindex(data,3) + lindex(data,4);
+    mean = sum / n;
     gather(n, sum, mean)
 }
 # Returns: {5 150 30}
