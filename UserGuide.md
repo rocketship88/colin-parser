@@ -358,12 +358,12 @@ Note that the normal tcl processing will treat a ; as the command terminator. If
 # a=5, b=10, c=15, returns 15
 ```
 
-### Using Newlines
+### Using Newlines - requires semi-colon
 
 ```tcl
 : {
-    x = 10
-    y = 20
+    x = 10;
+    y = 20;
     x + y
 }
 # Returns: 30
@@ -374,7 +374,7 @@ Note that the normal tcl processing will treat a ; as the command terminator. If
 ```tcl
 : {
     x = 10 ; y = 20
-    z = x + y
+    z = x + y;
     
     result = z * 2
 }
@@ -393,8 +393,8 @@ Comments can be added using `#`:
 
 # Multi-statement with comments
 : {
-    x = 10      # Initialize x
-    y = 20      # Initialize y
+    x = 10;      # Initialize x
+    y = 20;      # Initialize y
     z = x + y   ;# Calculate sum
 }
 
@@ -492,9 +492,9 @@ set b -5
 set c 6
 
 : {
-    discriminant = b*b - 4*a*c
-    root1 = (-b + sqrt(discriminant)) / (2*a)
-    root2 = (-b - sqrt(discriminant)) / (2*a)
+    discriminant = b*b - 4*a*c;
+    root1 = (-b + sqrt(discriminant)) / (2*a);
+    root2 = (-b - sqrt(discriminant)) / (2*a);
     gather(root1, root2)
 }
 # Returns: {3.0 2.0}
@@ -529,11 +529,11 @@ set i 1
 set j 1
 
 : {
-    center = mat(i,j)
-    top    = mat(i-1,j)
-    bottom = mat(i+1,j)
-    left   = mat(i,j-1)
-    right  = mat(i,j+1)
+    center = mat(i,j);
+    top    = mat(i-1,j);
+    bottom = mat(i+1,j);
+    left   = mat(i,j-1);
+    right  = mat(i,j+1);
     sum = center + top + bottom + left + right
 }
 # Returns: 25 (5+2+8+4+6)
@@ -550,8 +550,8 @@ set compounds_per_year 12
 set years 10
 
 : {
-    r_over_n = rate / compounds_per_year
-    exponent = compounds_per_year * years
+    r_over_n = rate / compounds_per_year;
+    exponent = compounds_per_year * years;
     amount = principal * pow(1 + r_over_n, exponent)
 }
 # Returns: ~1647.01
