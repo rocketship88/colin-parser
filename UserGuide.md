@@ -342,7 +342,7 @@ set y 20
 Calc supports multiple statements separated by:
 - Semicolon (`;`)
 - Single quote (`'`)
-- Newline
+- ~~Newline~~ No longer implemented, Use ' or ; so Newlines are now just whitespace
 - Both
 
 Note that the normal tcl processing will treat a ; as the command terminator. If it is to be used, then the expression must be in braces. For the simple case where just a few statements are desired, the `'` can be used and then braces are not required.
