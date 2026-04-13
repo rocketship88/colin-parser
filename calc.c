@@ -2,8 +2,19 @@
 #include <string.h>
 #include <math.h>   // for floor()
 #include <limits.h> // for LLONG_MIN, LLONG_MAX
-// milestone 1 before cleanup of old code for expression.c
+#include <intrin.h> // for __debugbreak()
 
+/*
+
+F:\myext>cl /O2 /Zi /Ob2 /Oi /Ot /GL /DUSE_TCL_STUBS -IC:\Users\core5\AppData\Local\Apps\Tcl86\include calc.c  /link -dll /DEBUG /LTCG /OPT:REF /OPT:ICF C:\Users\core5\AppData\Local\Apps\Tcl86\lib\tclstub86.lib /OUT:calc.dll
+
+nmake /f makefile debug
+nmake /f makefile release
+
+nmake /f makefile9 debug 
+nmake /f makefile9 release
+
+*/
 
 // INT_64 definition for cross-platform compatibility
 #ifdef _WIN32
@@ -11,6 +22,23 @@ typedef __int64 INT_64;
 #else
 typedef long long INT_64;
 #endif
+
+// Per-interpreter state: assemble dispatch cache + cache array name
+typedef struct {
+    Tcl_ObjCmdProc *assembleProc;   // resolved once per interpreter
+    ClientData      assembleCD;
+    Tcl_Obj        *cmdNameObj;     // "::tcl::unsupported::assemble"
+    Tcl_Obj        *cacheVar;       // "::Calc::cache"
+} CalcState;
+
+// Called when the command is deleted (interpreter teardown or explicit rename/delete)
+static void CalcDeleteProc(ClientData cd) {
+    CalcState *state = (CalcState *)cd;
+    if (state->cmdNameObj) Tcl_DecrRefCount(state->cmdNameObj);
+    if (state->cacheVar)   Tcl_DecrRefCount(state->cacheVar);
+    // assembleProc/assembleCD are not owned by us, no cleanup needed
+    ckfree((char *)state);
+}
 
 // Helper: Join multiple arguments into single string
 static Tcl_Obj* JoinArgs(int objc, Tcl_Obj *const objv[]) {
@@ -24,95 +52,113 @@ static Tcl_Obj* JoinArgs(int objc, Tcl_Obj *const objv[]) {
     return result;
 }
 
-// Helper: Compile expression to TAL (calls your Tcl code for now)
+// Helper: Compile expression to TAL (calls Tcl-level Calc::compile0)
 static Tcl_Obj* CompileExpression(Tcl_Interp *interp, Tcl_Obj *expr) {
     static Tcl_Obj *compileCmd = NULL;
     if (compileCmd == NULL) {
         compileCmd = Tcl_NewStringObj("Calc::compile0", -1);
         Tcl_IncrRefCount(compileCmd);
     }
-    
+
     Tcl_Obj *objv[2];
     objv[0] = compileCmd;
     objv[1] = expr;
-    
-    int result = Tcl_EvalObjv(interp, 2, objv, 0);
-    
-    if (result != TCL_OK) {
+
+    if (Tcl_EvalObjv(interp, 2, objv, 0) != TCL_OK) {
         return NULL;
     }
-    
-    // CRITICAL: Duplicate result to protect from interpreter cleanup
-    Tcl_Obj *talCode = Tcl_DuplicateObj(Tcl_GetObjResult(interp));
-    return talCode;
+
+    // Duplicate result to protect from interpreter result cleanup
+    return Tcl_DuplicateObj(Tcl_GetObjResult(interp));
 }
 
-// Helper: Execute assembled code
-static int ExecuteAssemble(Tcl_Interp *interp, Tcl_Obj *talCode) {
+// Helper: Simplest version - EvalObjv with cached command name string
+// Process-wide static is safe here: only caches a plain string Tcl_Obj
+static int ExecuteAssemblex(Tcl_Interp *interp, Tcl_Obj *talCode) {
     static Tcl_Obj *assembleCmd = NULL;
     if (assembleCmd == NULL) {
         assembleCmd = Tcl_NewStringObj("::tcl::unsupported::assemble", -1);
         Tcl_IncrRefCount(assembleCmd);
     }
-    
+
     Tcl_Obj *objv[2];
     objv[0] = assembleCmd;
     objv[1] = talCode;
-    
-    int result = Tcl_EvalObjv(interp, 2, objv, 0);
-    
-    return result;
+
+    return Tcl_EvalObjv(interp, 2, objv, 0);
 }
-int CalcCmd(ClientData cd, Tcl_Interp *interp, 
-            int objc, Tcl_Obj *const objv[]) {
-    
-    static Tcl_Obj *cacheVar = NULL;
-    if (cacheVar == NULL) {
-        cacheVar = Tcl_NewStringObj("::Calc::cache", -1);
-        Tcl_IncrRefCount(cacheVar);
+
+// Helper: Execute TAL code via cached per-interpreter assemble dispatch
+static int ExecuteAssemble(CalcState *state, Tcl_Interp *interp, Tcl_Obj *talCode) {
+    // One-time resolution per interpreter
+    if (state->assembleProc == NULL) {
+        Tcl_CmdInfo info;
+        if (!Tcl_GetCommandInfo(interp, "::tcl::unsupported::assemble", &info)) {
+            Tcl_SetResult(interp,
+                "cannot resolve ::tcl::unsupported::assemble", TCL_STATIC);
+            return TCL_ERROR;
+        }
+        if (!info.isNativeObjectProc) {
+            Tcl_SetResult(interp,
+                "::tcl::unsupported::assemble has no objProc", TCL_STATIC);
+            return TCL_ERROR;
+        }
+        state->assembleProc = info.objProc;
+        state->assembleCD   = info.objClientData;
+
+        state->cmdNameObj = Tcl_NewStringObj("::tcl::unsupported::assemble", -1);
+        Tcl_IncrRefCount(state->cmdNameObj);
     }
-    
-    // Build expression - MUST increment refcount!
+
+    Tcl_Obj *objv[2] = { state->cmdNameObj, talCode };
+    return state->assembleProc(state->assembleCD, interp, 2, objv);
+}
+
+int CalcCmd(ClientData cd, Tcl_Interp *interp,
+            int objc, Tcl_Obj *const objv[]) {
+
+    CalcState *state = (CalcState *)cd;
+
+    // Build expression string from one or more arguments
     Tcl_Obj *expr;
     if (objc == 2) {
         expr = objv[1];
         Tcl_IncrRefCount(expr);
     } else {
         expr = JoinArgs(objc, objv);
-        Tcl_IncrRefCount(expr);  // Critical!
+        Tcl_IncrRefCount(expr);
     }
-    
-    // Try cache lookup
-    Tcl_Obj *talCode = Tcl_ObjGetVar2(interp, cacheVar, expr, TCL_GLOBAL_ONLY);
-    
+
+    // Try cache lookup — one call, both existence test and retrieval
+    Tcl_Obj *talCode = Tcl_ObjGetVar2(interp, state->cacheVar, expr, TCL_GLOBAL_ONLY);
+
     int result;
     if (talCode != NULL) {
         // Cache hit
-        result = ExecuteAssemble(interp, talCode);
+        result = ExecuteAssemble(state, interp, talCode);
     } else {
-        // Cache miss - compile
+        // Cache miss - compile and store
         talCode = CompileExpression(interp, expr);
         if (talCode == NULL) {
             Tcl_DecrRefCount(expr);
             return TCL_ERROR;
         }
-        
-        Tcl_IncrRefCount(talCode);  // Keep it alive!
-        Tcl_ObjSetVar2(interp, cacheVar, expr, talCode, TCL_GLOBAL_ONLY);
-        result = ExecuteAssemble(interp, talCode);
+
+        Tcl_IncrRefCount(talCode);
+        Tcl_ObjSetVar2(interp, state->cacheVar, expr, talCode, TCL_GLOBAL_ONLY);
+        result = ExecuteAssemble(state, interp, talCode);
         Tcl_DecrRefCount(talCode);
     }
-    
+
     Tcl_DecrRefCount(expr);
     return result;
 }
-// Package initialization function
-// Must be named Myext_Init to match the DLL name
+
 #ifdef _WIN32
 __declspec(dllexport)
 #endif
 int Calc_Init(Tcl_Interp *interp) {
-    // Initialize Tcl stubs
+//    __debugbreak();  // VS will halt here as soon as the DLL loads
 #ifdef TCL9
     if (Tcl_InitStubs(interp, "9.0", 0) == NULL) {
 #else
@@ -120,15 +166,22 @@ int Calc_Init(Tcl_Interp *interp) {
 #endif
         return TCL_ERROR;
     }
-    
-    
-   // Create the "::" command for comparing timing, also uses ::Calc::cache
-    Tcl_CreateObjCommand(interp, "::", CalcCmd, NULL, NULL);
 
-    // Provide the package
+    // Allocate per-interpreter state
+    CalcState *state = (CalcState *)ckalloc(sizeof(CalcState));
+    state->assembleProc = NULL;
+    state->assembleCD   = NULL;
+    state->cmdNameObj   = NULL;
+
+    state->cacheVar = Tcl_NewStringObj("::Calc::cache", -1);
+    Tcl_IncrRefCount(state->cacheVar);
+
+    // "::" command - also uses ::Calc::cache, for timing comparisons
+    Tcl_CreateObjCommand(interp, "::", CalcCmd, (ClientData)state, CalcDeleteProc);
+
     if (Tcl_PkgProvide(interp, "calc", "1.0") != TCL_OK) {
         return TCL_ERROR;
     }
-    
+
     return TCL_OK;
 }
