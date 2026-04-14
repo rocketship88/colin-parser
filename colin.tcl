@@ -149,6 +149,7 @@ array set nativeFunc {
     strlen      {strlen 1}
     llength     {listLength 1}
     lindex		 {lindexMulti -2}
+	list         {list -1}
     xstrcat      {strcat 2}
     xtoupper     {strcaseUpper 1}
     xtolower     {strcaseLower 1}
