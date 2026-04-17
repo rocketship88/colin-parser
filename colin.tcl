@@ -36,24 +36,34 @@ interp alias {} = {} : ;# shorthands
 namespace eval Calc {
 
 # breakup compile into 2 parts to handle ; up front, 
-# also allow for ' and newline aliases, ' needs no bracing
+# also allow for '  aliase, ' needs no bracing
 # but newline does, and then requires no semicolon 
 # multiple ;;; are ignored and treated as one
 # comments can be #... or ;# it doesn't matter
 # empty lines are also allowed
-proc compile0 exp {
+proc compile0 {exp {inproc 0}} {
     if { [array size ::Calc::cache] > 1000 } {
         error "Calc: Cache exhausted with expression: $exp" ;# this is a programmer error, is using $sub in a Calc expression
     }
     # remove all comments that begin with the # character to the end of the line, but don't consume the newline
     # we can also support ;# since many will be used to that. In addition, the below code works with multiple ;
     regsub -all  {#[^\n]*}  $exp {} exp
+#    set exp [string map {"'" ";" "\n" ";"} $exp]
     set exp [string map {"'" ";" "\n" " "} $exp]
     # Fast path: no semicolons
+#            return [compile [tokenise $exp]]
+
+
     if {[string first ";" $exp] == -1} {
-        return [compile [tokenise $exp]]
+        set stmtcode [compile [tokenise $exp]]
+        if {$inproc} {
+            if {[regexp {^push ([[:alpha:]:][\w:]*); (.*); storeStk; $} $stmtcode -> name expr]} {
+                set stmtcode "$expr; store $name; "
+            }
+        }
+        return $stmtcode
     }
-    
+   
     # Has semicolons - split and compile each
     set statements [split $exp ";"]
     set bytecode ""
@@ -65,11 +75,23 @@ proc compile0 exp {
         if {$count > 0} {
             append bytecode "pop; "
         }
-        append bytecode [compile [tokenise $stmt]]
+        if { $inproc } {
+        	set stmtcode [compile [tokenise $stmt]]
+        	# peephole: push name; <expr>; storeStk; -> <expr>; store name;
+        	if {[regexp {^push ([[:alpha:]:][\w:]*); (.*); storeStk; $} $stmtcode -> name expr]} {
+        		set stmtcode "$expr; store $name; "
+        	}
+        	append bytecode $stmtcode
+        } else {
+        	append bytecode [compile [tokenise $stmt]]
+        }
+        
         incr count
     }
+    
     return $bytecode
 }
+
 proc tokenise input {
     set op_re  {\*\*|%|/|\*|-|\+|>>|<<|>=|<=|>|<|!=|==|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}
     #                                                  ^ added = here (after ==)
