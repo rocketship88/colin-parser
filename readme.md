@@ -39,8 +39,8 @@ When used in this way, there is no need for the C extension, in fact, this metho
 The proc= code also has an option following the body of the procedure, which can be a 0 or 1. It defaults to 1, and this causes the assembly code to be followed by an if 0 {... source code ...} so that it does not execute, but is there in the event of an error traceback. It should also keep the line numbers correct. It is slightly faster to not include this, so by adding a 0 to the end of a proc= procedure, i.e. after the } of the body. Thus proc= has one more (optional) argument than the standard proc command.
 
 ```tcl
-# source colin.tcl
-# source transform.tcl
+ source colin.tcl
+ source transform.tcl
 
  proc= roundRect { w x0 y0 x3 y3 radius args } {
     set r      [winfo pixels $w $radius]
