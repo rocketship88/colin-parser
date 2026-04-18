@@ -2,11 +2,9 @@
 
 ## Introduction
 
-Calc is a high-performance expression evaluator for Tcl that compiles expressions to Tcl Assembly Language (TAL) bytecode. It provides a clean syntax for mathematical calculations with support for variables, arrays, functions, and multiple statements.
+Calc (aka colon) is a high-performance expression evaluator for Tcl that compiles expressions to Tcl Assembly Language (TAL) bytecode. It provides a clean syntax for mathematical calculations with support for variables, arrays, functions, and multiple statements.
 
-The code is contained in the file colin.tcl that in the delivered form is in two parts, the code at the top and a set of test cases at the bottom. The user should copy the top portion into a file, for example, Calc-1.1.tm and then it can be used as a module. Alternatively, it can simply be sourced into a program. If the C extension is used, then it must be built from source and then it is loaded using the tcl load command. The C extension is optional.
-
-Note for testing purposes, the C extension defines the calc command as `::` and the user is free to change this to `=` or any other command name. Likewise, in the colin.tcl source code there is a `:` command and an alias of `=` defined so any of these may be used interchangebly. If you change them, be careful to use different names for the two or one might override the other depending on the order of loading.
+The code is contained in the file colon-1.0.tm that is organized as a Tcl module. There is a separate colon_test.tcl file that can load the module and contains a variety of tests. See the readme for more information on running the test file.
 
 ## Basic Usage
 
