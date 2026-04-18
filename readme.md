@@ -10,7 +10,7 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 - fixes for boolean literals and multi-character function names (log10, atan2)
 - Comprehensive test suite with 100+ verification tests
 
-- Support for multiple expressions separated by ` ' ` ` ; ` or `newline`.
+- Support for multiple expressions separated by ` ' ` or ` ; ` 
 - Assignment operator, right associative, `a = b = c` possible too
 - Allow for on-line comments with or without preceding ; as #... end of line
 - Includes check for more than 1000 expressions in cache, to catch $var in expressions
@@ -22,15 +22,19 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 tclsh colin.tcl
 ```
 
-The file will run all tests automatically and display results. At about line 426 there are some knobs for testing. To use w/o tests, just remove all code below that point and source into program (or create a package pkgIndex.tcl or use a module name colin-1.0.tm and then package require command).
+The file will run all tests automatically and display results. 
+
+## Use as a library
+
+To use in a program: At about line 444 in colin.tcl just remove all test code below that point and source (or copy/paste) the top portion into a program. Or create a package pkgIndex.tcl or use a module name colin-1.0.tm and then package require command.
 
 ## Use with proc=
 
-This is a method to parse text bytecodes via the assemble command only one time. This increases performance to effectively expr speed (within 5%). One writes and debugs code using the normal proc statement, but after debugged, and to get more performance, simply change proc to proc= and it will generate a procedure body with the applied improvement. 
+This is a method to parse text bytecodes via the assemble command only one time. This increases performance to effectively expr speed (within 5%). One writes and debugs code using the normal proc statement, but after debugged, and to get more performance, simply change proc to proc= and it will generate a procedure body with the applied improvement. `Note:` The `proc=` and `transform=` procedures assume the command name is `:` only.
 
-To use, extract the top portion of colin.tcl (remove the test code at the bottom), concatonate transform.tcl to the end and this becomes a file to source or treat as a module or package depending on how you prefer to include pure tcl into your program.
+`To use` extract the top portion of colin.tcl (remove the test code at the bottom), concatonate transform.tcl to the end and this becomes a file to source or treat as a module or package depending on how you prefer to include pure tcl into your program.
 
-When used in this way, there is no need for the C extension, in fact, this method is 3-5x faster than using the C extension.
+When used in this way, there is no need for the C extension, in fact, this method is 2-3x faster than using the C extension.
 
 The proc= code also has an option following the body of the procedure, which can be a 0 or 1. It defaults to 1, and this causes the assembly code to be followed by an if 0 {... source code ...} so that it does not execute, but is there in the event of an error traceback. It should also keep the line numbers correct. It is slightly faster to not include this, so by adding a 0 to the end of a proc= procedure, i.e. after the } of the body. Thus proc= has one more (optional) argument than the standard proc command.
 
@@ -39,6 +43,30 @@ proc= myproc args {
     : {a = 1 ; b = 2}        ;# semicolon
     : a = 1 ' b = 2          ;# single quote (no braces!)
 } 0 ;# the 0 suppresses the included original code
+
+ proc= roundRect { w x0 y0 x3 y3 radius args } {
+    set r      [winfo pixels $w $radius]
+    :   d    = 2*r
+    :   maxr = 0.75
+    if  {[: d > maxr * ( x3 - x0 )]} {
+          : d = maxr * ( x3 - x0 )
+    }
+    if  {[: d > maxr * ( y3 - y0 )]}  {
+          : d = maxr * ( y3 - y0 )
+    }    
+    : { x1 = x0 + d;
+        x2 = x3 - d;
+        y1 = y0 + d;
+        y2 = y3 - d;       
+        Poly = list(
+            x0, y0, x1, y0, x2, y0, 
+            x3, y0, x3, y1, x3, y2, 
+            x3, y3, x2, y3, x1, y3, 
+            x0, y3, x0, y2, x0, y1
+            )
+      }
+    $w create polygon {*}$Poly -smooth 1  {*}$args
+}   ;# default to 0, includes original source
 ```
 
 ## Features
@@ -54,7 +82,7 @@ proc= myproc args {
 - Right associative assignment, `= a = b = (3 + 4) * 2` ;# produces 14 -> a and b
 - Can now cross lines if inside braces, no `;` needed
 - For on line multiple statements without braces, can use `'` separator
-- Command alias, `=` or `:` or choose your own
+- Command alias, `=` or `:` or choose your own (must use `:` when using `proc=`)
 ## Requirements
 
 - Tcl 8.6 or 9.x
