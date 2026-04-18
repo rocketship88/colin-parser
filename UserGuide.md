@@ -277,6 +277,7 @@ set cube {{{a b} {c d}} {{e f} {g h}}}
 - `strlen(string)` - String length
 - `llength(list)` - List length  
 - `lindex(list, index, ...)` - List element access (variable arguments)
+- `list(a,b,c,123,...)`  - create a list in functional form
 
 ### 2. Math Functions (via tcl::mathfunc)
 
@@ -324,7 +325,7 @@ proc tcl::mathfunc::gather {args} {
     return [::list {*}$args]
 }
 
-# Note: tcl::mathfunc::list could also be defined and then list(.,.,.) could be used.
+# Note: the native function `list` is equivalent, but faster
 
 : gather(1, 2, 3)
 # Returns: {1 2 3}
