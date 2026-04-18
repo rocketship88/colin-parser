@@ -10,9 +10,9 @@
 # Bare words are treated as variable references.
 # Only numeric and boolean values and operations are supported.
 # catch {console show}
-# uncomment these for debug output
-proc deb1 s {}
-proc deb2 s {}
+# uncomment these for debug output (no longer included)
+
+
 #proc deb1 s {puts $s}
 #proc deb2 s {puts $s}
 
