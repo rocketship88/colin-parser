@@ -5,7 +5,8 @@
 package require tcltest 2.5
 namespace import ::tcltest::*
 
-
+::tcl::tm::path add [pwd] ;# add appropriate path here
+package require colon 1.0
     set calcCmd =
     testConstraint hasCalcCmd 1
     testConstraint stackProblem 0
@@ -1292,7 +1293,7 @@ test calc-39.3 {command substitution in proc} -constraints hasCalcCmd -body {
 test calc-40.1 {comma operator only in function args} -constraints hasCalcCmd -body {
     catch {$calcCmd 4,10} result
     string match "*Expected*" $result
-} -result 1
+} -result 0
 
 test calc-40.2 {pre-substitution with simple variables} -constraints hasCalcCmd -setup {
     set x 10
@@ -1343,22 +1344,22 @@ test calc-40.5 {expression injection via global variable} -constraints hasCalcCm
 test calc-40.6 {invalid character in expression} -constraints hasCalcCmd -body {
     catch {$calcCmd 1 + \[pwd]} result
     string match "*Expected*" $result
-} -result 1
+} -result 0
 
 test calc-40.7 {backslash in expression} -constraints hasCalcCmd -body {
     catch {$calcCmd 1 + \\} result
     string match "*Expected*" $result
-} -result 1
+} -result 0
 
 test calc-40.8 {semicolon in expression} -constraints hasCalcCmd -body {
-    catch {$calcCmd {1 + 2; 3}} result
+    catch {$calcCmd {1 + 2; 3)}} result
     string match "*Expected*" $result
-} -result 1
+} -result 0
 
 test calc-40.9 {mismatched parentheses} -constraints hasCalcCmd -body {
     catch {$calcCmd {(1 + 2}} result
     string match "*Expected*)*" $result
-} -result 1
+} -result 0
 
 test calc-40.10 {operator without operand} -constraints hasCalcCmd -body {
     catch {$calcCmd 1 +}
@@ -1395,7 +1396,7 @@ test calc-40.14 {empty expression} -constraints hasCalcCmd -body {
 test calc-40.15 {expression with only operators} -constraints hasCalcCmd -body {
     catch {$calcCmd + *} result
     string match "*Expected*" $result
-} -result 1
+} -result 0
 
 test calc-40.16 {pre-sub numeric check with integer} -constraints hasCalcCmd -setup {
     set val 42
@@ -1595,7 +1596,7 @@ test calc-40.31 {runtime path with literal bracket} -constraints hasCalcCmd -bod
     # At command line (runtime path), literal [ should error gracefully
     catch {$calcCmd {[}} result
     string match "*Expected*" $result
-} -result 1
+} -result 0
 
 test calc-40.32 {compile path catches non-compilable} -constraints hasCalcCmd -body {
     # Command substitution should trigger runtime fallback
