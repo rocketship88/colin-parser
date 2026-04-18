@@ -64,7 +64,7 @@ The proc= code also has an option following the body of the procedure, which can
             )
       }
     $w create polygon {*}$Poly -smooth 1  {*}$args
-}   ;# default to 0, includes original source
+} 0  ;# defaults to 1, includes original source, 0 to suppress
  grid [canvas .c -width 600 -height 300]
  grid [scale .s -orient horizontal \
           -label "Radius" \
