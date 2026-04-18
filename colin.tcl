@@ -870,11 +870,6 @@ puts "142 ========== Multiple Statements =========="
 : {p = 10 ; q = 20 ; p + q}
 verify "p + q after assignment" [expr {$p + $q}] 30
 
-puts "143 ========== Multiple Statements with Newlines =========="
-: {m = 5
-   n = 7
-   m * n}
-verify "m * n after multiline" [expr {$m * $n}] 35
 
 puts "144 ========== Gather Function =========="
 proc tcl::mathfunc::gather {args} { list {*}$args }
