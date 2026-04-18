@@ -11,8 +11,8 @@ Note for testing purposes, the C extension defines the calc command as `::` and 
 ## Basic Usage
 
 ```tcl
-# Load the Calc package
-package require Calc
+# Load the Calc module
+package require colon 1.0
 
 # Simple calculation
 : 2 + 3 * 4
