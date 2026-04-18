@@ -9,7 +9,7 @@
 # milestone 7 before adding =
 # Bare words are treated as variable references.
 # Only numeric and boolean values and operations are supported.
-catch {console show}
+# catch {console show}
 # uncomment these for debug output
 proc deb1 s {}
 proc deb2 s {}
