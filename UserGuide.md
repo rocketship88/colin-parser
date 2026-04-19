@@ -374,7 +374,7 @@ Note that the normal tcl processing will treat a ; as the command terminator. If
 
 ```tcl
 : {
-    x = 10 ; y = 20;
+    x = 10 ' y = 20;
     z = x + y;
     
     result = z * 2
