@@ -31,7 +31,7 @@ To use in a program: All the code is now in a `Tcl module`. Either place the mod
 
 ## Use with proc=
 
-This is a method to parse text bytecodes via the assemble command a single time. This increases performance to effectively expr speed (within 5%). One writes and debugs code using the normal proc statement, but after debugged, and to get more performance, simply change `proc` to `proc=` and it will generate a procedure body with the applied improvement. `Note:` The `proc=` procedure assumes the command name is `:` only.
+This is a method to parse text bytecodes via the assemble command a single time. This increases performance to effectively expr speed (within 5%). One writes and debugs code using the normal proc statement, but after debugged, and to get more performance, simply change `proc` to `proc=` and it will generate a procedure body with the applied improvement. 
 
 When used in this way, there is no need for the C extension, in fact, this method is 2-3x faster than using the C extension.
 
@@ -94,7 +94,7 @@ package require colon
 - Right associative assignment, `= a = b = (3 + 4) * 2` ;# produces 14 -> a and b
 - Can now cross lines if inside braces, no `;` needed
 - For on line multiple statements without braces, can use `'` separator
-- Command alias, `=` or `:` or choose your own (must use `:` when using `proc=`)
+- Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=`)
 ## Requirements
 
 - Tcl 8.6 or 9.x
