@@ -239,6 +239,11 @@ proc parsePrefix token {
     #deb2 "[string repeat {  } $dep]PARSEPREFIX token`$token` tokpos=$tokpos"
     
     # Is it a number? In C might use Tcl_GetNumberFromObj() here
+    # remove underscores from numbers so works in 8.6, normalize 0dxxx numbers also
+    if {[string is digit -strict [string index $token 0]]} {
+        regsub -all {_} $token {} token
+        regsub {^0[dD]} $token {} token
+    }
     if {[string is entier $token] || [string is double $token]} {
 	    set nexttok [lindex $tokens $tokpos]
 	    if {$nexttok eq "="} {
