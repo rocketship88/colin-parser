@@ -4,18 +4,15 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 
 ## What's New
 - Repackaging into separate test file, and module
-- proc= to apply bytecodes directly, faster, still all pure tcl
-- list is now a bytecode function, same as the gather but faster
+- proc= to apply bytecodes directly, faster, and still pure tcl
+- list is now a bytecode function, same as the gather mathfunc but faster
 - Array support: `= myarray(index) * 2` and multi-dimensional `matrix(i,j)`
-- fixes for boolean literals and multi-character function names (log10, atan2)
-- Comprehensive test suite with 100+ verification tests
+- Comprehensive test suite with 150+ verification tests
 
 - Support for multiple expressions separated by ` ' ` or ` ; ` 
-- Assignment operator, right associative, `a = b = c` possible too
-- Allow for on-line comments with or without preceding ; as #... end of line
-- Includes check for more than 1000 expressions in cache, to catch $var in expressions
+- Includes check for more than 1000 expressions in cache, to catch $var or [cmd] in expressions
 - Wrapping in Calc:: namespace and some code cleanup
-- Preliminary upload of C extension for : command, 30% faster - see build instructions below
+
 ## Usage
 
 ```tcl
@@ -23,11 +20,11 @@ tclsh colon_test.tcl
 wish  colon_test.tcl
 ```
 
-The file will run all tests automatically and display results. This requires both colon_test.tcl and colon-1.0.tm be in the same directory.
+The file will run all tests automatically and display results. This requires both `colon_test.tcl` and `colon-1.0.tm` be in the same directory.
 
 ## Use as a library
 
-To use in a program: All the code is now in a `Tcl module`. Either place the module (colon-1.0.tm) into a known module directory, or use the `::tcl::tm::path add <path to module>` command. 
+To use in a program: All the code is now in a `Tcl module`. Either place the module (`colon-1.0.tm`) into a known module directory, or use the `::tcl::tm::path add <path to module>` command. Then use `package require colon`.
 
 ## Use with proc=
 
@@ -35,7 +32,9 @@ This is a method to parse text bytecodes via the assemble command a single time.
 
 When used in this way, there is no need for the C extension, in fact, this method is 2-3x faster than using the C extension.
 
-The proc= code also has an option following the body of the procedure, which can be a 0 or 1. It defaults to 1, and this causes the assembly code to be followed by an if 0 {... source code ...} so that it does not execute, but is there in the event of an error traceback. It should also keep the line numbers correct. It is slightly faster to not include this, so by adding a 0 to the end of a proc= procedure, i.e. after the } of the body. Thus proc= has one more (optional) argument than the standard proc command.
+The proc= code also has an option following the body of the procedure. It defaults to 1 which causes the assembly code to be followed by an if 0 {... source code ...} so that it does not execute, but is there in the event of an error traceback and to keep the line numbers correct. It is slightly faster to not include this by adding a 0 to the end of a proc= procedure, i.e. after the } of the body.
+
+proc= will also catch any $var or [command] substitions in the expression and throw an error.
 
 ```tcl
 ::tcl::tm::path add [file dirname [info script]] ;# test file and module file in same directory
@@ -64,19 +63,17 @@ package require colon
       }
     $w create polygon {*}$Poly -smooth 1  {*}$args
 } 0  ;# defaults to 1, includes original source, 0 to suppress
+
  grid [canvas .c -width 600 -height 300]
  grid [scale .s -orient horizontal \
           -label "Radius" \
           -variable rad -from 0 -to 200 \
-          -command doit] \
-    -sticky ew
+          -command doit] -sticky ew
 
  proc doit { args } {
     global rad
-
     .c delete rect
     roundRect .c 100 50 500 250 $rad -fill white -outline black -tags rect
-
  }
 
 ```
