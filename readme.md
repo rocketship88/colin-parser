@@ -23,7 +23,7 @@ tclsh colon_test.tcl
 wish  colon_test.tcl
 ```
 
-The file will run all tests automatically and display results. 
+The file will run all tests automatically and display results. This requires both colon_test.tcl and colon-1.0.tm be in the same directory.
 
 ## Use as a library
 
