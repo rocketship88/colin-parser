@@ -456,15 +456,15 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
     set i 0
     while {$i < [llength $lines]} {
         set line [lindex $lines $i]
-        if {[regexp {^\s*:\s*\{} $line]} {
-            # path 1: : {...} possibly multiline
+        if {[regexp {^\s*[=:]\s*\{} $line]} {
+            # path 1: = or : followed by {...} possibly multiline
             set accum $line
             while {![info complete $accum]} {
                 incr i
                 append accum \n [lindex $lines $i]
             }
-            # extract expression - strip leading : and outer { }
-            regexp {:\s*(\{.*\})} $accum -> braced
+            # extract expression - strip leading = or : and outer { }
+            regexp {[=:]\s*(\{.*\})} $accum -> braced
             set expr [string range $braced 1 end-1]
             regsub {\s*;#[^\n]*$} $expr {} expr
             set tal [::Calc::compile0 $expr $inproc]
@@ -477,8 +477,8 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
 
-        } elseif {1 && [regexp {^\s*:\s*(\S[^\n]*)} $line -> expr]} {
-            # path 2: : expr  single line unbraced
+        } elseif {1 && [regexp {^\s*[=:]\s*(\S[^\n]*)} $line -> expr]} {
+            # path 2: = or : expr  single line unbraced
             regsub {\s*;#[^\n]*$} $expr {} expr
             set tal [::Calc::compile0 $expr $inproc]
             if {$inproc} {
@@ -490,11 +490,11 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
 
-        } elseif {1 && [regexp {\[:\s*[^\]]+\]} $line]} {
-            # path 3: inline [: expr] replacement - one for one substitution
+        } elseif {1 && [regexp {\[[=:]\s*[^\]]+\]} $line]} {
+            # path 3: inline [= expr] or [: expr] replacement
             set newline {}
             set pos 0
-            while {[regexp -indices -start $pos {\[:\s*([^\]]+)\]} $line match submatch]} {
+            while {[regexp -indices -start $pos {\[[=:]\s*([^\]]+)\]} $line match submatch]} {
                 # append everything before this match unchanged
                 append newline [string range $line $pos [expr {[lindex $match 0]-1}]]
                 # extract and compile the expression
