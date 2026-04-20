@@ -477,7 +477,8 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                 regsub -all {push ([[:alpha:]:][\w:]*); loadStk} $tal {load \1} tal
             }
             if {$preserve} {
-                append result "tcl::unsupported::assemble \{$tal\} ; if \{0\} \{ $accum \}\n"
+#                append result "tcl::unsupported::assemble \{$tal\} ; if \{0\} \{ $accum \}\n"
+                append result "if \{0\} \{ $accum \} \{ tcl::unsupported::assemble \{$tal\} \}\n"
             } else {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
@@ -490,7 +491,8 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                 regsub -all {push ([[:alpha:]:][\w:]*); loadStk} $tal {load \1} tal
             }
             if {$preserve} {
-                append result "tcl::unsupported::assemble \{$tal\} ; if \{0\} \{ $line \}\n"
+#                append result "tcl::unsupported::assemble \{$tal\} ; if \{0\} \{ $line \}\n"
+                append result "if \{0\} \{ $line \} \{ tcl::unsupported::assemble \{$tal\} \}\n"
             } else {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
