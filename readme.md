@@ -18,6 +18,10 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 ```tcl
 tclsh colon_test.tcl
 wish  colon_test.tcl
+
+Also:
+cd <to location of extracted files>   
+tclsh calc.test
 ```
 
 The file will run all tests automatically and display results. This requires both `colon_test.tcl` and `colon-1.0.tm` be in the same directory.
