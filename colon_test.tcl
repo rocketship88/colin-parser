@@ -557,6 +557,28 @@ puts "167 ========== proc= test =========="
 verify "test 0/1" [test0 20] [test1 20]
 verify "test 1/2" [test1 20] [test2 20]
 
+puts "169 ========== method= test =========="
+oo::class create Calculator {
+    variable result
+    
+    constructor {} {
+        set result 0
+    }
+    
+    method= compute {x y} {
+        : result = sqrt(x*x + y*y)
+        return $result
+    }
+    
+    method getResult {} {
+        return $result
+    }
+}
+
+set calc [Calculator new]
+verify "compute 3 4" [expr {sqrt(3*3 + 4*4 )}] [$calc compute 3 4] 
+verify "getResult" [expr {sqrt(3*3 + 4*4)}] [$calc getResult]  
+
 puts "\n=========================================="
 if {$failures == 0} {
     puts "ALL $::tests TESTS PASSED!"
