@@ -313,28 +313,24 @@ set qy 24
 - `min()` `max()` (variable arguments)
 - And others defined in `tcl::mathfunc::*`
 
-### The gather() Function
+### The list() Function
 
-A `gather()` function collects multiple values into a list:
+A `list()` function collects multiple values into a list:
 
 ```tcl
-# this is NOT defined automatically, to use include this definition in your code
-proc tcl::mathfunc::gather {args} { 
-    return [::list {*}$args]
-}
 
-# Note: the native function `list` is equivalent, but faster
 
-: gather(1, 2, 3)
+
+: list(1, 2, 3)
 # Returns: {1 2 3}
 
 set x 10
 set y 20
-: gather(x, y, x+y)
+: list(x, y, x+y)
 # Returns: {10 20 30}
 
 # Useful for returning multiple calculated values
-: gather(min(x,y), max(x,y), x+y, x*y)
+: list(min(x,y), max(x,y), x+y, x*y)
 # Returns: {10 20 30 200}
 ```
 
@@ -435,13 +431,13 @@ set field name
 # Similarly, not useful for math operations
 ```
 
-### Lists from gather()
+### Lists from list()
 
 ```tcl
-: gather(10, 20, 30)
+: list(10, 20, 30)
 # Returns: {10 20 30}
 
-# gather() is typically used for collecting results,
+# list() is typically used for collecting results,
 # not for further calculations
 ```
 
@@ -496,7 +492,7 @@ set c 6
     discriminant = b*b - 4*a*c;
     root1 = (-b + sqrt(discriminant)) / (2*a);
     root2 = (-b - sqrt(discriminant)) / (2*a);
-    gather(root1, root2)
+    list(root1, root2)
 }
 # Returns: {3.0 2.0}
 ```
@@ -512,7 +508,7 @@ set data {10 20 30 40 50}
     sum = lindex(data,0) + lindex(data,1) + lindex(data,2) + \
           lindex(data,3) + lindex(data,4);
     mean = sum / n;
-    gather(n, sum, mean)
+    list(n, sum, mean)
 }
 # Returns: {5 150 30}
 ```
