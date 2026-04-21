@@ -477,6 +477,8 @@ for {set i 0} {$i < 1000} {incr i} {
 
 This is a **feature**, not a bug - it helps you identify performance problems early.
 
+`Note:` When using `proc=` or `method=` the cache is not used in those procedures or methods. 
+
 ## Complete Examples
 
 ### Example 1: Quadratic Formula
@@ -561,7 +563,7 @@ set years 10
 |---------|-----------|-----------|
 | Variable reference | `x` | `$x` |
 | Command substitution | Not supported | `[cmd]` |
-| Multiple statements | `;` or newline | Not supported |
+| Multiple statements | `;` or `'` | Not supported |
 | Comments | `#` supported | `#` also supported |
 | Array syntax | `arr(key)` | `$arr(key)` |
 | Performance | Cached bytecode | Compiled per call |
