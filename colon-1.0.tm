@@ -532,3 +532,7 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
 proc proc= {name arglist body {preserve 1}} {
     proc $name $arglist [::Calc::transform= $arglist $body 1 $preserve]
 }
+proc oo::define::method= {name arglist body {preserve 1}} {
+    uplevel 1 [list method $name $arglist \
+        [::Calc::transform= $arglist $body 1 $preserve]]
+}
