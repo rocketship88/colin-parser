@@ -564,8 +564,11 @@ if {$failures == 0} {
     puts "TOTAL FAILURES: $failures"
 }
 puts "=========================================="
+puts "\n========== timing tests ========== "
 
-
+puts "expr  [time {test0 20} 10000]"
+puts "proc  [time {test1 20} 10000]"
+puts "proc= [time {test2 20} 10000]"
 
 } ;# end doalltests
 
