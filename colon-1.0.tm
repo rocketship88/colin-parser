@@ -279,7 +279,7 @@ proc parsePrefix token {
     
     # Try to build a name (may include ::)
     set name ""
-    while {$token eq {::} || [regexp {^[[:alpha:]][[:alnum:]_]*$} $token]} {
+    while {$token eq {::} || [regexp {^[[:alpha:]_][[:alnum:]_]*$} $token]} {
         append name $token
         set token [lindex $tokens $tokpos]
         incr tokpos
