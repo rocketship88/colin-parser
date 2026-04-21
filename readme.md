@@ -4,7 +4,7 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 
 ## What's New
 - Repackaging into separate test file, and module
-- proc= to apply bytecodes directly, faster, and still pure tcl
+- proc= and method= to apply bytecodes directly, faster, and still pure tcl
 - list is now a bytecode function, same as the gather mathfunc but faster
 - Array support: `= myarray(index) * 2` and multi-dimensional `matrix(i,j)`
 - Comprehensive test suite with 150+ verification tests
@@ -30,15 +30,15 @@ The file will run all tests automatically and display results. This requires bot
 
 To use in a program: All the code is now in a `Tcl module`. Either place the module (`colon-1.0.tm`) into a known module directory, or use the `::tcl::tm::path add <path to module>` command. Then use `package require colon`.
 
-## Use with proc=
+## Use with proc= and method=
 
-This is a method to parse text bytecodes via the assemble command a single time. This increases performance to effectively expr speed (within 5%). One writes and debugs code using the normal proc statement, but after debugged, and to get more performance, simply change `proc` to `proc=` and it will generate a procedure body with the applied improvement. 
+This is a way to parse text bytecodes via the assemble command during procedure or method compilation. This increases performance to effectively expr speed (within 5%). One writes and debugs code using the normal proc or method statement, but after debugged, and to get more performance, simply change `proc` to `proc=` and/or `method` to `method=` and it will generate a procedure/method body with the applied improvement. 
 
 When used in this way, there is no need for the C extension, in fact, this method is 2-3x faster than using the C extension.
 
-The proc= code also has an option following the body of the procedure. It defaults to 1 which causes the assembly code to be followed by an if 0 {... source code ...} so that it does not execute, but is there in the event of an error traceback and to keep the line numbers correct. It is slightly faster to not include this by adding a 0 to the end of a proc= procedure, i.e. after the } of the body.
+The proc= or method= code also has an option following the body of the procedure. It defaults to 1 which causes the assembly code to be wrapped in if {0} {... source code ...} {...assemble...} so that it does not execute, but is there in the event of an error traceback and to keep the line numbers correct. The bytecode compiler will optomize this out, so it shouldn't affect performance.
 
-proc= will also catch any $var or [command] substitions in the expression and throw an error.
+proc= and method= will also catch any $var or [command] substitutions in the expression and throw an error.
 
 ```tcl
 ::tcl::tm::path add [file dirname [info script]] ;# test file and module file in same directory
@@ -81,7 +81,30 @@ package require colon
  }
 
 ```
+Similarly, one can use method= with TCLOO methods:
+```
+oo::class create Calculator {
+    variable result
+    
+    constructor {} {
+        set result 0
+    }
+    
+    method= compute {x y} {
+        : result = sqrt(x*x + y*y)
+        return $result
+    }
+    
+    method getResult {} {
+        return $result
+    }
+}
 
+set calc [Calculator new]
+puts [$calc compute 3 4]   ;# should print 5.0
+puts [$calc getResult]      ;# should print 5.0
+
+```
 ## Features
 
 - Bare variable syntax: `= x + y` (no $ needed)
