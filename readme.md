@@ -36,7 +36,7 @@ This is a way to parse text bytecodes via the assemble command during procedure 
 
 When used in this way, there is no need for the C extension, in fact, this method is 2-3x faster than using the C extension.
 
-The proc= or method= code also has an option following the body of the procedure. It defaults to 1 which causes the assembly code to be wrapped in if {0} {... source code ...} {...assemble...} so that it does not execute, but is there in the event of an error traceback and to keep the line numbers correct. The bytecode compiler will optomize this out, so it shouldn't affect performance.
+The proc= or method= code also has an option following the body of the procedure. It defaults to 1 which causes the assembly code to be wrapped in if {0} {... source code ...} {...assemble...} so that the original source does not execute, but is there in the event of an error to keep the line numbers correct. The bytecode compiler will optomize this out, so it shouldn't affect performance.
 
 proc= and method= will also catch any $var or [command] substitutions in the expression and throw an error.
 
