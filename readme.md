@@ -117,7 +117,7 @@ puts [$calc getResult]      ;# should print 5.0
 - Right associative assignment, `= a = b = (3 + 4) * 2` ;# produces 14 -> a and b
 - Can now cross lines if inside braces, no `;` needed
 - For on line multiple statements without braces, can use `'` separator
-- Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=`)
+- Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=` or `method=`)
 ## Requirements
 
 - Tcl 8.6 or 9.x
@@ -135,14 +135,12 @@ proc tcl::mathfunc::rad {deg} {
     return [expr {$deg * 3.14159265358979323846/180.}]
 }
 
-# use for multipe return values - can now use list(.,.,...) directly
-proc tcl::mathfunc::gather {args} {
-    return [list {*}$args]
-}
+# use list() for multipe return values
+
 set glist [: { x = sin(rad(90))**2; 
     y = cos(rad(90))**2;     
     z = sqrt(x) + sqrt(y);
-    gather(x,y,z);
+    list(x,y,z);
   }]
 puts $glist
 0.9999999999998932 1.0679490440337123e-13 1.0000003267948432  # output
