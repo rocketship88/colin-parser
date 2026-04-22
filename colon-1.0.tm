@@ -530,9 +530,18 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
 
 } ;############### end namespace Calc
 proc proc= {name arglist body {preserve 1}} {
-    proc $name $arglist [::Calc::transform= $arglist $body 1 $preserve]
+    if {[catch {
+        set newbody [::Calc::transform= $arglist $body 1 $preserve]
+    } err_code]} {
+    	error "Proc= error compiling '$name' = $err_code" 
+    }
+    proc $name $arglist $newbody
 }
 proc oo::define::method= {name arglist body {preserve 1}} {
-    uplevel 1 [list method $name $arglist \
-        [::Calc::transform= $arglist $body 1 $preserve]]
+    if {[catch {
+        set newbody [::Calc::transform= $arglist $body 1 $preserve]
+    } err_code]} {
+        error "Method= error compiling '$name' = $err_code"
+    }
+    uplevel 1 [list method $name $arglist $newbody]
 }
