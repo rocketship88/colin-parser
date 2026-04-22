@@ -143,7 +143,7 @@ set glist [: { x = sin(rad(90))**2;
     list(x,y,z);
   }]
 puts $glist
-0.9999999999998932 1.0679490440337123e-13 1.0000003267948432  # output
+# 1.0 3.749399456654644e-33 1.0 # output
 ```
 ## Building The C extension
 
