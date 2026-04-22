@@ -99,9 +99,27 @@ set y 50
 
 Calc does **not** use Tcl's variable substitution. Instead, variables are loaded at runtime via bytecode instructions. This enables:
 
-- Better caching (same bytecode works with different values)
+- Better caching (same bytecode works with different values) when outside procedures or methods
 - Faster execution (no string substitution overhead)
 - Cleaner syntax
+### Performance Notes
+
+Calc expressions do not support `$var` or `[command]` substitutions. When using `proc=` or `method=`, any attempt to use them is caught immediately at definition time with a clear error message. This is by design — it ensures expressions are always fully known at compile time, enabling optimal bytecode generation.
+
+**Using `proc=` and `method=`** is strongly recommended for performance-critical code. Expressions are compiled once when the procedure or method is defined, producing bytecode identical to hand-written `set`/`expr` code. The cache is not used at all in this mode.
+
+**Outside of `proc=`/`method=`**, the `:` and `=` commands use a cache to avoid recompiling the same expression repeatedly. This is suitable for interactive use, scripts, and toplevel code, but is up to 20x slower than the compiled form since the assembler must parse the TAL text on every call.
+
+**Using `:` or `=` inside a regular `proc` or `method` without `proc=`/`method=`** gives no performance benefit over toplevel use — the assembler still runs on every call.
+
+**Bracing** matters in two places:
+
+- `expr` expressions should always be braced: `expr {$x + 1}` — this is well known
+- Conditional expressions in `if`, `while`, and `for` should also be braced for the same reason — less commonly known but equally important
+- Inline Calc expressions used as conditions should be wrapped in braces: `if {[: a > b]}` rather than `if [: a > b]`
+
+Failing to brace conditional expressions prevents Tcl from compiling the branch body inline, resulting in runtime string evaluation on every iteration.
+
 
 **If you need `$var` or `[command]` substitution, use Tcl's built-in `expr` instead:**
 
