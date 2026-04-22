@@ -10,7 +10,6 @@ This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added 
 - Comprehensive test suite with 150+ verification tests
 
 - Support for multiple expressions separated by ` ' ` or ` ; ` 
-- Includes check for more than 1000 expressions in cache, to catch $var or [cmd] in expressions
 - Wrapping in Calc:: namespace and some code cleanup
 
 ## Usage
