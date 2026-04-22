@@ -6,6 +6,12 @@ Calc (aka colon) is a high-performance expression evaluator for Tcl that compile
 
 The code is contained in the file `colon-1.0.tm` that is organized as a `Tcl module`. There is a separate `colon_test.tcl` file that can load the module and contains a variety of tests. See the readme for more information on running the test file.
 
+## Compile vs. Interpretive execution
+
+Calc includes two procedures, `proc=` and `method=` which can produce optimal TAL bytecode. To enable, one merely replaces any `proc` or `method` command using Calc commands with `proc=` or `method=` and peformance can improve as much as 10-20x. 
+
+When these alternate procedures are used, TAL is created once and converted to binary format. This also can detect the usage of `$var` or `[command]` substitutions that should not be used with Calc.
+
 ## Basic Usage
 
 ```tcl
