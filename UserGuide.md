@@ -582,7 +582,7 @@ set years 10
     exponent = compounds_per_year * years;
     amount = principal * pow(1 + r_over_n, exponent)
 }
-# Returns: ~1647.01
+# Returns: ~ 1647.01
 ```
 
 
