@@ -31,7 +31,9 @@ To use in a program: All the code is now in a `Tcl module`. Either place the mod
 
 ## Use with proc= and method=
 
-This is a way to parse text bytecodes via the assemble command during procedure or method compilation. This increases performance to effectively expr speed (within 5%). One writes and debugs code using the normal proc or method statement, but after debugged, and to get more performance, simply change `proc` to `proc=` and/or `method` to `method=` and it will generate a procedure/method body with the applied improvement. This allows various debugging tools such as the tclpro debugger to be used for breakpointing and stepping procedure code.
+This is a way to parse text bytecodes via the assemble command during procedure or method compilation. This increases performance to effectively expr speed (within 5%). One typically writes and debugs code using the normal proc or method statements but once debugged, to get more performance, simply change `proc` to `proc=` and/or `method` to `method=` and it will generate a procedure/method body with the applied improvement. 
+
+This approach of using proc/method for debug allows various debugging tools such as the tclpro debugger to be used for breakpointing and stepping through the original source code and then shifting to the performance gains after debug by using optimised code. 
 
 When used in this way, there is less need for the C extension, in fact, this method is 2-3x faster than using the C extension. However, the C extension does improve performance for use outside of procedures or methods, where proc= and method= cannot be used.
 
