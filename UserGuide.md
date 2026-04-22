@@ -4,7 +4,7 @@
 
 Calc (aka colon) is a high-performance expression evaluator for Tcl that compiles expressions to Tcl Assembly Language (TAL) bytecode. It provides a clean syntax for mathematical calculations with support for variables, arrays, functions, and multiple statements.
 
-The code is contained in the file colon-1.0.tm that is organized as a Tcl module. There is a separate colon_test.tcl file that can load the module and contains a variety of tests. See the readme for more information on running the test file.
+The code is contained in the file `colon-1.0.tm` that is organized as a `Tcl module`. There is a separate `colon_test.tcl` file that can load the module and contains a variety of tests. See the readme for more information on running the test file.
 
 ## Basic Usage
 
@@ -246,7 +246,7 @@ These compile directly to TAL instructions:
 
 ```tcl
 set text "Hello, World!"
-set mylist {a b c d e}
+set mylist [list a b c d e]
 
 # String length
 : strlen(text)
@@ -269,6 +269,11 @@ set matrix {{1 2 3} {4 5 6} {7 8 9}}
 set cube {{{a b} {c d}} {{e f} {g h}}}
 : lindex(cube, 1, 0, 1)
 # Returns: "f"
+
+# functional list creation
+: a = 10 ' b = 20 ' c = 30
+: alistof3 = list(a+5, b-5, c+10)
+# returns {15 15 40}
 ```
 
 **Available native functions:**
