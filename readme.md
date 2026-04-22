@@ -113,7 +113,7 @@ puts [$calc getResult]      ;# should print 5.0
 - Boolean operations: `= a < 10 && b > 5`
 - Bignum support: `= 2 ** 1000`
 - Bytecode caching for performance
-- Assignment with `=` multiple statements with `'`  `;` or `newline` separators
+- Assignment with `=` multiple statements with `'` or `;`  separators
 - Right associative assignment, `= a = b = (3 + 4) * 2` ;# produces 14 -> a and b
 - Can now cross lines if inside braces, no `;` needed
 - For on line multiple statements without braces, can use `'` separator
