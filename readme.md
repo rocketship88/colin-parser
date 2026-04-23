@@ -27,8 +27,11 @@ The file will run all tests automatically and display results. This requires bot
 
 ## Use as a library
 
-To use in a program: All the code is now in a `Tcl module`. Either place the module (`colon-1.0.tm`) into a known module directory, or use the `::tcl::tm::path add <path to module>` command. Then use `package require colon`.
-
+All the code is now in a `Tcl module`. Either place the module `colon-1.0.tm` into a known module directory, or use the following command to add a directory path, similar to using auto_path for regular packages.
+```
+::tcl::tm::path add <path to module>
+package require colon 1.0
+```
 ## Use with proc= and method=
 
 Use of these 2 commands increases performance to expr speed. One typically writes and debugs code using the normal proc or method statements but once debugged, to get more performance, simply change `proc` to `proc=` and/or `method` to `method=` and it will generate a procedure/method body with the compiled improvement. 
