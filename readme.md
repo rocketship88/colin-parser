@@ -1,4 +1,4 @@
-# Expression Evaluator with Array Support
+# Expression Evaluator with Additional Features
 
 This is Colin Macleod's original bytecode-based expression evaluator for Tcl, with added support for array references, native functions, multiple statements with assignment operator, bytecode caching, and proc and method compiling.
 
