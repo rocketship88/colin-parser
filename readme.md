@@ -1,10 +1,10 @@
 # Expression Evaluator with Array Support
 
-This is Colin Macleod's bytecode-based expression evaluator for Tcl, with added support for array references and caching.
+This is Colin Macleod's original bytecode-based expression evaluator for Tcl, with added support for array references, native functions, multiple statements with assignment operator, bytecode caching, and proc and method compiling.
 
 ## What's New
-- Repackaging into separate test file, and module
-- proc= and method= to apply bytecodes directly, faster, and still pure tcl
+- Repackaging into separate test file, and Tcl module
+- proc= and method= to apply bytecodes directly, faster, while still pure tcl
 - list is now a bytecode function, same as the gather mathfunc but faster
 - Array support: `= myarray(index) * 2` and multi-dimensional `matrix(i,j)`
 - Comprehensive test suite with 150+ verification tests
