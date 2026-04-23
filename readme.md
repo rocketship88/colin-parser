@@ -10,7 +10,7 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 - Comprehensive test suite with 150+ verification tests
 
 - Support for multiple expressions separated by ` ' ` or ` ; ` 
-- Wrapping in Calc:: namespace and some code cleanup
+- Wrapping in Calc:: namespace
 
 ## Usage
 
@@ -32,23 +32,25 @@ All the code is now in a `Tcl module`. Either place the module `colon-1.0.tm` in
 ::tcl::tm::path add <path to module>
 package require colon 1.0
 ```
-## Use with proc= and method=
+## Compiling with `proc=` and `method=`
 
-Use of these 2 commands increases performance to expr speed. One typically writes and debugs code using the normal proc or method statements but once debugged, to get more performance, simply change `proc` to `proc=` and/or `method` to `method=` and it will generate a procedure/method body with the compiled improvement. 
+Changing `proc` to `proc=` or `method` to `method=` compiles expressions once at definition time, achieving performance identical to hand-written `set`/`expr` code.
 
-This approach allows various debugging tools such as the tclpro debugger to be used for breakpointing and stepping through the original source code and then shifting to the performance gains after debug by using optimised assembly code.
+A typical workflow is to develop and debug using normal `proc`/`method`, then switch to `proc=`/`method=` once the code is working. Debugging tools such as the TclPro debugger can be used with the original source, then `proc=`/`method=` applied for production performance.
 
-When used in this way, there is less need for the C extension. However, the C extension does still improve performance outside of procedures or methods, where proc= and method= cannot be used. Both approaches can be used together, since proc= and method= produce only assembly code and so the extension would not apply to the generated code.
+An optional argument (default 1) controls source preservation — when enabled, the original source is wrapped in `if {0} {...}` alongside the assembled code, keeping line numbers correct for error reporting. The bytecode compiler eliminates the dead branch entirely so there is no performance cost.
 
-The proc= or method= code has an option following the body of the procedure. It defaults to true which causes the assembly code to be wrapped in if {0} {... source code ...} {...assemble...} so that the original source does not execute, but is there in the event of an error to keep the line numbers correct. The bytecode compiler will optomize this out, so it shouldn't affect performance.
+The C extension complements `proc=`/`method=` rather than replacing it — `proc=`/`method=` handles code inside procedures and methods, while the C extension improves performance for expressions evaluated outside of them. Both can be used together since `proc=`/`method=` generates only assembly code and the C extension never comes into play for compiled procs or methods.
 
-`proc=` and `method=` will also catch any `$var` or `[command]` substitutions in the expression and throw an error.
+Any attempt to use `$var` or `[command]` substitutions inside a `:` or `=` expression is caught at definition time with a clear error message.
+
+##  Example with performance comparisons
 
 The rounded rectangle example below demonstrates real-world performance. Three versions were benchmarked with 1000 iterations:
 
 - **`proc=` version** — matches `expr`/`set` performance exactly, within the margin of error of the `time` command
 - **C extension version** — 2x slower overall, 4x slower for pure calculation
-- **Untransformed `:` version** — 3x slower overall, 8x slower for pure calculation
+- **Uncompiled `:` version** — 3x slower overall, 8x slower for pure calculation
 
 The overall timings include polygon drawing, which dominates and masks the calculation differences. When timing only the mathematical calculations, `proc=` and hand-written `expr`/`set` are indistinguishable, while the gap to the other versions becomes more apparent.
 
@@ -58,6 +60,7 @@ This demonstrates that `proc=` eliminates all expression evaluation overhead —
 ::tcl::tm::path add [file dirname [info script]] ;# test file and module file in same directory
 package require colon
 
+# Derived from a tclcore email by Florent Merlet
  proc= roundRect { w x0 y0 x3 y3 radius args } {
     set r      [winfo pixels $w $radius]
     :   d    = 2*r
