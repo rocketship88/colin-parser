@@ -14,7 +14,7 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
   
 ## Features
 
-- Bare variable syntax: `= x + y` (no $ needed)
+- Bare variable syntax: `= x + y` (no $ needed - and not allowed)
 - Array access: `= data(idx) + 100`
 - Math functions: `= sqrt(x*x + y*y)`
 - Ternary operator: `= x > 0 ? x : -x`
