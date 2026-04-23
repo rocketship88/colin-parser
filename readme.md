@@ -4,15 +4,35 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 
 ## What's New
 - Repackaging into separate test file, and Tcl module
-- proc= and method= to apply bytecodes directly, faster, while still pure tcl
-- list is now a bytecode function, same as the gather mathfunc but faster
+- proc= and method= to compile bytecodes directly, faster, while still just pure tcl
+- list is now a bytecode function instead of a mathfunc but faster
 - Array support: `= myarray(index) * 2` and multi-dimensional `matrix(i,j)`
 - Comprehensive test suite with 150+ verification tests
 
 - Support for multiple expressions separated by ` ' ` or ` ; ` 
 - Wrapping in Calc:: namespace
+  
+## Features
 
-## Usage
+- Bare variable syntax: `= x + y` (no $ needed)
+- Array access: `= data(idx) + 100`
+- Math functions: `= sqrt(x*x + y*y)`
+- Ternary operator: `= x > 0 ? x : -x`
+- Boolean operations: `= a < 10 && b > 5`
+- Bignum support: `= 2 ** 1000`
+- Bytecode caching for performance
+- Assignment with `=` multiple statements with `'` or `;`  separators
+- Right associative assignment, `= a = b = (3 + 4) * 2` ;# produces 14 -> a and b
+- Can now cross lines if inside braces, no `;` needed
+- For on line multiple statements without braces, can use `'` separator
+- Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=` or `method=`)
+  
+## Requirements
+
+- Tcl 8.6 or 9.x
+- tcllib (for fibonacci tests with math::fibonacci)
+  
+## Run with test file
 
 ```tcl
 tclsh colon_test.tcl
@@ -122,24 +142,54 @@ puts [$calc compute 3 4]   ;# should print 5.0
 puts [$calc getResult]      ;# should print 5.0
 
 ```
-## Features
+## A look Under the Hood
 
-- Bare variable syntax: `= x + y` (no $ needed)
-- Array access: `= data(idx) + 100`
-- Math functions: `= sqrt(x*x + y*y)`
-- Ternary operator: `= x > 0 ? x : -x`
-- Boolean operations: `= a < 10 && b > 5`
-- Bignum support: `= 2 ** 1000`
-- Bytecode caching for performance
-- Assignment with `=` multiple statements with `'` or `;`  separators
-- Right associative assignment, `= a = b = (3 + 4) * 2` ;# produces 14 -> a and b
-- Can now cross lines if inside braces, no `;` needed
-- For on line multiple statements without braces, can use `'` separator
-- Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=` or `method=`)
-## Requirements
+To illustrate how proc= works, here is a simple canvas helper that tags a rectangular region. The three views — source, generated assembly, and disassembled bytecode — show how clean source code translates to optimal execution with no extra steps.
 
-- Tcl 8.6 or 9.x
-- tcllib (for fibonacci tests with math::fibonacci)
+```
+proc= box {x y delta tag}  {.canvas addtag $tag {*}[: list(x-delta, x+delta, y-delta, y+delta) ]}
+
+proc  box {x y delta tag}  {.canvas addtag $tag {*}[tcl::unsupported::assemble {load x; load delta; sub;
+    load x; load delta; add; load y; load delta; sub; load y; load delta; add; list 4; }]
+}
+
+ByteCode 0x00000000081B44B0, refCt 1, epoch 17, interp 0x00000000009AFBD0 (epoch 17)
+  Source ".canvas addtag $tag {*}[tcl::unsupported::assemble {loa..."
+  Cmds 2, src 163, inst 48, litObjs 2, aux 0, stkDepth 8, code/src 0.00
+  Proc 0x0000000005547E00, refCt 1, args 4, compiled locals 4
+      slot 0, scalar, arg, "x"
+      slot 1, scalar, arg, "y"
+      slot 2, scalar, arg, "delta"
+      slot 3, scalar, arg, "tag"
+  Commands 2:
+      1: pc 0-46, src 0-161        2: pc 7-40, src 24-160
+  Command 1: ".canvas addtag $tag {*}[tcl::unsupported::assemble {loa..."
+    (0) expandStart 
+    (1) push1 0 	# ".canvas"
+    (3) push1 1 	# "addtag"
+    (5) loadScalar1 %v3 	# var "tag"
+  Command 2: "tcl::unsupported::assemble {load x; load delta; sub; lo..."
+    (7) startCommand +34 1 	# next cmd at pc 41, 1 cmds start here
+    (16) loadScalar1 %v0 	# var "x"
+    (18) loadScalar1 %v2 	# var "delta"
+    (20) sub 
+    (21) loadScalar1 %v0 	# var "x"
+    (23) loadScalar1 %v2 	# var "delta"
+    (25) add 
+    (26) loadScalar1 %v1 	# var "y"
+    (28) loadScalar1 %v2 	# var "delta"
+    (30) sub 
+    (31) loadScalar1 %v1 	# var "y"
+    (33) loadScalar1 %v2 	# var "delta"
+    (35) add 
+    (36) list 4 
+    (41) expandStkTop 4 
+    (46) invokeExpanded 
+    (47) done 
+
+
+
+```
 
 ## Examples
 ```tcl
