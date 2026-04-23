@@ -193,20 +193,29 @@ If Tcl headers are in a different location:
 gcc -O3 -march=native -flto -shared -fPIC -o calc.so calc.c  \
     $(pkg-config --cflags tcl) -ltclstub8.6
 ```
-### Using the C extension
-Depending on which of the tcl or C extension one uses, the command is `:` or `::` in order to be able to compare the performance of pure tcl vs. the C extension.  Otherwise, the two commands produce the same results and both use the same `::cache` variable and call on the same compile and assemble commands for parsing and execution. The `::` name defined in the C code is easily changed to anything desired. The same goes for the tcl source. However, the test cases all expect the command to be `=`, and so there is an alias command just following the `:` proc definition at the top of the file to equate the two.
+### Using the C Extension
+
+The C extension provides the `::` command, which is functionally identical to the pure Tcl `:` and `=` commands — the Tcl module defines both as aliases for the same implementation. All three use the same `::Calc::cache`, and the same assembler. The C extension is faster in several ways: it uses a single C call for the cache lookup rather than two Tcl commands, and it joins multiple arguments into a single expression string more efficiently than the pure Tcl version. It also caches the pointer to the assemble command avoiding a runtime string lookup. These are enough to gain 2x or more in performance.
+
+To load the appropriate version and switch the `=` alias to use the C extension:
+
 ```tcl
-interp alias {} = {} : ;# alias to = for test suite
+if { $tcl_version >= "9.0" } {
+    load calc9.dll  ;# Windows 9.x
+} else {
+    load calc.dll   ;# Windows 8.6
+}
+# load calc.so     ;# Linux
 
-load calc.dll   # windows 8.6
-load calc9.dll  # windows 9.x
+# By default both = and : use the pure Tcl implementation
+# Uncomment to switch = to the C extension:
+# rename = old=
+# rename :: =
 
-load calc.so    # linux
-
-:: expression # uses the C extension 
-:  expression # uses tcl command
-=  expression # alias which all the test code uses
 ```
+
+The command names can be changed to anything — the test suite uses `=` throughout, and `rename` makes it easy to switch implementations without changing any other code.
+
 ## Testing
 
 All tests verify `=` command results against `expr` to ensure correctness.
