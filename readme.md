@@ -26,6 +26,7 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 - Can now cross lines if inside braces, no `;` needed
 - For on line multiple statements without braces, can use `'` separator
 - Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=` or `method=`)
+- Included C extension provides up to 2x performance outside of procs and methods
   
 ## Requirements
 
