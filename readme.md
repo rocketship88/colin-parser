@@ -64,6 +64,51 @@ The C extension complements `proc=`/`method=` rather than replacing it — `proc
 
 Any attempt to use `$var` or `[command]` substitutions inside a `:` or `=` expression is caught at definition time with a clear error message.
 
+## A look Under the Hood
+
+To illustrate how proc= works, here is a simple canvas helper that tags a rectangular region. The three views — source, generated assembly, and disassembled bytecode — show how clean source code translates to optimal execution with no extra steps.
+
+```
+proc= box {x y delta tag}  {.canvas addtag $tag {*}[: list(x-delta, x+delta, y-delta, y+delta) ]}
+
+proc  box {x y delta tag}  {.canvas addtag $tag {*}[tcl::unsupported::assemble {load x; load delta; sub;
+    load x; load delta; add; load y; load delta; sub; load y; load delta; add; list 4; }]
+}
+
+ByteCode 0x00000000081B44B0, refCt 1, epoch 17, interp 0x00000000009AFBD0 (epoch 17)
+  Source ".canvas addtag $tag {*}[tcl::unsupported::assemble {loa..."
+  Cmds 2, src 163, inst 48, litObjs 2, aux 0, stkDepth 8, code/src 0.00
+  Proc 0x0000000005547E00, refCt 1, args 4, compiled locals 4
+      slot 0, scalar, arg, "x"
+      slot 1, scalar, arg, "y"
+      slot 2, scalar, arg, "delta"
+      slot 3, scalar, arg, "tag"
+  Commands 2:
+      1: pc 0-46, src 0-161        2: pc 7-40, src 24-160
+  Command 1: ".canvas addtag $tag {*}[tcl::unsupported::assemble {loa..."
+    (0) expandStart 
+    (1) push1 0 	# ".canvas"
+    (3) push1 1 	# "addtag"
+    (5) loadScalar1 %v3 	# var "tag"
+  Command 2: "tcl::unsupported::assemble {load x; load delta; sub; lo..."
+    (7) startCommand +34 1 	# next cmd at pc 41, 1 cmds start here
+    (16) loadScalar1 %v0 	# var "x"
+    (18) loadScalar1 %v2 	# var "delta"
+    (20) sub 
+    (21) loadScalar1 %v0 	# var "x"
+    (23) loadScalar1 %v2 	# var "delta"
+    (25) add 
+    (26) loadScalar1 %v1 	# var "y"
+    (28) loadScalar1 %v2 	# var "delta"
+    (30) sub 
+    (31) loadScalar1 %v1 	# var "y"
+    (33) loadScalar1 %v2 	# var "delta"
+    (35) add 
+    (36) list 4 
+    (41) expandStkTop 4 
+    (46) invokeExpanded 
+    (47) done 
+```
 ##  Example with performance comparisons
 
 The rounded rectangle example below demonstrates real-world performance. Three versions were benchmarked with 1000 iterations:
@@ -142,54 +187,7 @@ puts [$calc compute 3 4]   ;# should print 5.0
 puts [$calc getResult]      ;# should print 5.0
 
 ```
-## A look Under the Hood
 
-To illustrate how proc= works, here is a simple canvas helper that tags a rectangular region. The three views — source, generated assembly, and disassembled bytecode — show how clean source code translates to optimal execution with no extra steps.
-
-```
-proc= box {x y delta tag}  {.canvas addtag $tag {*}[: list(x-delta, x+delta, y-delta, y+delta) ]}
-
-proc  box {x y delta tag}  {.canvas addtag $tag {*}[tcl::unsupported::assemble {load x; load delta; sub;
-    load x; load delta; add; load y; load delta; sub; load y; load delta; add; list 4; }]
-}
-
-ByteCode 0x00000000081B44B0, refCt 1, epoch 17, interp 0x00000000009AFBD0 (epoch 17)
-  Source ".canvas addtag $tag {*}[tcl::unsupported::assemble {loa..."
-  Cmds 2, src 163, inst 48, litObjs 2, aux 0, stkDepth 8, code/src 0.00
-  Proc 0x0000000005547E00, refCt 1, args 4, compiled locals 4
-      slot 0, scalar, arg, "x"
-      slot 1, scalar, arg, "y"
-      slot 2, scalar, arg, "delta"
-      slot 3, scalar, arg, "tag"
-  Commands 2:
-      1: pc 0-46, src 0-161        2: pc 7-40, src 24-160
-  Command 1: ".canvas addtag $tag {*}[tcl::unsupported::assemble {loa..."
-    (0) expandStart 
-    (1) push1 0 	# ".canvas"
-    (3) push1 1 	# "addtag"
-    (5) loadScalar1 %v3 	# var "tag"
-  Command 2: "tcl::unsupported::assemble {load x; load delta; sub; lo..."
-    (7) startCommand +34 1 	# next cmd at pc 41, 1 cmds start here
-    (16) loadScalar1 %v0 	# var "x"
-    (18) loadScalar1 %v2 	# var "delta"
-    (20) sub 
-    (21) loadScalar1 %v0 	# var "x"
-    (23) loadScalar1 %v2 	# var "delta"
-    (25) add 
-    (26) loadScalar1 %v1 	# var "y"
-    (28) loadScalar1 %v2 	# var "delta"
-    (30) sub 
-    (31) loadScalar1 %v1 	# var "y"
-    (33) loadScalar1 %v2 	# var "delta"
-    (35) add 
-    (36) list 4 
-    (41) expandStkTop 4 
-    (46) invokeExpanded 
-    (47) done 
-
-
-
-```
 
 ## Examples
 ```tcl
