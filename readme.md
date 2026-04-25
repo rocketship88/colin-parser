@@ -162,8 +162,9 @@ This is consistent with the Tcl style guide recommendation to always place `if`,
 During final testing, you can verify that all expressions were found and transformed by temporarily renaming `:` and `=` after the module is loaded and any toplevel (not inside procs or methods) initialization is finished:
 
 ```tcl
-package require colon     ;# loads and runs proc=/method= definitions
+package require colon     ;# loads module
 ... initial top level code, can contain :/= commands ...
+... proc and method definitions ....
 rename : {}               ;# disable : command
 rename = {}               ;# disable = command
 # now run your test suite - any runtime : or = calls will error
