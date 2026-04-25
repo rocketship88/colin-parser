@@ -474,27 +474,25 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
             regsub {\s*;#[^\n]*$} $expr {} expr
             set tal [::Calc::compile0 $expr $inproc]
             if {$inproc} {
-                regsub -all {push ([[:alpha:]:][\w:]*); loadStk} $tal {load \1} tal
+                regsub -all {push ([[:alpha:]][^:;\s]*); loadStk} $tal {load \1} tal
             }
             if {$preserve} {
                 append result "if \{0\} \{ $accum \} \{ tcl::unsupported::assemble \{$tal\} \}\n"
             } else {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
-
         } elseif {1 && [regexp {^\s*[=:]\s+(\S[^\n]*)} $line -> expr]} {
             # path 2: = or : expr  single line unbraced
             regsub {\s*;#[^\n]*$} $expr {} expr
             set tal [::Calc::compile0 $expr $inproc]
             if {$inproc} {
-                regsub -all {push ([[:alpha:]:][\w:]*); loadStk} $tal {load \1} tal
+                regsub -all {push ([[:alpha:]][^:;\s]*); loadStk} $tal {load \1} tal
             }
             if {$preserve} {
                 append result "if \{0\} \{ $line \} \{ tcl::unsupported::assemble \{$tal\} \}\n"
             } else {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
-
         } elseif {1 && [regexp {\[[=:]\s+[^\]]+\]} $line]} {
             # path 3: inline [= expr] or [: expr] replacement
             set newline {}
@@ -506,7 +504,7 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                 set expr [string range $line {*}$submatch]
                 set tal [::Calc::compile0 $expr $inproc]
                 if {$inproc} {
-                    regsub -all {push ([[:alpha:]:][\w:]*); loadStk} $tal {load \1} tal
+                    regsub -all {push ([[:alpha:]][^:;\s]*); loadStk} $tal {load \1} tal
                 }
                 append newline "\[tcl::unsupported::assemble \{$tal\}\]"
                 set pos [expr {[lindex $match 1]+1}]
@@ -514,7 +512,6 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
             # append remainder of line after last match
             append newline [string range $line $pos end]
             append result $newline \n
-
         } else {
             # passthrough
             append result $line \n
