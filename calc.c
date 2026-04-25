@@ -2,7 +2,7 @@
 #include <string.h>
 #include <math.h>   // for floor()
 #include <limits.h> // for LLONG_MIN, LLONG_MAX
-#include <intrin.h> // for __debugbreak()
+
 
 /*
 
@@ -18,6 +18,7 @@ nmake /f makefile9 release
 
 // INT_64 definition for cross-platform compatibility
 #ifdef _WIN32
+#include <intrin.h> // for __debugbreak()
 typedef __int64 INT_64;
 #else
 typedef long long INT_64;
