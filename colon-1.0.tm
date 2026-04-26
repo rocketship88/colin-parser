@@ -50,9 +50,9 @@ proc compile0 {exp {inproc 0}} {
     if {[string first ";" $exp] == -1} {
         set stmtcode [compile [tokenise $exp]]
         if {$inproc} {
-            if {[regexp {^push ([[:alpha:]:][\w:]*); (.*); storeStk; $} $stmtcode -> name expr]} {
+            if {[regexp {^push ([[:alpha:]_][^:;\s]*); (.*); storeStk; $} $stmtcode -> name expr]} {
                 set stmtcode "$expr; store $name; "
-            }
+            }        
         }
         return $stmtcode
     }
@@ -71,9 +71,9 @@ proc compile0 {exp {inproc 0}} {
         if { $inproc } {
         	set stmtcode [compile [tokenise $stmt]]
         	# peephole: push name; <expr>; storeStk; -> <expr>; store name;
-        	if {[regexp {^push ([[:alpha:]:][\w:]*); (.*); storeStk; $} $stmtcode -> name expr]} {
-        		set stmtcode "$expr; store $name; "
-        	}
+            if {[regexp {^push ([[:alpha:]_][^:;\s]*); (.*); storeStk; $} $stmtcode -> name expr]} {
+                set stmtcode "$expr; store $name; "
+            }        
         	append bytecode $stmtcode
         } else {
         	append bytecode [compile [tokenise $stmt]]
