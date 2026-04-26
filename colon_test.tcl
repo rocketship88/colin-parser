@@ -579,6 +579,131 @@ set calc [Calculator new]
 verify "compute 3 4" [expr {sqrt(3*3 + 4*4 )}] [$calc compute 3 4] 
 verify "getResult" [expr {sqrt(3*3 + 4*4)}] [$calc getResult]  
 
+
+
+puts "171 ========== Variable Scope in proc= =========="
+
+# Setup namespace variables
+namespace eval testns {
+    variable _nsvar 100
+    variable nsvar2 200
+}
+set ::_global 42
+set ::plainGlobal 99
+
+# Local variables optimised to LVT slots
+proc= testLocal {x y} {
+    : result = x + y
+    return $result
+}
+verify "local vars x+y" [expr {5 + 10}] [testLocal 5 10]
+
+# Underscore local variables
+proc= testUnderscore {_x _y} {
+    : _result = _x + _y
+    return $_result
+}
+verify "underscore locals _x+_y" [expr {5 + 10}] [testUnderscore 5 10]
+
+# Namespace qualified variables - runtime path
+proc= testNamespace {x} {
+    : testns::_nsvar + x
+}
+verify "namespace ::testns::_nsvar + x" [expr {$testns::_nsvar + 5}] [testNamespace 5]
+
+# Global namespace variables
+proc= testGlobal {x} {
+    : ::plainGlobal + x
+}
+verify "::plainGlobal + x" [expr {$::plainGlobal + 5}] [testGlobal 5]
+
+# Mixed local and namespace
+proc= testMixed {x} {
+    : x + ::_global
+}
+verify "local + ::_global" [expr {5 + $::_global}] [testMixed 5]
+
+# Assignment to local vs namespace
+proc= testAssign {x} {
+    : local = x * 2
+    : testns::nsvar2 = x * 3
+    return $local
+}
+verify "assign local and namespace" [expr {5 * 2}] [testAssign 5]
+verify "namespace var assigned" [expr {5 * 3}] $testns::nsvar2
+
+# Chained assignment local
+proc= testChained {x} {
+    : a = b = x + 1
+    return $a
+}
+verify "chained assignment locals" [expr {5 + 1}] [testChained 5]
+
+# Underscore namespace variable
+proc= testNsUnderscore {x} {
+    : testns::_nsvar + x
+}
+verify "namespace _nsvar + x" [expr {$testns::_nsvar + 5}] [testNsUnderscore 5]
+
+
+
+puts "180 ========== Namespace Lookup Version Differences =========="
+
+namespace eval outer {
+    variable x 1000
+    namespace eval inner {
+        variable y 2000
+    }
+}
+
+# These work the same on both versions - fully qualified always safe
+proc= testFullyQualified {n} {
+    : ::outer::x + n
+}
+verify "fully qualified ::outer::x" [expr {$::outer::x + 5}] [testFullyQualified 5]
+
+proc= testFullyQualified2 {n} {
+    : ::outer::inner::y + n
+}
+verify "fully qualified ::outer::inner::y" [expr {$::outer::inner::y + 5}] [testFullyQualified2 5]
+
+if {$::tcl_version >= 9.0} {
+
+    puts "183 ========== 9.x Relative Namespace Lookup =========="
+    # In 9.x namespace variables must be fully qualified in proc=
+    namespace eval outer {
+        proc= ::outer::testRelative {n} {
+            : ::outer::x + n
+        }
+    }
+    verify "9.x fully qualified ::outer::x" [expr {$::outer::x + 5}] [::outer::testRelative 5]
+
+    namespace eval outer::inner {
+        proc= ::outer::inner::testRelativeInner {n} {
+            : ::outer::inner::y + n
+        }
+    }
+    verify "9.x fully qualified ::outer::inner::y" [expr {$::outer::inner::y + 5}] [::outer::inner::testRelativeInner 5]
+
+} else {
+    puts "183 ========== 8.6 Global Namespace Lookup =========="
+    # In 8.6, unqualified namespace refs default to global namespace
+    proc= testUnqualified {n} {
+        : outer::x + n
+    }
+    verify "8.6 unqualified outer::x" [expr {$::outer::x + 5}] [testUnqualified 5]
+
+    proc= testUnqualified2 {n} {
+        : outer::inner::y + n
+    }
+    verify "8.6 unqualified outer::inner::y" [expr {$::outer::inner::y + 5}] [testUnqualified2 5]
+}
+
+
+
+
+
+
 puts "\n=========================================="
 if {$failures == 0} {
     puts "ALL $::tests TESTS PASSED!"
