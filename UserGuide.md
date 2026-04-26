@@ -35,7 +35,7 @@ set y 20
 
 ## Command Syntax
 
-The Calc evaluator uses the `:` command (or `=` in some versions):
+The Calc evaluator uses the `:` command (or `=` as a command alias):
 
 ```tcl
 : expression
