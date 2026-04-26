@@ -109,102 +109,8 @@ ByteCode 0x00000000081B44B0, refCt 1, epoch 17, interp 0x00000000009AFBD0 (epoch
     (41) expandStkTop 4 
     (46) invokeExpanded 
     (47) done 
+
 ```
-## proc= and method= Compilation Limitations
-
-`proc=` and `method=` use a simple line-oriented preprocessor rather than a full Tcl parser. This is a deliberate tradeoff — a true full parser would need to be character-by-character rather than line-by-line, would be as complex as Tcl's own parser, and would likely need to be written in C for adequate performance. That would make it a C extension rather than a pure Tcl module — possible, but a very different proposition requiring its own maintenance burden. The lightweight pure Tcl approach handles the vast majority of real-world code patterns correctly.
-
-### How the preprocessor works
-
-The preprocessor uses three regex-based patterns to find `:` and `=` expressions:
-
-- **Path 1** — `: {` or `= {` at the start of a line, possibly spanning multiple lines. `info complete` is used to find the matching closing `}` correctly, handling nested braces and comments.
-- **Path 2** — `: expr` or `= expr` at the start of a line, single line unbraced
-- **Path 3** — `[: expr]` or `[= expr]` appearing inline anywhere within a line
-
-Everything else passes through unchanged.
-
-### What it handles correctly
-
-Code written in the recommended Tcl style — with `if`, `while`, and `for` bodies on separate indented lines — is handled correctly:
-
-```tcl
-proc= foo {x y} {
-    if {[: x > y]} {
-        : result = x - y
-    } else {
-        : result = y - x
-    }
-    return $result
-}
-```
-
-### What it does not handle
-
-A `: ` expression that appears inside a braced block on the same line as the opening brace will not be transformed:
-
-```tcl
-if {condition} {: expr}    ;# NOT transformed - falls back to runtime :
-```
-
-Rewrite as:
-
-```tcl
-if {condition} {
-    : expr                  ;# transformed correctly
-}
-```
-
-This is consistent with the Tcl style guide recommendation to always place `if`, `while`, and `for` bodies on separate indented lines — a practice most experienced Tcl programmers already follow.
-
-### Catching untransformed expressions
-
-During final testing, you can verify that all expressions were found and transformed by temporarily renaming `:` and `=` after the module is loaded and any toplevel (not inside procs or methods) initialization is finished:
-
-```tcl
-package require colon     ;# loads module
-... initial top level code, can contain :/= commands ...
-... proc and method definitions ....
-rename : {}               ;# disable : command
-rename = {}               ;# disable = command
-# now run your test suite - any runtime : or = calls will error
-```
-
-Any expression that `transform=` missed will now produce an "invalid command name" error, immediately identifying expressions that need to be reformatted for the preprocessor to find them.
-
-### Summary of tradeoffs
-
-| Approach | Complexity | Core changes | Performance |
-|---|---|---|---|
-| Full C parser extension | High | None needed | Maximum |
-| proc= preprocessor | Low | None | Equal to expr |
-| Runtime `:` only | None | None | ~10x slower |
-
-The preprocessor hits the sweet spot — trivial complexity, no core changes, expr-level performance for the vast majority of real-world code patterns.
-
----
-
-
-
-### Namespace variables in `proc=`
-
-When using `proc=` inside a `namespace eval` block, namespace variables must be referenced with their fully qualified name:
-
-```tcl
-namespace eval myns {
-    variable x 100
-    
-    proc= myProc {n} {
-        : ::myns::x + n    ;# correct - fully qualified
-    }
-}
-```
-
-Using the unqualified name `x` would cause the peephole optimiser to generate a `load x` instruction which expects a local LVT slot — resulting in a "can't read x: no such variable" error. The fully qualified `::myns::x` correctly bypasses the peephole and uses the runtime namespace lookup path.
-
-For variables declared with `variable` inside the proc body, the same rule applies — use fully qualified names in expressions. For complex TCLOO scenarios involving mixins or namespace variables not declared with `variable`, use fully qualified names (`::ns::var`) in expressions — or if in doubt, use `expr` which handles all scoping cases correctly.
-
----
 
 ##  Example with performance comparisons
 
@@ -260,7 +166,7 @@ package require colon
  }
 
 ```
-Similarly, one can use method= with TCLOO methods:
+## Example method= with TCLOO methods:
 ```
 oo::class create Calculator {
     variable result
