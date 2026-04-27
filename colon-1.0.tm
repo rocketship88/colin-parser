@@ -472,7 +472,9 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
             regexp {[=:]\s+(\{.*\})} $accum -> braced
             set expr [string range $braced 1 end-1]
             regsub {\s*;#[^\n]*$} $expr {} expr
-            set tal [::Calc::compile0 $expr $inproc]
+            if {[catch {set tal [::Calc::compile0 $expr $inproc]} err_code]} {
+                error "line [expr {   $i +1  }]: $err_code"
+            }
             if {$inproc} {
                 regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {load \1} tal
             }
@@ -484,7 +486,9 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
         } elseif {1 && [regexp {^\s*[=:]\s+(\S[^\n]*)} $line -> expr]} {
             # path 2: = or : expr  single line unbraced
             regsub {\s*;#[^\n]*$} $expr {} expr
-            set tal [::Calc::compile0 $expr $inproc]
+            if {[catch {set tal [::Calc::compile0 $expr $inproc]} err_code]} {
+                error "line [expr {   $i +1  }]: $err_code"
+            }
             if {$inproc} {
                 regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {load \1} tal
             }
@@ -502,7 +506,9 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                 append newline [string range $line $pos [expr {[lindex $match 0]-1}]]
                 # extract and compile the expression
                 set expr [string range $line {*}$submatch]
-                set tal [::Calc::compile0 $expr $inproc]
+                if {[catch {set tal [::Calc::compile0 $expr $inproc]} err_code]} {
+                    error "line [expr {   $i +1  }]: $err_code"
+                }
                 if {$inproc} {
                     regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {load \1} tal
                 }
@@ -526,19 +532,31 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
 }
 
 } ;############### end namespace Calc
+
+proc calc= {label body {preserve 1}} {
+    if {[catch {
+        set newbody [::Calc::transform= {} $body 0 $preserve]
+    } err_code]} {
+        error "Calc= error in section '$label' $err_code"
+    }
+    if { $preserve } {
+        set Calc::calc("calc=$label") $newbody
+    }
+    uplevel 1 $newbody
+}
 proc proc= {name arglist body {preserve 1}} {
     if {[catch {
         set newbody [::Calc::transform= $arglist $body 1 $preserve]
     } err_code]} {
-    	error "Proc= error compiling '$name' = $err_code" 
+    	error "Proc= error compiling '$name'  $err_code" 
     }
-    proc $name $arglist $newbody
+    uplevel 1 [list proc $name $arglist $newbody]
 }
 proc oo::define::method= {name arglist body {preserve 1}} {
     if {[catch {
         set newbody [::Calc::transform= $arglist $body 1 $preserve]
     } err_code]} {
-        error "Method= error compiling '$name' = $err_code"
+        error "Method= error compiling '$name'  $err_code"
     }
     uplevel 1 [list method $name $arglist $newbody]
 }
