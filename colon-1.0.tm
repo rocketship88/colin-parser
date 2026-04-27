@@ -506,7 +506,11 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                 if {$inproc} {
                     regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {load \1} tal
                 }
-                append newline "\[tcl::unsupported::assemble \{$tal\}\]"
+                if {$preserve} {
+                    append newline "\[if \{0\} \{[string range $line {*}$match]\} \{tcl::unsupported::assemble \{$tal\}\}\]"
+                } else {
+                    append newline "\[tcl::unsupported::assemble \{$tal\}\]"
+                }
                 set pos [expr {[lindex $match 1]+1}]
             }
             # append remainder of line after last match
