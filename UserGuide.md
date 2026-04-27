@@ -554,6 +554,88 @@ if {condition} {
 ```
 
 This is consistent with the Tcl style guide recommendation to always place `if`, `while`, and `for` bodies on separate indented lines — a practice most experienced Tcl programmers already follow.
+## `calc=` — Toplevel Code Blocks
+
+`calc=` is designed for toplevel code outside of procedures and methods. It takes a labeled block of code, transforms any `:` and `=` expressions using `transform=`, and executes the result in the caller's scope via `uplevel`.
+
+### Syntax
+
+```tcl
+calc= label {
+    body
+} ?preserve?
+```
+
+- **label** — a name identifying this block, used in error messages and for storing the transformed code
+- **body** — Tcl code containing `:` and `=` expressions
+- **preserve** — optional, defaults to 1. When 1, original source is preserved in `if {0}` blocks and the transformed body is stored in `::Calc::calc("calc=label")` for inspection
+
+### When to use `calc=`
+
+`calc=` is best suited for:
+- Initialization code that runs once at program startup
+- Configuration blocks that set up variables
+- Any toplevel code where cleaner expression syntax is desired
+
+### When NOT to use `calc=`
+
+Do not use `calc=` inside loops:
+
+```tcl
+# WRONG - assemble re-parses TAL on every iteration
+for {set i 0} {$i < 1000} {incr i} {
+    calc= body {
+        : result = i * 2
+    }
+}
+# CORRECT - calc= wraps the entire loop, compiled once
+calc= compute {
+    for {set i 0} {$i < 1000} {incr i} {
+        : result = i * 2
+        puts $result
+    }
+}
+
+```
+
+For best performance with loop bodies use `proc=` instead:
+
+```tcl
+# CORRECT - compiled once at definition time
+proc= compute {i} {
+    : result = i * 2
+    return $result
+}
+for {set i 0} {$i < 1000} {incr i} {
+    compute $i
+}
+```
+
+### Performance
+
+With `preserve 0`, `calc=` executes bare `assemble` calls with no cache lookup overhead — comparable to the C extension for toplevel code. With `preserve 1` (default), a small `if {0}` overhead is added but original source is preserved for debugging.
+
+### Inspecting the transformed code
+
+When `preserve 1`, the transformed body is stored in `::Calc::calc("calc=label")`:
+
+```tcl
+calc= myblock {
+    : x = 5
+    : y = x * 2
+}
+puts $::Calc::calc("calc=myblock")  ;# shows transformed TAL
+```
+
+### Error reporting
+
+Errors during transformation include the label and line number:
+
+```
+Calc= error in section 'myblock' line 3: Calc: expected start of expression but found '$'
+```
+
+---
 
 ### Catching untransformed expressions
 
