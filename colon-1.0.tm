@@ -513,7 +513,10 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                     regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {load \1} tal
                 }
                 if {$preserve} {
-                    append newline "\[if \{0\} \{[string range $line {*}$match]\} \{tcl::unsupported::assemble \{$tal\}\}\]"
+                    # extract just the : expr without the surrounding []
+                    set src [string range $line {*}$match]
+                    set src [string range $src 1 end-1]  ;# strip the [ and ]
+                    append newline "\[if \{0\} \{$src\} \{tcl::unsupported::assemble \{$tal\}\}\]"
                 } else {
                     append newline "\[tcl::unsupported::assemble \{$tal\}\]"
                 }
