@@ -5,6 +5,7 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 ## What's New
 - Repackaging into separate test file, and Tcl module
 - proc= and method= to compile bytecodes directly, faster, while still just pure tcl
+- calc= for toplevel compiling
 - list is now a bytecode function instead of a mathfunc but faster
 - Array support: `= myarray(index) * 2` and multi-dimensional `matrix(i,j)`
 - Comprehensive test suite with 150+ verification tests
@@ -64,6 +65,19 @@ An optional argument (default 1) controls source preservation — when enabled, 
 The C extension complements `proc=`/`method=` rather than replacing it — `proc=`/`method=` handles code inside procedures and methods, while the C extension improves performance for expressions evaluated outside of them. Both can be used together since `proc=`/`method=` generates only assembly code and the C extension never comes into play for compiled procs or methods.
 
 Any attempt to use `$var` or `[command]` substitutions inside a `:` or `=` expression is caught at definition time with a clear error message.
+
+## Toplevel Compilation with `calc=`
+
+`calc=` transforms a block of code containing `:` and `=` expressions and executes it in the caller's scope. Use it to wrap toplevel initialization and setup code for cleaner syntax. For performance-critical loop bodies, use `proc=` instead. Using `calc=` eliminates the need for a cache since it directly replaces `:` or `=` calls with TAL code. It includes a label parameter to aid in error line number messaging since it can be used in several distinct source code sections.
+
+```tcl
+calc= setup {
+    : pi = 3.14159265358979
+    : twopi = pi * 2
+    : halfpi = pi / 2
+    puts "pi=[: pi] twopi=[: twopi]"
+}
+```
 
 ## A look Under the Hood
 
