@@ -24,7 +24,7 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 - Bytecode caching for performance
 - Assignment with `=` multiple statements with `'` or `;`  separators
 - Right associative assignment, `= a = b = (3 + 4) * 2` ;# produces 14 -> a and b
-- Can now cross lines if inside braces, no `;` needed
+- Can now cross lines if inside braces, `;` needed
 - For on line multiple statements without braces, can use `'` separator
 - Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=` or `method=`)
 - Included C extension provides up to 2x performance outside of procs and methods
