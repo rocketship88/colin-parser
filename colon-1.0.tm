@@ -455,6 +455,23 @@ proc parseTernary {} {
     append opcodes "label $end; nop; "
     return $opcodes
 }
+proc debug {label body newbody} {
+    file delete [set f1 [file normalize [file join $::env(TEMP) calc-temp-1.tcl]]]
+    file delete [set f2 [file normalize [file join $::env(TEMP) calc-temp-2.tcl]]]
+
+    set io [open $f1 w]
+    puts $io "original $label"
+    puts $io $body
+    close $io
+    set io [open $f2 w]
+    puts $io "transformed $label"
+    puts $io $newbody
+    close $io
+
+    exec "C:/Program Files (x86)/Beyond Compare 2/BC2.exe" "$f1" "$f2"
+    file delete $f1
+    file delete $f2
+}
 proc transform= {arglist body {inproc 0} {preserve 1}} {
     set result {}
     set lines [split $body \n]
@@ -536,23 +553,53 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
 
 } ;############### end namespace Calc
 
-proc calc= {label body {preserve 1}} {
+proc calc= {label body {debug 1}} {
+    if       { $debug == 1 } {
+    	set preserve 1
+    } elseif { $debug == 2 } {
+    	set preserve 2
+    } elseif { $debug == -2 } {
+    	set preserve 0
+    } else {
+    	set preserve 0
+    }
+    
     if {[catch {
         set newbody [::Calc::transform= {} $body 0 $preserve]
     } err_code]} {
         error "Calc= error in section '$label' $err_code"
     }
-    if { $preserve } {
+    if { $preserve != 0} {
         set Calc::calc("calc=$label") $newbody
     }
+    
+    if { abs($debug) > 1} {
+        Calc::debug $label $body $newbody 
+    }
+    
     uplevel 1 $newbody
 }
-proc proc= {name arglist body {preserve 1}} {
+proc proc= {name arglist body {debug 1}} {
+    if       { $debug == 1 } {
+    	set preserve 1
+    } elseif { $debug == 2 } {
+    	set preserve 2
+    } elseif { $debug == -2 } {
+    	set preserve 0
+    } else {
+    	set preserve 0
+    }
+    
     if {[catch {
         set newbody [::Calc::transform= $arglist $body 1 $preserve]
     } err_code]} {
     	error "Proc= error compiling '$name'  $err_code" 
     }
+    
+    if { abs($debug) > 1} {
+        Calc::debug $name $body $newbody 
+    }
+    
     uplevel 1 [list proc $name $arglist $newbody]
 }
 proc oo::define::method= {name arglist body {preserve 1}} {
