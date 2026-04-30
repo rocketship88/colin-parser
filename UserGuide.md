@@ -626,6 +626,9 @@ calc= myblock {
 }
 puts $::Calc::calc("calc=myblock")  ;# shows transformed TAL
 ```
+### Side by side comparison (Calc::debug)
+
+The `preserve` option in calc= and proc= can be a simple 0/1 (default 1) to keep the original source in the output. It can also be a value of -2 or 2 which will invoke Calc::debug with the before and after transformed body and exec a side by side compare tool. The tool included in the debug procedure is beyond compare version 2. This can be changed in the moudle source to any other tool, such as a diff or winmerge etc. If -2 it does not include in the output the original source (i.e. -2 -> 0, 2 -> 1).
 
 ### Error reporting
 
