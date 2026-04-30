@@ -455,16 +455,16 @@ proc parseTernary {} {
     append opcodes "label $end; nop; "
     return $opcodes
 }
-proc debug {label body newbody} {
+proc debug {label arglist body newbody} {
     file delete [set f1 [file normalize [file join $::env(TEMP) calc-temp-1.tcl]]]
     file delete [set f2 [file normalize [file join $::env(TEMP) calc-temp-2.tcl]]]
 
     set io [open $f1 w]
-    puts $io "original $label"
+    puts $io "original $label $arglist"
     puts $io $body
     close $io
     set io [open $f2 w]
-    puts $io "transformed $label"
+    puts $io "transformed $label $arglist"
     puts $io $newbody
     close $io
 
@@ -574,7 +574,7 @@ proc calc= {label body {debug 1}} {
     }
     
     if { abs($debug) > 1} {
-        Calc::debug $label $body $newbody 
+        Calc::debug $label {} $body $newbody 
     }
     
     uplevel 1 $newbody
@@ -597,7 +597,7 @@ proc proc= {name arglist body {debug 1}} {
     }
     
     if { abs($debug) > 1} {
-        Calc::debug $name $body $newbody 
+        Calc::debug $name \{$arglist\} $body $newbody 
     }
     
     uplevel 1 [list proc $name $arglist $newbody]
