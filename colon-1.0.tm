@@ -554,16 +554,8 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
 } ;############### end namespace Calc
 
 proc calc= {label body {debug 1}} {
-    if       { $debug == 1 } {
-    	set preserve 1
-    } elseif { $debug == 2 } {
-    	set preserve 2
-    } elseif { $debug == -2 } {
-    	set preserve 0
-    } else {
-    	set preserve 0
-    }
-    
+    set preserve [expr {   max($debug,0)   }]
+        
     if {[catch {
         set newbody [::Calc::transform= {} $body 0 $preserve]
     } err_code]} {
@@ -580,15 +572,7 @@ proc calc= {label body {debug 1}} {
     uplevel 1 $newbody
 }
 proc proc= {name arglist body {debug 1}} {
-    if       { $debug == 1 } {
-    	set preserve 1
-    } elseif { $debug == 2 } {
-    	set preserve 2
-    } elseif { $debug == -2 } {
-    	set preserve 0
-    } else {
-    	set preserve 0
-    }
+    set preserve [expr {   max($debug,0)   }]
     
     if {[catch {
         set newbody [::Calc::transform= $arglist $body 1 $preserve]
@@ -602,11 +586,18 @@ proc proc= {name arglist body {debug 1}} {
     
     uplevel 1 [list proc $name $arglist $newbody]
 }
-proc oo::define::method= {name arglist body {preserve 1}} {
+proc oo::define::method= {name arglist body {debug 1}} {
+    set preserve [expr {   max($debug,0)   }]
+    
     if {[catch {
         set newbody [::Calc::transform= $arglist $body 1 $preserve]
     } err_code]} {
         error "Method= error compiling '$name'  $err_code"
     }
+    
+    if { abs($debug) > 1} {
+        Calc::debug $name \{$arglist\} $body $newbody 
+    }
+    
     uplevel 1 [list method $name $arglist $newbody]
 }
