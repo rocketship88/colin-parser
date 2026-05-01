@@ -514,11 +514,11 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
             } else {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
-        } elseif {1 && [regexp {\[[=:]\s+[^\]]+\]} $line]} {
+        } elseif {1 && [regexp {\[\s*[=:]\s+[^\]]+\]} $line]} {
             # path 3: inline [= expr] or [: expr] replacement
             set newline {}
             set pos 0
-            while {[regexp -indices -start $pos {\[[=:]\s+([^\]]+)\]} $line match submatch]} {
+            while {[regexp -indices -start $pos {\[\s*[=:]\s+([^\]]+)\]} $line match submatch]} {
                 # append everything before this match unchanged
                 append newline [string range $line $pos [expr {[lindex $match 0]-1}]]
                 # extract and compile the expression
