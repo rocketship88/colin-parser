@@ -576,6 +576,7 @@ calc= label {
 - Initialization code that runs once at program startup
 - Configuration blocks that set up variables
 - Any toplevel code where cleaner expression syntax is desired
+- `NOTE` User defined mathfunc procedures must be defined prior to and outside of calc= blocks
 
 ### When NOT to use `calc=`
 
