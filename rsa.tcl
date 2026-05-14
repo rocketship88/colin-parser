@@ -325,8 +325,8 @@ proc do_keygen {} {
     set p [string trim [.pentry get]]
     set q [string trim [.qentry get]]
 
-    if {![string is integer -strict $p] || ![string is integer -strict $q]} {
-        log "ERROR: p and q must be integers. if key size > 32 must use tcl 9.x" err
+    if {[catch {expr {$p + 0}}] || [catch {expr {$q + 0}}]} {
+        log "ERROR: p and q must be integers." err
         return
     }
 
@@ -532,7 +532,7 @@ pack  .blbl -in .genf.row -side left -padx {8 4}
 
 spinbox .bentry -from 4 -to 4096 -width 5 -font {Courier 11} -justify center
 .bentry delete 0 end
-.bentry insert 0 32
+.bentry insert 0 256
 pack .bentry -in .genf.row -side left -padx {0 8}
 
 # Mousewheel bindings for bit-size spinbox
