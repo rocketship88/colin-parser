@@ -1,35 +1,3 @@
-#source {C:\Users\core5\Desktop\cstuff\colon-1.0.tm}
-#source {C:\Users\core5\Desktop\startup.tcl}
-#calc= all {
-if { 00 } {
-if { $::tcl_version >= 9 } {
-	con+
-}
-console eval {
-	set ::tk::console::maxLines 5000
-	set ::tk::console_flag 0
-	set ::tk::do_scroll 1
-	proc ::tk::console_hack {} {
-		
-		if {$::tk::console_flag && $::tk::do_scroll} {
-			.console mark set insert end
-			.console see insert
-			set ::tk::console_flag 0
-		}
-		after 500 	::tk::console_hack
-	}
-	proc ::tk::ConsoleOutput {dest string} {
-		set w .console
-		$w insert output $string $dest
-		::tk::console::ConstrainBuffer $w $::tk::console::maxLines
-		set ::tk::console_flag 1
-	}
-	after 500 	::tk::console_hack
-	
-}
-}
-
-
 ::tcl::tm::path add [file dirname [info script]]
 package require colon
 catch {console show}
@@ -751,4 +719,3 @@ pack  .sdlbl -in .stdecf.res -side left
 text .sdresult -width 24 -height 2 -font {Courier 11 bold} \
      -relief sunken -bd 2 -state normal
 pack .sdresult -in .stdecf.res -side left -padx 8 -pady 4
-#} 
