@@ -153,17 +153,6 @@ proc= detect_entropy_source {} {
     expr {srand([clock milliseconds] ^ [clock microseconds])}
     return rand_fallback
 }
-#------------------------------------
-source "D:/stuff/vw debugging.tcl"
-set ::___zz___(sel)	 smart
-cooltip::tooltip off
-set ::___zz___(lbp-tips) 0
-
-#interp alias {} v {} vw+ ;# shorthands 
-#interp alias {} g {} go+
-#interp alias {} u {} util+
-#interp alias {} i {} instrument+
-#------------------------------------
 
 #set ::entropy_source rand_fallback 
 set ::entropy_source  [detect_entropy_source]
