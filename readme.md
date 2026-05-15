@@ -34,7 +34,7 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 - Tcl 8.6 or 9.x
 - tcllib (for fibonacci tests with math::fibonacci)
   
-## Run with test file
+## Run with test files
 
 ```tcl
 tclsh colon_test.tcl
@@ -43,9 +43,11 @@ wish  colon_test.tcl
 Also:
 cd <to location of extracted files>   
 tclsh calc.test
+
+wish rsa.tcl
 ```
 
-The file will run all tests automatically and display results. This requires both `colon_test.tcl` and `colon-1.0.tm` be in the same directory.
+The file will run all tests automatically and display results. This requires both `colon_test.tcl` and `colon-1.0.tm` be in the same directory. Likewise, rsa.tcl should also be in the same directory with the module file. Unzipping all to a single directory and cd'ing to that directory is recomended. 
 
 ## Use as a library
 
