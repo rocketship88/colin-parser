@@ -85,23 +85,40 @@ proc compile0 {exp {inproc 0}} {
     return $bytecode
 }
 #instrument+  Calc::compile0  
-proc tokenise input {
-    set op_re  {\*\*|%|/|\*|-|\+|>>|<<|>=|<=|>|<|!=|==|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}
-    #                                                  ^ added = here (after ==)
+proc tokenise {input} {  
+    set op_re  {\*\*|%|/|\*|-|\+|>>|<<|>=|<=|>|<|!=|==|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}  
+    #                                                  ^ added = here (after ==)  
     # ... rest stayed the same
+  
+    set pos 0  
+    set output {}  
+    foreach ind [regexp -indices -all -inline -- $op_re $input] {  
+        lassign $ind start end  
+        set prev [string trim [string range $input $pos $start-1]]  
+        if {$prev ne {}} {lappend output $prev}  
+        lappend output [string range $input $start $end]  
+        set pos [expr {$end + 1}]  
+    }  
+    set rest [string trim [string range $input $pos end]]  
+    if {$rest ne {}} {lappend output $rest}  
 
-    set pos 0
-    set output {}
-    foreach ind [regexp -indices -all -inline -- $op_re $input] {
-        lassign $ind start end
-        set prev [string trim [string range $input $pos $start-1]]
-        if {$prev ne {}} {lappend output $prev}
-        lappend output [string range $input $start $end]
-        set pos [expr {$end + 1}]
+    # merge scientific notation tokens: e.g. 3.0e - 33 -> 3.0e-33
+    set merged {}
+    set j 0
+    while {$j < [llength $output]} {
+        set tok [lindex $output $j]
+        if {[regexp {^[0-9]*\.?[0-9]+[eE]$} $tok] && 
+            $j+2 < [llength $output] &&
+            [lindex $output [expr {$j+1}]] in {- +} &&
+            [string is digit [lindex $output [expr {$j+2}]]]} {
+            lappend merged "$tok[lindex $output [expr {$j+1}]][lindex $output [expr {$j+2}]]"
+            incr j 3
+        } else {
+            lappend merged $tok
+            incr j
+        }
     }
-    set rest [string trim [string range $input $pos end]]
-    if {$rest ne {}} {lappend output $rest}
-    return $output
+    return $merged
 }
 
 proc compile toks {
