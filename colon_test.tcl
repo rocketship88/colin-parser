@@ -33,7 +33,22 @@ proc verify {description expr_result calc_result} {
         incr failures
     }
 }
-
+# For scientific notation, normalize both through expr before comparing
+proc verifyFloat {desc a b} {
+    global tests failures
+    incr tests
+    set na [expr {double($a)}]
+    set nb [expr {double($b)}]
+    if {$na == $nb} {
+        puts "$tests) description= |$desc| expr_result= |$a| calc_result= |$b| "
+    } else {
+        puts "$tests) description= |$desc| expr_result= |$a| calc_result= |$b| "
+        puts "FAILED: $desc"
+        puts "  expr returned: $a"
+        puts "  = returned: $b"
+        incr failures
+    }
+}
 puts "\n1 ========== Basic Arithmetic =========="
 verify "1 + 2" [expr {1 + 2}] [= 1 + 2]
 
@@ -701,6 +716,46 @@ if {$::tcl_version >= 9.0} {
 
 
 
+puts "185 ========== Scientific Notation =========="
+
+# Basic scientific notation without sign - works without merge
+verifyFloat "10e5"          [expr {10e5}]          [= 10e5]
+verifyFloat "1.5e3"         [expr {1.5e3}]         [= 1.5e3]
+verifyFloat "2E4"           [expr {2E4}]           [= 2E4]
+
+# Scientific notation with negative exponent - requires merge
+verifyFloat "3.0e-33"       [expr {3.0e-33}]       [= 3.0e-33]
+verifyFloat "1.5e-10"       [expr {1.5e-10}]       [= 1.5e-10]
+verifyFloat "2.0E-5"        [expr {2.0E-5}]        [= 2.0E-5]
+
+# Scientific notation with positive exponent - requires merge
+verifyFloat "3.0e+33"       [expr {3.0e+33}]       [= 3.0e+33]
+verifyFloat "1.5e+10"       [expr {1.5e+10}]       [= 1.5e+10]
+
+# Scientific notation in expressions
+verifyFloat "1.0e-3 + 2.0e-3" [expr {1.0e-3 + 2.0e-3}] [= 1.0e-3 + 2.0e-3]
+verifyFloat "1.5e2 * 2.0e-1"  [expr {1.5e2 * 2.0e-1}]  [= 1.5e2 * 2.0e-1]
+
+# Variables ending in e should not trigger false merge
+set angle 45
+set force 100
+verifyFloat "angle + force" [expr {$angle + $force}] [= angle + force]
+
+puts "196 ========== Scientific Notation Errors =========="
+
+# These should produce errors
+foreach {desc expr} {
+    "invalid: bare e"           "e33"
+    "invalid: e without digits" "3.0e"
+    "invalid: double e"         "3.0e-3e2"
+} {
+    if {[catch {= $expr} err]} {
+        puts "  expected error for $desc: ok"
+    } else {
+        puts "  UNEXPECTED SUCCESS for $desc"
+        incr failures
+    }
+}
 
 
 
