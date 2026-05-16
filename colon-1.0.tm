@@ -91,16 +91,25 @@ proc tokenise {input} {
     # ... rest stayed the same
   
     set pos 0  
-    set output {}  
+    set output {}
+    set needsMerge 0
     foreach ind [regexp -indices -all -inline -- $op_re $input] {  
         lassign $ind start end  
         set prev [string trim [string range $input $pos $start-1]]  
-        if {$prev ne {}} {lappend output $prev}  
+        if {$prev ne {}} {
+            lappend output $prev
+            set last [string index $prev end]
+            if {($last eq "e" || $last eq "E") && [string is double -strict "${prev}0"]} {
+                set needsMerge 1
+            }
+        }
         lappend output [string range $input $start $end]  
         set pos [expr {$end + 1}]  
     }  
     set rest [string trim [string range $input $pos end]]  
-    if {$rest ne {}} {lappend output $rest}  
+    if {$rest ne {}} {lappend output $rest}
+
+    if {!$needsMerge} {return $output}
 
     # merge scientific notation tokens: e.g. 3.0e - 33 -> 3.0e-33
     set merged {}
