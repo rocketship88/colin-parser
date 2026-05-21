@@ -181,6 +181,7 @@ package require Tk
     roundRect .c 100 50 500 250 $rad -fill white -outline black -tags rect
  }
 doit
+
 ```
 ## Example method= with TCLOO methods:
 ```
