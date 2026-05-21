@@ -143,7 +143,7 @@ This demonstrates that `proc=` eliminates all expression evaluation overhead —
 ```tcl
 ::tcl::tm::path add [file dirname [info script]] ;# test file and module file in same directory
 package require colon
-
+package require Tk
 # Derived from a tclcore email by Florent Merlet
  proc= roundRect { w x0 y0 x3 y3 radius args } {
     set r      [winfo pixels $w $radius]
@@ -180,7 +180,7 @@ package require colon
     .c delete rect
     roundRect .c 100 50 500 250 $rad -fill white -outline black -tags rect
  }
-
+doit
 ```
 ## Example method= with TCLOO methods:
 ```
