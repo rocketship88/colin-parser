@@ -149,11 +149,11 @@ package require Tk
     set r      [winfo pixels $w $radius]
     :   d    = 2*r
     :   maxr = 0.75
-    if  {[: d > maxr * ( x3 - x0 )]} {
-          : d = maxr * ( x3 - x0 )
+    if  {[: d > (d0 = maxr * ( x3 - x0 )) ]} { ;# save sub-expr into d0
+          : d = d0
     }
-    if  {[: d > maxr * ( y3 - y0 )]}  {
-          : d = maxr * ( y3 - y0 )
+    if  {[: d > (d0 = maxr * ( y3 - y0 )) ]} {
+          : d = d0
     }    
     : { x1 = x0 + d;
         x2 = x3 - d;
