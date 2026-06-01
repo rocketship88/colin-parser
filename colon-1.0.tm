@@ -130,6 +130,7 @@ proc tokenise {input} {
     return $merged
 }
 
+
 proc compile toks {
     variable depth
     variable tokens
@@ -504,7 +505,8 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
     set i 0
     while {$i < [llength $lines]} {
         set line [lindex $lines $i]
-        if {[regexp {^\s*[=:]\s+\{} $line]} {
+        if {[regexp {^(\s*)[=:]\s+\{} $line -> indent]} {
+            append result $indent
             # path 1: = or : followed by {...} possibly multiline
             set accum $line
             while {![info complete $accum]} {
@@ -526,8 +528,9 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
             } else {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
-        } elseif {1 && [regexp {^\s*[=:]\s+(\S[^\n]*)} $line -> expr]} {
+        } elseif { [regexp {^(\s*)[=:]\s+(\S[^\n]*)} $line -> indent expr]} {
             # path 2: = or : expr  single line unbraced
+            append result $indent
             regsub {\s*;#[^\n]*$} $expr {} expr
             if {[catch {set tal [::Calc::compile0 $expr $inproc]} err_code]} {
                 error "line [expr {   $i +1  }]: $err_code"
@@ -540,7 +543,7 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
             } else {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
-        } elseif {1 && [regexp {\[\s*[=:]\s+[^\]]+\]} $line]} {
+        } elseif { [regexp {\[\s*[=:]\s+[^\]]+\]} $line]} {
             # path 3: inline [= expr] or [: expr] replacement
             set newline {}
             set pos 0
