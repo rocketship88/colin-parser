@@ -669,25 +669,6 @@ The preprocessor hits the sweet spot — trivial complexity, no core changes, ex
 ---
 
 
-
-### Namespace variables in `proc=`
-
-When using `proc=` inside a `namespace eval` block, namespace variables must be referenced with their fully qualified name:
-
-```tcl
-namespace eval myns {
-    variable x 100
-    
-    proc= myProc {n} {
-        : ::myns::x + n    ;# correct - fully qualified
-    }
-}
-```
-
-Using the unqualified name `x` would cause the peephole optimiser to generate a `load x` instruction which expects a local LVT slot — resulting in a "can't read x: no such variable" error. The fully qualified `::myns::x` correctly bypasses the peephole and uses the runtime namespace lookup path.
-
-For variables declared with `variable` inside the proc body, the same rule applies — use fully qualified names in expressions. For complex TCLOO scenarios involving mixins or namespace variables not declared with `variable`, use fully qualified names (`::ns::var`) in expressions — or if in doubt, use `expr` which handles all scoping cases correctly.
-
 ## Complete Examples
 
 ### Example 1: Quadratic Formula
