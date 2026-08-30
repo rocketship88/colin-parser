@@ -116,7 +116,9 @@ Calc expressions do not support `$var` or `[command]` substitutions. When using 
 
 **Outside of `proc=`/`method=`**, the `:` and `=` commands use a cache to avoid recompiling the same expression repeatedly. This is suitable for interactive use, scripts, and toplevel code, but is up to 20x slower than the compiled form since the assembler must parse the TAL text on every call.
 
-**Using `:` or `=` inside a regular `proc` or `method` without `proc=`/`method=`** gives no performance benefit over toplevel use — the assembler still runs on every call.
+Also available is the `calc=` preprocessor that, like `proc=` and `method=` will substitute expressions using the `:` and `=` commands. The cache is not used there. It is within 95% the efficiency of procedure code, lacking only in local scalar variables, which the bytecode system handles with added efficiency. It can also be used across and outside of normal proc's but again, will not optimize quite as efficiently as when using `proc=` and `method=`. However, for convenience, it can be used once across many proc's and toplevel code.
+
+**Using `:` or `=` inside a regular `proc` or `method` without `proc=`/`method=`** gives no performance benefit over toplevel use — the assembler still runs on every call. However, as noted above, using `calc=` outside of these two will provide near optimal performance.
 
 **Bracing** matters in two places:
 
