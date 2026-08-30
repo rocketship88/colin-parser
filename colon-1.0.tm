@@ -335,6 +335,13 @@ proc parsePrefix token {
                 return $opcodes
             }
             
+            # Check if it's a general command or proc THIRD
+            set fun [namespace which $name]
+            if {$fun ne {}} {
+                set opcodes "push $fun; "
+                append opcodes [parseFuncArgs $name ""]
+                return $opcodes
+            }
             # It's an array reference
             set opcodes "push $name; "
             
