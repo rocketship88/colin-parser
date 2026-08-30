@@ -333,6 +333,10 @@ set qy 24
 : distance(px, py, qx, qy)
 # Returns: 5.0
 ```
+**Note: functions in the global or other namespaces**
+
+Functions are checked first in the tcl::math:: namespace and if not found there will be searched for in the global or other namespaces as well. The difference is that these will not be available to `expr` but will be available to calc.
+
 
 **Standard math functions available:**
 - `abs()` `ceil()` `floor()` `round()` `int()`
@@ -508,9 +512,9 @@ This is a **feature**, not a bug - it helps you identify performance problems ea
 
 `Note:` When using `proc=` or `method=` the cache is not used in those procedures or methods. 
 
-## proc= and method= Compilation Limitations
+## proc= method= calc= Compilation Limitations
 
-`proc=` and `method=` use a simple line-oriented preprocessor rather than a full Tcl parser. This is a deliberate tradeoff — a true full parser would need to be character-by-character rather than line-by-line, would be as complex as Tcl's own parser, and would likely need to be written in C for adequate performance. That would make it a C extension rather than a pure Tcl module — possible, but a very different proposition requiring its own maintenance burden. The lightweight pure Tcl approach handles the vast majority of real-world code patterns correctly.
+`proc=`, `method=` and `calc=`,use a simple line-oriented preprocessor rather than a full Tcl parser. This is a deliberate tradeoff — a true full parser would need to be character-by-character rather than line-by-line, would be as complex as Tcl's own parser, and would likely need to be written in C for adequate performance. That would make it a C extension rather than a pure Tcl module — possible, but a very different proposition requiring its own maintenance burden. The lightweight pure Tcl approach handles the vast majority of real-world code patterns correctly.
 
 ### How the preprocessor works
 
