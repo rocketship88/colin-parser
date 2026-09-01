@@ -520,7 +520,7 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                 incr i
                 append accum \n [lindex $lines $i]
             }
-            # extract expression - strip leading = or : and outer { }
+            # extract expression - strip leading = or : and outer braces
             regexp {[=:]\s+(\{.*\})} $accum -> braced
             set expr [string range $braced 1 end-1]
             regsub {\s*;#[^\n]*$} $expr {} expr
@@ -550,6 +550,52 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
             } else {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
+
+        } elseif {[regexp -indices {\[[=:]\s+\{} $line match]} {
+            # path 3a: inline [: { ... }] possibly multiline
+            # find what comes before the opening bracket
+            set bracketStart [lindex $match 0]
+            set prefix [string range $line 0 [expr {$bracketStart - 1}]]
+
+            # accumulate from the opening bracket onwards until info complete
+            set accum [string range $line $bracketStart end]
+            while {![info complete $accum]} {
+                incr i
+                append accum \n [lindex $lines $i]
+            }
+
+            # extract the expression - strip leading [: and outer braces
+            regexp {\[[=:]\s+(\{.*\})} $accum -> braced
+            set expr [string range $braced 1 end-1]
+            regsub {\s*;#[^\n]*$} $expr {} expr
+            if {[catch {set tal [::Calc::compile0 $expr $inproc]} err_code]} {
+                error "line [expr {$i+1}]: $err_code"
+            }
+            if {$inproc} {
+                regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {load \1} tal
+            }
+
+            # find suffix after the closing bracket
+            # case 1: closing bracket on same line, possibly with whitespace between
+            if {[regexp {\}\s*(\].*)} $accum -> suffix]} {
+                # closing bracket found after closing brace in accumulated text
+            } else {
+                # closing bracket may be on next line or after blank lines
+                set suffix ""
+                while {$suffix eq "" && $i < [llength $lines]} {
+                    incr i
+                    set suffix [string trimleft [lindex $lines $i]]
+                }
+            }
+            # strip the leading ] from suffix
+            set suffix [string range $suffix 1 end]
+
+            if {$preserve} {
+                append result "$prefix\[if \{0\} \{$accum\} \{tcl::unsupported::assemble \{$tal\}\}\]$suffix\n"
+            } else {
+                append result "$prefix\[tcl::unsupported::assemble \{$tal\}\]$suffix\n"
+            }
+
         } elseif { [regexp {\[\s*[=:]\s+[^\]]+\]} $line]} {
             # path 3: inline [= expr] or [: expr] replacement
             set newline {}
