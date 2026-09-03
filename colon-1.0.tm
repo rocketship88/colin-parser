@@ -42,7 +42,7 @@ proc compile0 {exp {inproc 0}} {
     # we can also support ;# since many will be used to that. In addition, the below code works with multiple ;
     regsub -all  {#[^\n]*}  $exp {} exp
 #    set exp [string map {"'" ";" "\n" ";"} $exp] ;# this will make \n a statement separator, not using this now
-    set exp [string map {"'" ";" "\n" " "} $exp]
+    set exp [string map {"'" ";" "\n" " " "\$" ""} $exp]
     # Fast path: no semicolons
 #            return [compile [tokenise $exp]]
 
@@ -536,8 +536,8 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                 append result "tcl::unsupported::assemble \{$tal\}\n"
             }
         } elseif { [regexp {^(\s*)[=:]\s+(\S[^\n]*)} $line -> indent expr]} {
-            # path 2: = or : expr  single line unbraced
             append result $indent
+            # path 2: = or : expr  single line unbraced
             regsub {\s*;#[^\n]*$} $expr {} expr
             if {[catch {set tal [::Calc::compile0 $expr $inproc]} err_code]} {
                 error "line [expr {   $i +1  }]: $err_code"
