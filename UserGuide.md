@@ -109,7 +109,7 @@ Calc does **not** use Tcl's variable substitution. Instead, variables are loaded
 - Faster execution (no string substitution overhead)
 - Cleaner syntax
 
-Calc will now,  in the latest update,  ignore all $ characters in a script. This means if one uses $var it will be changed to the bare variable var before it is processed. However, []'s in use will still throw an error if used inside braces, which includes the 3 proc=/method=/calc= preprocessors.
+Calc will now,  in the latest update,  ignore all `$` characters in a script. This means if one uses `$var` it will be changed to the bare variable `var` before it is processed. However, `[]`'s in use will still throw an error if used inside braces, which includes the 3 proc=/method=/calc= preprocessors.
   
 ### Performance Notes
 
