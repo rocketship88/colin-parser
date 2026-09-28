@@ -632,6 +632,187 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
     }
     return $result
 }
+# Calc::transformProcs --
+#
+#   Retrofits one or more already-defined procs to use compiled (inlined)
+#   assemble calls instead of runtime :calc dispatch, without needing
+#   proc= at definition time. This is the "second route to the same
+#   destination" described in chapter 6: reconstruct an existing proc's
+#   arglist and body, run the body through ::Calc::transform= with
+#   inproc 1 (the LVT-optimized form), and redefine the proc in place.
+#
+# Usage:
+#   Calc::transformProcs ?-preserve value? ?-regex? ?-listonly? pattern ?pattern ...?
+#
+#   -listonly         dry run: resolve the pattern(s) to matching proc names
+#                      and return that list, but don't transform or redefine
+#                      anything. -preserve's value is still irrelevant in
+#                      this mode since transform= is never called.
+#   -preserve value   the same dual-purpose "debug" value proc=/method=/
+#                      calc= take as their trailing $debug argument
+#                      (default 1, matching their own default):
+#                        - the value actually passed to transform= as its
+#                          $preserve argument is max(value,0), exactly as
+#                          proc= computes it.
+#                        - if abs(value) > 1, Calc::debug is called for
+#                          every matched proc, exactly as proc= calls it:
+#                              Calc::debug $name \{$arglist\} $body $newbody
+#                      A caller who only wants transform='s $preserve
+#                      knob (never the debug dump) should stick to 0 or 1.
+#   -regex            match each pattern as a regular expression instead of
+#                      a glob pattern.
+#
+# Matching semantics:
+#   Each pattern is matched against proc names exactly as Tcl's own
+#   `info procs` matches them: a namespace-qualified pattern (contains ::)
+#   only matches procs directly in that namespace -- it does NOT recurse
+#   into child namespaces, because that's what `info procs` itself does
+#   (verified empirically: `info procs ::foo::*` does not return
+#   ::foo::bar::b even though ::foo::bar is a child of ::foo). A pattern
+#   with no namespace qualifier is treated as global (an implicit leading
+#   :: is added) so that calling Calc::transformProcs from inside ::Calc
+#   does not accidentally resolve bare patterns relative to ::Calc instead
+#   of relative to the global namespace -- "with or without a namespace"
+#   in the spec means the *pattern itself* names or doesn't name a
+#   namespace, not that matching is relative to some ambient context.
+#
+#   In -regex mode there is no `info procs`-level primitive to delegate
+#   to, so the candidate set is built by walking all namespaces
+#   recursively from ::, collecting every proc's fully-qualified name.
+#   A pattern containing :: is matched against the fully-qualified name;
+#   a pattern without :: is matched against just the tail (the part after
+#   the last ::), so plain names still behave the way a per-namespace
+#   glob would.
+#
+# Each matched proc is transformed and redefined in place; procs that are
+# not real procs (imported commands, etc.) are silently skipped since
+# `info procs` and the namespace walk below only ever collect real procs
+# in the first place.
+
+
+
+proc AllProcsRecursive {} {
+    set out {}
+    set pending [list ::]
+    while {[llength $pending]} {
+        set ns [lindex $pending 0]
+        set pending [lrange $pending 1 end]
+        lappend out {*}[info procs ${ns}::*]
+        # avoid double :: at global namespace
+        if {$ns eq "::"} {
+            lappend out {*}[info procs ::*]
+        }
+        foreach child [namespace children $ns] {
+            lappend pending $child
+        }
+    }
+    lsort -unique $out
+}
+
+proc transformProcs {args} {
+    set debug 1
+    set useRegex 0
+    set listOnly 0
+
+    # ---- parse the optional leading flags ----
+    while {[llength $args]} {
+        set a [lindex $args 0]
+        switch -- $a {
+            -preserve {
+                if {[llength $args] < 2} {
+                    error "Calc::transformProcs: -preserve requires a value"
+                }
+                set debug [lindex $args 1]
+                set args [lrange $args 2 end]
+            }
+            -regex {
+                set useRegex 1
+                set args [lrange $args 1 end]
+            }
+            -listonly {
+                set listOnly 1
+                set args [lrange $args 1 end]
+            }
+            default {
+                break
+            }
+        }
+    }
+    set patterns $args
+    if {![llength $patterns]} {
+        error "Calc::transformProcs: no proc name pattern(s) given"
+    }
+
+    # -preserve's value is treated exactly like proc='s $debug argument.
+    set preserve [expr {max($debug,0)}]
+
+    # ---- resolve patterns to a concrete, de-duplicated list of ----
+    # ---- fully-qualified proc names                              ----
+    set matched {}
+
+    if {!$useRegex} {
+        foreach pat $patterns {
+            if {![string match "::*" $pat]} {
+                set pat "::$pat"
+            }
+            foreach p [info procs $pat] {
+                if {![string match "::*" $p]} {
+                    set p "::$p"
+                }
+                lappend matched $p
+            }
+        }
+    } else {
+        set candidates [::Calc::AllProcsRecursive]
+        foreach pat $patterns {
+            set hasNs [string match "*::*" $pat]
+            foreach p $candidates {
+                if {$hasNs} {
+                    set subject $p
+                } else {
+                    set subject [namespace tail $p]
+                }
+                if {[regexp -- $pat $subject]} {
+                    lappend matched $p
+                }
+            }
+        }
+    }
+    set matched [lsort -unique $matched]
+
+    if {$listOnly} {
+        return $matched
+    }
+
+    # ---- reconstruct, transform, and redefine each matched proc ----
+    set touched {}
+    foreach procName $matched {
+        set arglist {}
+        foreach argName [info args $procName] {
+            if {[info default $procName $argName defaultVal]} {
+                lappend arglist [list $argName $defaultVal]
+            } else {
+                lappend arglist $argName
+            }
+        }
+        set body [info body $procName]
+
+        if {[catch {
+            set newbody [::Calc::transform= $arglist $body 1 $preserve]
+        } err_code]} {
+            error "Calc::transformProcs error compiling '$procName'  $err_code"
+        }
+
+        if {abs($debug) > 1} {
+            Calc::debug $procName \{$arglist\} $body $newbody
+        }
+
+        proc $procName $arglist $newbody
+        lappend touched $procName
+    }
+
+    return $touched
+}
 
 } ;############### end namespace Calc
 
