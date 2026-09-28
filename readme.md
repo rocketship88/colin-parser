@@ -67,7 +67,7 @@ An optional argument (default 1) controls source preservation — when enabled, 
 
 The C extension complements `proc=`/`method=` rather than replacing it — `proc=`/`method=` handles code inside procedures and methods, while the C extension improves performance for expressions evaluated outside of them. Both can be used together since `proc=`/`method=` generates only assembly code and the C extension never comes into play for compiled procs or methods.
 
-Any attempt to use `[command]` substitutions inside a `:` or `=` expression is caught at definition time with a clear error message. And $var is mapped to a bare var for compatibility. ${...} still an error. Only use standard variable names.
+Any attempt to use `[command]` substitutions inside a `:` or `=` expression is caught at definition time with a clear error message. And `$var` is mapped to a bare var for compatibility. `${...}` is still an error. Only use standard variable names.
 
 ## Toplevel Compilation with `calc=`
 
