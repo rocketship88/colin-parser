@@ -12,6 +12,12 @@ Calc includes two procedures, `proc=` and `method=` which can produce optimal TA
 
 When these alternate procedures are used, TAL is created once and converted to binary format. This also can detect the usage of `$var` or `[command]` substitutions that should not be used with Calc.
 
+In addition to explicit  `proc=` calls, the procedure Calc::transformProcs is now supported which can transform existing procedures, using introspection commands, to optimal TAL code. The usage is,
+
+    Calc::transformProcs ?-preserve value? ?-regex? ?-listonly? pattern ?pattern ...?
+
+where patterns can include wildcards for names and/or namespaces using glob or regex pattern matching. See the comments in the module code for more details.
+
 ## Basic Usage
 
 ```tcl
