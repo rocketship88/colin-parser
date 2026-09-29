@@ -4,7 +4,7 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 
 ## What's New
 - Repackaging into separate test file, and Tcl module
-- add Calc::transformProc to compile multiple procs from existing procs
+- add Calc::transformProcs to compile multiple procs from existing procs
 - proc= and method= to compile bytecodes directly, faster, while still just pure tcl
 - calc= for toplevel compiling
 - list is now a bytecode function instead of a mathfunc but faster
