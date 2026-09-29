@@ -35,6 +35,8 @@ namespace eval Calc {
 # comments can be #... or ;# it doesn't matter
 # empty lines are also allowed
 proc compile0 {exp {inproc 0}} {
+    variable tokens
+    variable tokpos
     if { [array size ::Calc::cache] > 1000 } {
         error "Calc: Cache exhausted with expression: $exp" ;# this is a programmer error, is using $sub in a Calc expression
     }
@@ -46,17 +48,19 @@ proc compile0 {exp {inproc 0}} {
     # Fast path: no semicolons
 #            return [compile [tokenise $exp]]
 
-
     if {[string first ";" $exp] == -1} {
         set stmtcode [compile [tokenise $exp]]
+        if {$tokpos < [llength $tokens]} {
+            error "Calc: unexpected token '[lindex $tokens $tokpos]' in expression '$exp'"
+        }
         if {$inproc} {
             if {[regexp {^push ([[:alpha:]_][^:;\s]*); (.*); storeStk; $} $stmtcode -> name expr]} {
                 set stmtcode "$expr; store $name; "
-            }        
+            }
         }
         return $stmtcode
     }
-   
+
     # Has semicolons - split and compile each
     set statements [split $exp ";"]
     set bytecode ""
@@ -64,24 +68,30 @@ proc compile0 {exp {inproc 0}} {
     foreach stmt $statements {
         set stmt [string trim $stmt]
         if {$stmt eq ""} continue
-        
+
         if {$count > 0} {
             append bytecode "pop; "
         }
         if { $inproc } {
         	set stmtcode [compile [tokenise $stmt]]
+            if {$tokpos < [llength $tokens]} {
+                error "Calc: unexpected token '[lindex $tokens $tokpos]' in statement '$stmt'"
+            }
         	# peephole: push name; <expr>; storeStk; -> <expr>; store name;
             if {[regexp {^push ([[:alpha:]_][^:;\s]*); (.*); storeStk; $} $stmtcode -> name expr]} {
                 set stmtcode "$expr; store $name; "
-            }        
+            }
         	append bytecode $stmtcode
         } else {
         	append bytecode [compile [tokenise $stmt]]
+            if {$tokpos < [llength $tokens]} {
+                error "Calc: unexpected token '[lindex $tokens $tokpos]' in statement '$stmt'"
+            }
         }
-        
+
         incr count
     }
-    
+
     return $bytecode
 }
 #instrument+  Calc::compile0  
