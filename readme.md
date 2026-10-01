@@ -81,6 +81,9 @@ calc= setup {
     puts "pi=[: pi] twopi=[: twopi]"
 }
 ```
+## Using Calc::transformProcs to re-compile existing procs
+
+Similar to `proc=` one can choose instead to define procs normally, and then later re-compile them. The Calc::transformProcs procedure can compile a list of procs and/or proc patterns, including namespace patterns. The patterns can be glob or regex. There is also a `-testonly` option to check what procs the wildcard patterns produce.
 
 ## A look Under the Hood
 
