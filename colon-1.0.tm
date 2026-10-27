@@ -254,7 +254,15 @@ proc parse min_prec {
             continue
     }
         # Infix operator
-        append opcodes [parse $tok_prec] "$incode($token); "
+        set code $incode($token)
+        if {$token eq "||" || $token eq "&&"} {
+            # these templates contain labels; make them unique per use,
+            # as parseTernary does, so several can appear in one assemble
+            set n [incr ::labelcount]
+            set code [string map [list pop_A pop_A$n true_res true_res$n \
+                false_res false_res$n end_res end_res$n] $code]
+        }
+        append opcodes [parse $tok_prec] "$code; "
     }
     #deb2 "[string repeat {  } $dep]PARSE opcodes='$opcodes'"
     set depth [expr {$dep - 1}]

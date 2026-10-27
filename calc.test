@@ -1609,6 +1609,54 @@ test calc-40.32 {compile path catches non-compilable} -constraints hasCalcCmd -b
 }
 
 # ============================================================================
+# SEVERAL && / || IN ONE COMPILED BODY (labels must be unique per use)
+# ============================================================================
+
+test calc-41.1 {three || in one expression, proc=} -constraints {hasCalcCmd hasLogicalOps} -body {
+    proc= t41_1 {a b c} {= (a < 0) || (b < 0) || (c < 0)}
+    list [t41_1 1 1 1] [t41_1 1 -1 1] [t41_1 1 1 -1] [t41_1 -1 1 1]
+} -result {0 1 1 1} -cleanup {
+    rename t41_1 {}
+}
+
+test calc-41.2 {|| in two statements of one body} -constraints {hasCalcCmd hasLogicalOps} -body {
+    proc= t41_2 {a b c} {
+        = { x = (a < 0) || (b < 0); y = (b < 0) || (c < 0); x*2 + y }
+    }
+    list [t41_2 1 1 1] [t41_2 -1 1 1] [t41_2 1 -1 1] [t41_2 1 1 -1]
+} -result {0 2 3 1} -cleanup {
+    rename t41_2 {}
+}
+
+test calc-41.3 {|| mixed with &&, matches expr} -constraints {hasCalcCmd hasLogicalOps} -body {
+    proc= t41_3c {a b c} {= !(((a<0)||(b<0)||(c<0)) && ((a>0)||(b>0)||(c>0)))}
+    proc t41_3e {a b c} {expr {!((($a<0)||($b<0)||($c<0)) && (($a>0)||($b>0)||($c>0)))}}
+    set bad {}
+    foreach a {-2 0 3} {foreach b {-1 0 5} {foreach c {-4 0 7} {
+        if {[t41_3c $a $b $c] != [t41_3e $a $b $c]} {lappend bad [list $a $b $c]}
+    }}}
+    set bad
+} -result {} -cleanup {
+    rename t41_3c {}
+    rename t41_3e {}
+}
+
+test calc-41.4 {&& and || in ternary branches} -constraints {hasCalcCmd hasLogicalOps hasTernary} -body {
+    proc= t41_4 {a b c} {= a > 0 ? (b > 0 && c > 0 ? 1 : 2) : (b < 0 || c < 0 ? 3 : 4)}
+    list [t41_4 1 1 1] [t41_4 1 1 -1] [t41_4 -1 -1 1] [t41_4 -1 1 1]
+} -result {1 2 3 4} -cleanup {
+    rename t41_4 {}
+}
+
+test calc-41.5 {two && operators, Calc::transformProcs} -constraints {hasCalcCmd hasLogicalOps} -body {
+    proc t41_5 {a b c} {= (a > 0) && (b > 0) && (c > 0)}
+    Calc::transformProcs t41_5
+    list [t41_5 1 1 1] [t41_5 1 1 0] [t41_5 0 1 1]
+} -result {1 0 0} -cleanup {
+    rename t41_5 {}
+}
+
+# ============================================================================
 # CLEANUP
 # ============================================================================
 
