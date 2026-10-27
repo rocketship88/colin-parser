@@ -37,6 +37,8 @@ namespace eval Calc {
 proc compile0 {exp {inproc 0}} {
     variable tokens
     variable tokpos
+    variable inprocFlag
+    set inprocFlag $inproc    ;# the tuple code uses real local slots (store) inside a proc
     if { [array size ::Calc::cache] > 1000 } {
         error "Calc: Cache exhausted with expression: $exp" ;# this is a programmer error, is using $sub in a Calc expression
     }
@@ -96,7 +98,7 @@ proc compile0 {exp {inproc 0}} {
 }
 #instrument+  Calc::compile0  
 proc tokenise {input} {  
-    set op_re  {\*\*|%|/|\*|-|\+|>>|<<|>=|<=|>|<|!=|==|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}  
+    set op_re  {\*\*|%|/|\*|->|-|\+|>>|<<|>=|<=|>|<|!=|==|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}  
     #                                                  ^ added = here (after ==)  
     # ... rest stayed the same
   
@@ -161,6 +163,7 @@ foreach {op prec code} {
     )  0 -
     ,  0 -
     =  0 -
+    -> 0.5 -
     ?  1 -
     :  1 -
     || 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}
@@ -252,7 +255,12 @@ proc parse min_prec {
         if {$token eq "?"} {
             append opcodes [parseTernary]
             continue
-    }
+        }
+        if {$token eq "->"} {
+            # value -> pattern : the pattern is a name or a (nested) tuple of names
+            append opcodes [destructure [parsePattern]]
+            continue
+        }
         # Infix operator
         set code $incode($token)
         if {$token eq "||" || $token eq "&&"} {
@@ -308,10 +316,30 @@ proc parsePrefix token {
     
     # Parenthesised subexpression?
     if {$token eq "("} {
+        # find the matching ")" ; if "=" follows it this is a tuple pattern, (a,b,c) = expr
+        set d 1
+        for {set j $tokpos} {$j < [llength $tokens]} {incr j} {
+            set tj [lindex $tokens $j]
+            if {$tj eq "("} { incr d } elseif {$tj eq ")"} { if {[incr d -1] == 0} break }
+        }
+        if {$j < [llength $tokens] && [lindex $tokens $j+1] eq "="} {
+            incr tokpos -1                      ;# back onto the "(" for parsePattern
+            set pat [parsePattern]
+            incr tokpos                         ;# skip the =
+            return "[parse 0][destructure $pat]"
+        }
         set opcodes [parse 0]
         set token [lindex $tokens $tokpos]
+        set n 1
+        while {$token eq ","} {                 ;# (e1, e2, ...) is a list
+            incr tokpos
+            append opcodes [parse 0]
+            incr n
+            set token [lindex $tokens $tokpos]
+        }
         if {$token eq ")"} {
             incr tokpos
+            if {$n > 1} { append opcodes "list $n; " }
             return $opcodes
         }
         error "Calc: expected ')' but found '$token'"
@@ -415,6 +443,61 @@ proc parsePrefix token {
 
 
 
+
+# ---- tuples: (a,b,c) = expr   and   expr -> (a,(b,c))  --------------------------
+# A pattern is a name, or a parenthesised comma list of patterns. Missing list
+# elements give the empty string, as lindex does; extra elements are ignored.
+# The name _ means "skip this element". The value of the whole assignment is
+# the list that was assigned from.
+# Returns {n name} for a name, {t child child ...} for a tuple, leaves tokpos after it.
+proc parsePattern {} {
+    variable tokens
+    variable tokpos
+    set token [lindex $tokens $tokpos]
+    incr tokpos
+    if {$token eq "("} {
+        set kids {}
+        while 1 {
+            lappend kids [parsePattern]
+            set token [lindex $tokens $tokpos]
+            incr tokpos
+            if {$token eq ")"} break
+            if {$token ne ","} { error "Calc: expected ',' or ')' in a pattern but found '$token'" }
+        }
+        return [linsert $kids 0 t]
+    }
+    if {![regexp {^[[:alpha:]_][[:alnum:]_]*$} $token]} {
+        error "Calc: expected a variable name in a pattern but found '$token'"
+    }
+    return [list n $token]
+}
+
+# The value to take apart is on top of the stack; it is still there afterwards.
+proc destructure pat {
+    variable inprocFlag
+    lassign $pat kind first
+    if {$kind eq "n"} {
+        if {$first eq "_"} { return "" }
+        if {$inprocFlag} { return "store $first; " }
+        return "push $first; over 1; storeStk; pop; "
+    }
+    set opcodes ""
+    set i 0
+    foreach kid [lrange $pat 1 end] {
+        if {$kid eq {n _}} {
+            # skipped
+        } elseif {[lindex $kid 0] eq "n" && !$inprocFlag} {
+            # same shape lassign compiles to outside a proc: name first, then copy the list up
+            append opcodes "push [lindex $kid 1]; over 1; listIndexImm $i; storeStk; pop; "
+        } elseif {[lindex $kid 0] eq "n"} {
+            append opcodes "dup; listIndexImm $i; store [lindex $kid 1]; pop; "
+        } else {
+            append opcodes "dup; listIndexImm $i; [destructure $kid]pop; "
+        }
+        incr i
+    }
+    return $opcodes
+}
 
 # Parse zero or more arguments to a math function. The arguments are
 # expressions separated by commas and terminated by a closing parenthesis.
