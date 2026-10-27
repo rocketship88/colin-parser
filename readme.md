@@ -3,6 +3,7 @@
 This is Colin Macleod's original bytecode-based expression evaluator for Tcl, with added support for array references, native functions, multiple statements with assignment operator, bytecode caching, and proc and method compiling.
 
 ## What's New
+- Tuples: unpack a list into variables with `(x,y,z) = expr` or `expr -> (x,y,z)`, nested patterns, `_` to skip an element, and `(a,b,c)` to build a list (see the Tuples section in the UserGuide)
 - Repackaging into separate test file, and Tcl module
 - add Calc::transformProcs to compile multiple procs from existing procs
 - proc= and method= to compile bytecodes directly, faster, while still just pure tcl
@@ -27,6 +28,10 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 - Right associative assignment, `= a = b = (3 + 4) * 2` ;# produces 14 -> a and b
 - Can now cross lines if inside braces, `;` needed
 - For on line multiple statements without braces, can use `'` separator
+- Tuple assignment: `: (x,y,z) = pt` or `: pt -> (x,y,z)` (like `lassign`, but inside an expression)
+- Nested patterns: `: edge -> ((x1,y1),(x2,y2))` for a list of two points
+- Skip with `_`: `: (first,_,last) = pt`
+- List builder: `: ((t1,t2),(t2,t3),(t3,t1))` builds a list of lists, same as nested `list()` calls
 - Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=` or `method=`)
 - Included C extension provides up to 2x performance outside of procs and methods
   
