@@ -1657,6 +1657,207 @@ test calc-41.5 {two && operators, Calc::transformProcs} -constraints {hasCalcCmd
 }
 
 # ============================================================================
+# TUPLES - destructuring assignment, nested patterns, "->", "_" skip, list builder
+# ============================================================================
+
+test calc-42.1 {tuple assignment: (x,y,z) = list} -constraints hasCalcCmd -body {
+    set pt {3 4 5}
+    = (x, y, z) = pt
+    list $x $y $z
+} -result {3 4 5} -cleanup {
+    unset -nocomplain pt x y z
+}
+
+test calc-42.2 {tuple assignment returns the whole list} -constraints hasCalcCmd -body {
+    set pt {3 4 5}
+    = (x, y, z) = pt
+} -result {3 4 5} -cleanup {
+    unset -nocomplain pt x y z
+}
+
+test calc-42.3 {tuple with ->: value -> (pattern)} -constraints hasCalcCmd -body {
+    set pt {3 4 5}
+    = pt -> (x, y, z)
+    list $x $y $z
+} -result {3 4 5} -cleanup {
+    unset -nocomplain pt x y z
+}
+
+test calc-42.4 {tuple with -> returns the list} -constraints hasCalcCmd -body {
+    set pt {3 4 5}
+    = pt -> (x, y, z)
+} -result {3 4 5} -cleanup {
+    unset -nocomplain pt x y z
+}
+
+test calc-42.5 {tuple: extra elements are ignored} -constraints hasCalcCmd -body {
+    set v {1 2 3 4 5}
+    = (a, b) = v
+    list $a $b
+} -result {1 2} -cleanup {
+    unset -nocomplain v a b
+}
+
+test calc-42.6 {tuple: missing elements are empty strings} -constraints hasCalcCmd -body {
+    set v {1 2}
+    = (a, b, c) = v
+    list $a $b [string length $c]
+} -result {1 2 0} -cleanup {
+    unset -nocomplain v a b c
+}
+
+test calc-42.7 {tuple: _ skips an element} -constraints hasCalcCmd -body {
+    set v {3 4 5}
+    = (first, _, last) = v
+    list $first $last [info exists _]
+} -result {3 5 0} -cleanup {
+    unset -nocomplain v first last _
+}
+
+test calc-42.8 {tuple: nested pattern} -constraints hasCalcCmd -body {
+    set edge {{1 2} {7 9}}
+    = ((x1, y1), (x2, y2)) = edge
+    list $x1 $y1 $x2 $y2
+} -result {1 2 7 9} -cleanup {
+    unset -nocomplain edge x1 y1 x2 y2
+}
+
+test calc-42.9 {tuple: nested pattern with -> and _} -constraints hasCalcCmd -body {
+    set edge {{1 2} {7 9}}
+    = edge -> ((x1, _), (_, y2))
+    list $x1 $y2
+} -result {1 9} -cleanup {
+    unset -nocomplain edge x1 y2 _
+}
+
+test calc-42.10 {tuple: swap, the right side is built before storing} -constraints hasCalcCmd -body {
+    set a 1
+    set b 2
+    = (a, b) = (b, a)
+    list $a $b
+} -result {2 1} -cleanup {
+    unset -nocomplain a b
+}
+
+test calc-42.11 {list builder: (a,b) builds a list} -constraints hasCalcCmd -body {
+    = (1+2, 3*3)
+} -result {3 9}
+
+test calc-42.12 {list builder: same as list()} -constraints hasCalcCmd -body {
+    set x 10
+    set y 20
+    list [= (x, y, x+y)] [= list(x, y, x+y)]
+} -result {{10 20 30} {10 20 30}} -cleanup {
+    unset -nocomplain x y
+}
+
+test calc-42.13 {list builder: nested} -constraints hasCalcCmd -body {
+    = ((1,2),(3,4))
+} -result {{1 2} {3 4}}
+
+test calc-42.14 {list builder into nested pattern} -constraints hasCalcCmd -body {
+    = ((a, b), (c, d)) = ((1,2),(3,4))
+    list $a $b $c $d
+} -result {1 2 3 4} -cleanup {
+    unset -nocomplain a b c d
+}
+
+test calc-42.15 {parentheses without a comma are still grouping} -constraints hasCalcCmd -body {
+    list [= (1+2)*3] [= (1+2)] [= ((2))]
+} -result {9 3 2}
+
+test calc-42.16 {-> does not break comparisons: x<-1 and x>-1} -constraints hasCalcCmd -body {
+    set x 0
+    list [= x<-1] [= x>-1] [= x < -1] [= x > -1]
+} -result {0 1 0 1} -cleanup {
+    unset -nocomplain x
+}
+
+test calc-42.17 {tuple pattern: a number is an error} -constraints hasCalcCmd -body {
+    set pt {3 4 5}
+    catch {= (a, 1) = pt} msg
+    set msg
+} -result {Calc: expected a variable name in a pattern but found '1'} -cleanup {
+    unset -nocomplain pt a
+}
+
+test calc-42.18 {tuple pattern: an expression is an error} -constraints hasCalcCmd -body {
+    set pt {3 4 5}
+    catch {= (a, b+1) = pt} msg
+    set msg
+} -result {Calc: expected ',' or ')' in a pattern but found '+'} -cleanup {
+    unset -nocomplain pt a
+}
+
+test calc-42.19 {tuple in proc=} -constraints hasCalcCmd -body {
+    proc= t42_19 {v} {= {(p, _, q) = v; p*10 + q}}
+    t42_19 {1 2 3}
+} -result 13 -cleanup {
+    rename t42_19 {}
+}
+
+test calc-42.20 {tuple in proc=: variables are local} -constraints hasCalcCmd -body {
+    proc= t42_20 {v} {= {(p, q) = v; p + q}}
+    unset -nocomplain p q
+    set r [t42_20 {3 4}]
+    list $r [info exists p] [info exists q]
+} -result {7 0 0} -cleanup {
+    rename t42_20 {}
+    unset -nocomplain r
+}
+
+test calc-42.21 {nested tuple in proc=: edge length} -constraints hasCalcCmd -body {
+    proc= t42_21 {edge} {
+        = {
+            ((x1,y1),(x2,y2)) = edge;
+            hypot(x2-x1, y2-y1)
+        }
+    }
+    t42_21 {{0 0} {3 4}}
+} -result 5.0 -cleanup {
+    rename t42_21 {}
+}
+
+test calc-42.22 {list builder and nested tuple in proc=} -constraints hasCalcCmd -body {
+    proc= t42_22 {t1 t2 t3} {
+        = {
+            ((ax,ay),(bx,by),(cx,cy)) = (t1,t2,t3);
+            ax + by + cx
+        }
+    }
+    t42_22 {1 2} {3 4} {5 6}
+} -result 10 -cleanup {
+    rename t42_22 {}
+}
+
+test calc-42.23 {tuple with Calc::transformProcs} -constraints hasCalcCmd -body {
+    proc t42_23 {v} {= {(p, q) = v; p + q}}
+    Calc::transformProcs t42_23
+    t42_23 {3 4}
+} -result 7 -cleanup {
+    rename t42_23 {}
+}
+
+test calc-42.24 {tuple in method=} -constraints hasCalcCmd -body {
+    oo::class create C42_24 {
+        method= m {v} {= {(a, b) = v; a + b}}
+    }
+    [C42_24 new] m {4 5}
+} -result 9 -cleanup {
+    C42_24 destroy
+}
+
+test calc-42.25 {tuple in calc=} -constraints hasCalcCmd -body {
+    calc= t42_25 {
+        set e {{1 2} {7 9}}
+        = e -> ((u, _), (_, w))
+    }
+    list $u $w
+} -result {1 9} -cleanup {
+    unset -nocomplain e u w _
+}
+
+# ============================================================================
 # CLEANUP
 # ============================================================================
 
