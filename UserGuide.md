@@ -1,5 +1,27 @@
 # Calc Expression Evaluator - User Manual
 
+## Contents
+
+- [Introduction](#introduction)
+- [Compile vs. Interpretive execution](#compile-vs-interpretive-execution)
+- [Basic Usage](#basic-usage)
+- [Command Syntax](#command-syntax)
+- [Operators](#operators)
+- [Variables](#variables)
+- [Assignments](#assignments)
+- [Tuples](#tuples)
+- [Arrays](#arrays)
+- [Functions](#functions)
+- [Multiple Statements](#multiple-statements)
+- [Comments](#comments)
+- [Non-Numeric Results](#non-numeric-results)
+- [Performance Notes](#performance-notes)
+- [proc= method= calc= Compilation Limitations](#proc-method-calc-compilation-limitations)
+- [calc= — Toplevel Code Blocks](#calc--toplevel-code-blocks)
+- [Complete Examples](#complete-examples)
+- [Differences from expr](#differences-from-expr)
+- [Summary](#summary)
+
 ## Introduction
 
 Calc (aka colon) is a high-performance expression evaluator for Tcl that compiles expressions to Tcl Assembly Language (TAL) bytecode. It provides a clean syntax for mathematical calculations with support for variables, arrays, functions, and multiple statements.
@@ -17,6 +39,8 @@ In addition to explicit  `proc=` calls, the procedure Calc::transformProcs is no
     Calc::transformProcs ?-preserve value? ?-regex? ?-listonly? pattern ?pattern ...?
 
 where patterns can include wildcards for names and/or namespaces using glob or regex pattern matching. See the comments in the module code for more details.
+
+[Back to top](#contents)
 
 ## Basic Usage
 
@@ -39,6 +63,8 @@ set y 20
 # Returns: 55
 ```
 
+[Back to top](#contents)
+
 ## Command Syntax
 
 The Calc evaluator uses the `:` command (or `=` as a command alias):
@@ -48,6 +74,8 @@ The Calc evaluator uses the `:` command (or `=` as a command alias):
 ```
 
 All expressions are evaluated without `$` variable substitution or `[command]` substitution.
+
+[Back to top](#contents)
 
 ## Operators
 
@@ -90,6 +118,8 @@ Calc supports standard operators with C-like precedence:
 12. `*` `/` `%`
 13. `**` (right associative)
 14. Unary: `+` `-` `!` `~`
+
+[Back to top](#contents)
 
 ## Variables
 
@@ -163,6 +193,8 @@ proc tcl::mathfunc::listlen {lst} {
 # See below, since llength, and lindex are available natively
 ```
 
+[Back to top](#contents)
+
 ## Assignments
 
 The `=` operator is **right associative** and can be chained:
@@ -188,6 +220,86 @@ set z [: total = x + y + 10]
 - Number literals: `: 10 = 5` → Error
 - Boolean literals: `: true = 3` → Error
 - Array elements (see Arrays section below)
+
+[Back to top](#contents)
+
+## Tuples
+
+A **tuple pattern** on the left of `=` takes a list apart by position and stores each
+element in a variable. It does what `lassign` does, but inside a Calc expression, and it
+compiles to the same bytecode instructions `lassign` uses.
+
+```tcl
+set pt {3 4 5}
+: (x, y, z) = pt
+# x is 3, y is 4, z is 5
+```
+
+The same thing can be written left to right with `->`:
+
+```tcl
+: pt -> (x, y, z)
+```
+
+The value of the whole expression is the list that was unpacked, `3 4 5` here.
+
+### Nested patterns
+
+A pattern can contain patterns, for a list of lists:
+
+```tcl
+set edge {{1 2} {7 9}}
+: ((x1,y1),(x2,y2)) = edge
+# x1=1 y1=2 x2=7 y2=9
+```
+
+Here `edge` is two points, and each point is an x,y pair. The outer parentheses take
+the two points, and each inner pair takes the two numbers of one point.
+
+### Skipping elements with `_`
+
+A name that is just `_` takes its position but stores nothing:
+
+```tcl
+: (first, _, last) = pt
+# first is 3, last is 5
+
+: edge -> ((x1,_),(_,y2))
+# x1 is 1, y2 is 9
+```
+
+### How many elements?
+
+- Extra elements are ignored: `(a,b) = {1 2 3 4 5}` gives a=1, b=2.
+- Missing elements give an empty string: `(a,b,c) = {1 2}` gives c = "".
+- Pattern entries must be plain variable names or `_`. Numbers, expressions and array elements are an error, for example `(a, 1) = pt` reports "expected a variable name in a pattern".
+- There is no "take the rest" pattern (such as `*rest`).
+
+### Building a list: `(a,b,c)`
+
+A parenthesized list with commas, anywhere an expression can appear, builds a list. It is the same as `list()`, and it nests:
+
+```tcl
+: edges = ((t1,t2),(t2,t3),(t3,t1))
+# same as: : edges = list(list(t1,t2), list(t2,t3), list(t3,t1))
+```
+
+A parenthesized single expression is still just grouping, so `(1+2)*3` is 9. On the left of an assignment, a "(" is read as a pattern only when its matching ")" is followed by `=`. After `->` it is always a pattern.
+
+### In procs, and with `proc=`
+
+Patterns work at the top level, inside `proc=`, `method=` and `calc=`. In a compiled proc the names become compiled local variables.
+
+```tcl
+proc= edge_length {edge} {
+    : {
+        ((x1,y1),(x2,y2)) = edge;
+        hypot(x2-x1, y2-y1)
+    }
+}
+```
+
+[Back to top](#contents)
 
 ## Arrays
 
@@ -270,6 +382,8 @@ set data(key) 100
 ```
 
 This is because array assignment requires different bytecode (`storeArrayStk` with special handling) that conflicts with the function/array syntax ambiguity.
+
+[Back to top](#contents)
 
 ## Functions
 
@@ -378,6 +492,8 @@ set y 20
 # Returns: {10 20 30 200}
 ```
 
+[Back to top](#contents)
+
 ## Multiple Statements
 
 Calc supports multiple statements separated by:
@@ -424,6 +540,8 @@ Note that the normal tcl processing will treat a ; as the command terminator. If
 
 **Blank lines are allowed** and ignored.
 
+[Back to top](#contents)
+
 ## Comments
 
 Comments can be added using `#`:
@@ -443,6 +561,8 @@ Comments can be added using `#`:
 : a = 5 ;# Set a to 5
 ```
 The Calc parser ignores blank lines and empty statements (e.g. a=2 ;; b = 3) 
+
+[Back to top](#contents)
 
 ## Non-Numeric Results
 
@@ -487,6 +607,8 @@ set field name
 
 **Best practice:** Use these operations when you need to return or collect values, but the results are generally the final output, not intermediate values for further math.
 
+[Back to top](#contents)
+
 ## Performance Notes
 
 ### Caching
@@ -522,6 +644,8 @@ for {set i 0} {$i < 1000} {incr i} {
 This is a **feature**, not a bug - it helps you identify performance problems early.
 
 `Note:` When using `proc=` or `method=` the cache is not used in those procedures or methods. 
+
+[Back to top](#contents)
 
 ## proc= method= calc= Compilation Limitations
 
@@ -569,6 +693,9 @@ if {condition} {
 ```
 
 This is consistent with the Tcl style guide recommendation to always place `if`, `while`, and `for` bodies on separate indented lines — a practice most experienced Tcl programmers already follow.
+
+[Back to top](#contents)
+
 ## `calc=` — Toplevel Code Blocks
 
 `calc=` is designed for toplevel code outside of procedures and methods. It takes a labeled block of code, transforms any `:` and `=` expressions using `transform=`, and executes the result in the caller's scope via `uplevel`.
@@ -683,6 +810,7 @@ The preprocessor hits the sweet spot — trivial complexity, no core changes, ex
 
 ---
 
+[Back to top](#contents)
 
 ## Complete Examples
 
@@ -761,6 +889,7 @@ set years 10
 # Returns: ~ 1647.01
 ```
 
+[Back to top](#contents)
 
 ## Differences from expr
 
@@ -773,6 +902,8 @@ set years 10
 | Array syntax | `arr(key)` | `$arr(key)` |
 | Performance | Cached bytecode | Compiled per call |
 | Assignment | `x = value` | `set x [expr ...]` |
+
+[Back to top](#contents)
 
 ## Summary
 
@@ -798,3 +929,5 @@ Calc provides:
 ---
 
 *For more information, see the Calc source code and test suite.*
+
+[Back to top](#contents)
