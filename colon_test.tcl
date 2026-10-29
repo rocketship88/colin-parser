@@ -6,7 +6,7 @@ package require colon
 catch {console show}
 # --------------------------- knobs -------------------------------------------
 set doAllTests        t   ;# all verify tests
-set putsAllTests      t  ;# puts on each verify test
+set putsAllTests      [expr {"-v" in $argv}]  ;# puts on each verify test; run with -v to see them
 # -----------------------------------------------------------------------------
 
 if [catch {
@@ -40,7 +40,9 @@ proc verifyFloat {desc a b} {
     set na [expr {double($a)}]
     set nb [expr {double($b)}]
     if {$na == $nb} {
-        puts "$tests) description= |$desc| expr_result= |$a| calc_result= |$b| "
+        if {$::putsAllTests} {
+            puts "$tests) description= |$desc| expr_result= |$a| calc_result= |$b| "
+        }
     } else {
         puts "$tests) description= |$desc| expr_result= |$a| calc_result= |$b| "
         puts "FAILED: $desc"
@@ -177,7 +179,7 @@ for {set i 1} {$i <= 50} {incr i} {
 }
 verify "50! + 1" [expr {$n + 1}] [= m + 1]
 
-puts "54 ========== Mixed Bignum and Regular =========="
+puts "53 ========== Mixed Bignum and Regular =========="
 set small 42
 set huge [expr {10 ** 100}]
 verify "huge + small" [expr {$huge + $small}] [= huge + small]
@@ -447,7 +449,7 @@ puts "142 ========== Multiple Statements =========="
 : {p = 10 ; q = 20 ; p + q}
 verify "p + q after assignment" [expr {$p + $q}] 30
 
-puts "144 ========== Gather Function =========="
+puts "143 ========== Gather Function =========="
 proc tcl::mathfunc::gather {args} { list {*}$args }
 
 set result [: gather(10, 20, 30)]
@@ -458,7 +460,7 @@ set y 10
 set coords [: gather(x*2, y*2)]
 verify "gather(x*2, y*2)" [list [expr {$x*2}] [expr {$y*2}]] $coords
 
-puts "146 ========== Complex: Assignment + Gather =========="
+puts "145 ========== Complex: Assignment + Gather =========="
 : {px = 100 ; py = 200}
 set points [: gather(px, py, px+10, py+10)]
 verify "gather with assigned vars" [list 100 200 110 210] $points
@@ -466,7 +468,7 @@ verify "gather with assigned vars" [list 100 200 110 210] $points
 
 
 
-puts "147 ========== Logical AND (&&) Operator =========="
+puts "146 ========== Logical AND (&&) Operator =========="
 verify "true && true" [expr {true && true}] [: true && true]
 verify "true && false" [expr {true && false}] [: true && false]
 verify "false && true" [expr {false && true}] [: false && true]
@@ -480,7 +482,7 @@ set x 10
 set y 5
 verify "x > 5 && y < 10" [expr {$x > 5 && $y < 10}] [: x > 5 && y < 10]
 
-puts "153 ========== Logical OR (||) Operator =========="
+puts "152 ========== Logical OR (||) Operator =========="
 verify "true || true" [expr {true || true}] [: true || true]
 verify "true || false" [expr {true || false}] [: true || false]
 verify "false || true" [expr {false || true}] [: false || true]
@@ -495,7 +497,7 @@ set q 20
 verify "p < 5 || q > 15" [expr {$p < 5 || $q > 15}] [: p < 5 || q > 15]
 
 
-puts "159 ========== Multi-Dimensional Arrays =========="
+puts "158 ========== Multi-Dimensional Arrays =========="
 array set arr2 {
     0,0 100  0,1 101  0,2 102
     1,0 200  1,1 201  1,2 202
@@ -509,7 +511,7 @@ set j 2
 verify "arr2(i,j) after change" [expr {$arr2($i,$j)}] [= arr2(i,j)]
 verify "arr2(0,0) + arr2(1,1)" [expr {$arr2(0,0) + $arr2(1,1)}] [= arr2(0,0) + arr2(1,1)]
 verify "arr2(i,j) * 2" [expr {$arr2($i,$j) * 2}] [= arr2(i,j) * 2]
-puts "164 ========== 3D Arrays =========="
+puts "162 ========== 3D Arrays =========="
 array set cube {
     0,0,0 1000  0,0,1 1001  0,1,0 1010  0,1,1 1011
     1,0,0 2000  1,0,1 2001  1,1,0 2010  1,1,1 2011
@@ -520,7 +522,7 @@ set k 1
 verify "cube(i,j,k)" [expr {$cube($i,$j,$k)}] [= cube(i,j,k)]
 verify "cube(0,0,0) + cube(1,1,1)" [expr {$cube(0,0,0) + $cube(1,1,1)}] [= cube(0,0,0) + cube(1,1,1)]
 
-puts "166 ========== Multi-Dim with Expressions =========="
+puts "164 ========== Multi-Dim with Expressions =========="
 set row 1
 set col 0
 verify "arr2(row*1, col+1)" [expr {$arr2([expr {$row*1}],[expr {$col+1}])}] [= arr2(row*1, col+1)]
@@ -684,7 +686,7 @@ verify "fully qualified ::outer::inner::y" [expr {$::outer::inner::y + 5}] [test
 
 if {$::tcl_version >= 9.0} {
 
-    puts "183 ========== 9.x Relative Namespace Lookup =========="
+    puts "182 ========== 9.x Relative Namespace Lookup =========="
     # In 9.x namespace variables must be fully qualified in proc=
     namespace eval outer {
         proc= ::outer::testRelative {n} {
@@ -701,7 +703,7 @@ if {$::tcl_version >= 9.0} {
     verify "9.x fully qualified ::outer::inner::y" [expr {$::outer::inner::y + 5}] [::outer::inner::testRelativeInner 5]
 
 } else {
-    puts "183 ========== 8.6 Global Namespace Lookup =========="
+    puts "182 ========== 8.6 Global Namespace Lookup =========="
     # In 8.6, unqualified namespace refs default to global namespace
     proc= testUnqualified {n} {
         : outer::x + n
@@ -716,7 +718,7 @@ if {$::tcl_version >= 9.0} {
 
 
 
-puts "185 ========== Scientific Notation =========="
+puts "184 ========== Scientific Notation =========="
 
 # Basic scientific notation without sign - works without merge
 verifyFloat "10e5"          [expr {10e5}]          [= 10e5]
@@ -741,7 +743,7 @@ set angle 45
 set force 100
 verifyFloat "angle + force" [expr {$angle + $force}] [= angle + force]
 
-puts "196 ========== Scientific Notation Errors =========="
+puts "195 ========== Scientific Notation Errors =========="
 
 # These should produce errors
 foreach {desc expr} {
@@ -758,6 +760,107 @@ foreach {desc expr} {
 }
 
 
+
+
+puts "195 ========== Tuples (compared with lassign) =========="
+# clr unsets the named globals; vals lists their values (UNSET if missing)
+proc clr {args} {foreach n $args {unset -nocomplain ::$n}}
+proc vals {args} {
+    set out {}
+    foreach n $args {lappend out [expr {[info exists ::$n] ? [set ::$n] : "UNSET"}]}
+    return $out
+}
+
+set pt {3 4 5}
+set D {{1 2} {3 4} {5 6}}
+set edge {{1 2} {7 9}}
+
+clr x y z; lassign $pt x y z;               set want [vals x y z]
+clr x y z; = (x, y, z) = pt;                verify "tuple (x,y,z) = pt"          $want [vals x y z]
+clr x y z; = pt -> (x, y, z);               verify "tuple pt -> (x,y,z)"         $want [vals x y z]
+clr x y z; = pt => (x, y, z);               verify "tuple pt => (x,y,z)"         $want [vals x y z]
+verify "tuple returns the list"  $pt [= (x, y, z) = pt]
+verify "tuple -> returns the list" $pt [= pt -> (x, y, z)]
+
+clr x1 y1 x2 y2; lassign [lindex $edge 0] x1 y1; lassign [lindex $edge 1] x2 y2; set want [vals x1 y1 x2 y2]
+clr x1 y1 x2 y2; = ((x1,y1),(x2,y2)) = edge; verify "nested ((x1,y1),(x2,y2)) = edge" $want [vals x1 y1 x2 y2]
+clr x1 y1 x2 y2; = edge -> ((x1,y1),(x2,y2)); verify "nested edge -> ((x1,y1),(x2,y2))" $want [vals x1 y1 x2 y2]
+clr x1 y1 x2 y2; = edge => ((x1,y1),(x2,y2)); verify "nested edge => ((x1,y1),(x2,y2))" $want [vals x1 y1 x2 y2]
+
+clr ax ay bx by cx cy
+lassign $D p1 p2 p3; lassign $p1 ax ay; lassign $p2 bx by; lassign $p3 cx cy; set want [vals ax ay bx by cx cy]
+clr ax ay bx by cx cy; = D -> ((ax,ay),(bx,by),(cx,cy)); verify "three pairs, nested pattern" $want [vals ax ay bx by cx cy]
+
+clr ax ay bx by cx cy; lassign $D ax ay bx by cx cy; set want [vals ax ay bx by cx cy]
+clr ax ay bx by cx cy; = D -> (ax,ay,bx,by,cx,cy);  verify "three pairs, flat pattern (whole elements, rest empty)" $want [vals ax ay bx by cx cy]
+clr ax ay bx by cx cy; = (ax,ay,bx,by,cx,cy) = D;    verify "three pairs, flat pattern with =" $want [vals ax ay bx by cx cy]
+
+clr first mid last; lassign $pt first mid last; set want [vals first last]
+clr first mid last; = (first, _, last) = pt; verify "skip with _" $want [vals first last]
+verify "_ is not assigned" UNSET [vals _]
+
+set s12 {1 2}; set s5 {1 2 3 4 5}
+clr a b c; lassign $s12 a b c; set want [vals a b c]
+clr a b c; = (a, b, c) = s12;   verify "missing elements are empty" $want [vals a b c]
+clr a b; lassign $s5 a b; set want [vals a b]
+clr a b; = (a, b) = s5;  verify "extra elements ignored" $want [vals a b]
+
+clr x; = pt -> x; verify "single name takes the whole value" [list $pt] [vals x]
+
+verify "list builder (1,2,3)"       [list 1 2 3]            [= (1,2,3)]
+verify "list builder nested"        [list {1 2} {3 4}]      [= ((1,2),(3,4))]
+set u 3; set v 4
+verify "list builder with names"    [list 3 4 7]            [= (u, v, u+v)]
+verify "grouping is not a list"     9                       [= (1+2)*3]
+verify "round trip"                 {4 3 2 1}               [= {((a,b),(c,d)) = ((1,2),(3,4)); (d,c,b,a)}]
+
+puts "216 ========== Strict tuples: => =========="
+proc tryerr {script} {
+    if {[catch {uplevel #0 $script} msg]} {return $msg} else {return OK}
+}
+verify "=> pattern longer than data"  "Calc: tuple mismatch: pattern (ax,ay,bx,by,cx,cy) expects 6, data has 3 (use -> to allow a mismatch)" [tryerr {= D => (ax,ay,bx,by,cx,cy)}]
+verify "=> data longer than pattern"  "Calc: tuple mismatch: pattern (p,q) expects 2, data has 4 (use -> to allow a mismatch)" [tryerr {= (1,2,3,4) => (p,q)}]
+verify "=> group against one value"   "Calc: tuple mismatch: pattern (p,q) expects 2, data has 1 (use -> to allow a mismatch)" [tryerr {= (1,2) => ((p,q),(r,s))}]
+verify "=> inner group named"         "Calc: tuple mismatch: pattern (bx) expects 1, data has 2 (use -> to allow a mismatch)" [tryerr {= D => ((ax,ay),(bx),(cx,cy))}]
+clr p q r; catch {= (1,2) => (p,q,r)}
+verify "=> outer mismatch assigns nothing" {UNSET UNSET UNSET} [vals p q r]
+clr p q r; = (1,2) -> (p,q,r)
+verify "-> pads instead"              {1 2 {}} [vals p q r]
+verify "=> _ counts as a slot"        OK [tryerr {= (1,2,3) => (p,_,r)}]
+verify "=> _ slot, wrong size"        "Calc: tuple mismatch: pattern (p,_) expects 2, data has 3 (use -> to allow a mismatch)" [tryerr {= (1,2,3) => (p,_)}]
+
+puts "224 ========== Tuples in procs =========="
+proc plain_edge {edge} {
+    lassign $edge p1 p2; lassign $p1 x1 y1; lassign $p2 x2 y2
+    expr {hypot($x2-$x1, $y2-$y1)}
+}
+proc= tuple_edge {edge} {
+    = ((x1,y1),(x2,y2)) = edge
+    = hypot(x2-x1, y2-y1)
+}
+proc= tuple_edge_strict {edge} {
+    = edge => ((x1,y1),(x2,y2))
+    = hypot(x2-x1, y2-y1)
+}
+verify "proc= tuple edge"         [plain_edge $edge] [tuple_edge $edge]
+verify "proc= strict tuple edge"  [plain_edge $edge] [tuple_edge_strict $edge]
+verify "proc= strict mismatch"    "Calc: tuple mismatch: pattern ((x1,y1),(x2,y2)) expects 2, data has 3 (use -> to allow a mismatch)" [tryerr {tuple_edge_strict {{1 2} {3 4} {5 6}}}]
+proc plain_ok {} {= (1,2,3) => (a,b,c); list $a $b $c}
+verify "plain proc strict ok"     {1 2 3} [plain_ok]
+
+puts "228 ========== Tuple targets that must be rejected =========="
+foreach {desc script} {
+    "number target"            {= 1 = 1 + 1}
+    "number in pattern ="      {= (a, 1) = pt}
+    "number in pattern ->"     {= pt -> (a, 1)}
+    "number in pattern =>"     {= pt => (a, 1)}
+    "float in pattern"         {= pt -> (a, 3.5)}
+    "expression in pattern"    {= pt -> (a, b+1)}
+    "function call in pattern" {= pt -> (a, sin(1))}
+    "string in pattern"        {= pt -> (a, "b")}
+} {
+    verify "rejected: $desc" 1 [catch {uplevel #0 $script}]
+}
 
 puts "\n=========================================="
 if {$failures == 0} {

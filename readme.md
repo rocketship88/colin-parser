@@ -3,7 +3,7 @@
 This is Colin Macleod's original bytecode-based expression evaluator for Tcl, with added support for array references, native functions, multiple statements with assignment operator, bytecode caching, and proc and method compiling.
 
 ## What's New
-- Tuples: unpack a list into variables with `(x,y,z) = expr` or `expr -> (x,y,z)`, nested patterns, `_` to skip an element, and `(a,b,c)` to build a list (see the Tuples section in the UserGuide)
+- Tuples: unpack a list into variables with `(x,y,z) = expr` or `expr -> (x,y,z)`, nested patterns, `_` to skip an element, and `(a,b,c)` to build a list, and `=>` as a strict `->` that errors when the sizes do not match (see the Tuples section in the UserGuide)
 - Repackaging into separate test file, and Tcl module
 - add Calc::transformProcs to compile multiple procs from existing procs
 - proc= and method= to compile bytecodes directly, faster, while still just pure tcl
@@ -30,6 +30,7 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 - For on line multiple statements without braces, can use `'` separator
 - Tuple assignment: `: (x,y,z) = pt` or `: pt -> (x,y,z)` (like `lassign`, but inside an expression)
 - Nested patterns: `: edge -> ((x1,y1),(x2,y2))` for a list of two points
+- Strict form: `: edge => ((x1,y1),(x2,y2))` raises an error if the list sizes do not match the pattern
 - Skip with `_`: `: (first,_,last) = pt`
 - List builder: `: ((t1,t2),(t2,t3),(t3,t1))` builds a list of lists, same as nested `list()` calls
 - Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=` or `method=`)
@@ -45,6 +46,9 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 ```tcl
 tclsh colon_test.tcl
 wish  colon_test.tcl
+
+Add -v to list every test as it runs (the default prints only failures and a summary):
+tclsh colon_test.tcl -v
 
 Also:
 cd <to location of extracted files>   

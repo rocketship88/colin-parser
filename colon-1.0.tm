@@ -27,6 +27,7 @@ proc = {arg args} {
 #interp alias {} = {} : ;# shorthands 
 
 namespace eval Calc {
+variable strictFlag 0
 
 # breakup compile into 2 parts to handle ; up front, 
 # also allow for '  alias, ' needs no bracing
@@ -98,7 +99,7 @@ proc compile0 {exp {inproc 0}} {
 }
 #instrument+  Calc::compile0  
 proc tokenise {input} {  
-    set op_re  {\*\*|%|/|\*|->|-|\+|>>|<<|>=|<=|>|<|!=|==|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}  
+    set op_re  {\*\*|%|/|\*|->|-|\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}  
     #                                                  ^ added = here (after ==)  
     # ... rest stayed the same
   
@@ -164,6 +165,7 @@ foreach {op prec code} {
     ,  0 -
     =  0 -
     -> 0.5 -
+    => 0.5 -
     ?  1 -
     :  1 -
     || 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}
@@ -259,6 +261,15 @@ proc parse min_prec {
         if {$token eq "->"} {
             # value -> pattern : the pattern is a name or a (nested) tuple of names
             append opcodes [destructure [parsePattern]]
+            continue
+        }
+        if {$token eq "=>"} {
+            # value => pattern : like -> but every group must have exactly as many
+            # elements as the pattern has slots, otherwise it is an error
+            variable strictFlag
+            set strictFlag 1
+            append opcodes [destructure [parsePattern]]
+            set strictFlag 0
             continue
         }
         # Infix operator
@@ -472,6 +483,14 @@ proc parsePattern {} {
     return [list n $token]
 }
 
+# text of a pattern, for error messages: (a,(b,c))
+proc patternText pat {
+    if {[lindex $pat 0] eq "n"} { return [lindex $pat 1] }
+    set parts {}
+    foreach kid [lrange $pat 1 end] { lappend parts [patternText $kid] }
+    return "([join $parts ,])"
+}
+
 # The value to take apart is on top of the stack; it is still there afterwards.
 proc destructure pat {
     variable inprocFlag
@@ -482,6 +501,15 @@ proc destructure pat {
         return "push $first; over 1; storeStk; pop; "
     }
     set opcodes ""
+    variable strictFlag
+    if {[info exists strictFlag] && $strictFlag} {
+        set n [incr ::labelcount]
+        set want [expr {[llength $pat] - 1}]
+        set txt [patternText $pat]
+        append opcodes "dup; listLength; push $want; neq; jumpFalse tupok$n; "
+        append opcodes "push error; push {Calc: tuple mismatch: pattern $txt expects $want, data has }; "
+        append opcodes "over 2; listLength; push { (use -> to allow a mismatch)}; strcat 3; invokeStk 2; pop; label tupok$n; "
+    }
     set i 0
     foreach kid [lrange $pat 1 end] {
         if {$kid eq {n _}} {

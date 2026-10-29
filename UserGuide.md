@@ -101,23 +101,26 @@ Calc supports standard operators with C-like precedence:
 
 **Assignment:**
 - `=` (right associative)
+- `->` takes a list apart into a pattern of variables (see Tuples)
+- `=>` the same, but the sizes must match exactly (see Tuples)
 
 ### Operator Precedence (lowest to highest)
 
 1. `,` `)` `=` (precedence 0)
-2. `?` `:` (ternary)
-3. `||`
-4. `&&`
-5. `|`
-6. `^`
-7. `&`
-8. `==` `!=`
-9. `<` `>` `<=` `>=`
-10. `<<` `>>`
-11. `+` `-`
-12. `*` `/` `%`
-13. `**` (right associative)
-14. Unary: `+` `-` `!` `~`
+2. `->` `=>` (precedence 0.5, take a pattern, not an expression, on the right)
+3. `?` `:` (ternary)
+4. `||`
+5. `&&`
+6. `|`
+7. `^`
+8. `&`
+9. `==` `!=`
+10. `<` `>` `<=` `>=`
+11. `<<` `>>`
+12. `+` `-`
+13. `*` `/` `%`
+14. `**` (right associative)
+15. Unary: `+` `-` `!` `~`
 
 [Back to top](#contents)
 
@@ -274,6 +277,47 @@ A name that is just `_` takes its position but stores nothing:
 - Missing elements give an empty string: `(a,b,c) = {1 2}` gives c = "".
 - Pattern entries must be plain variable names or `_`. Numbers, expressions and array elements are an error, for example `(a, 1) = pt` reports "expected a variable name in a pattern".
 - There is no "take the rest" pattern (such as `*rest`).
+
+### Make the data match the pattern
+
+A pattern is a picture of the data: each slot takes **one element** of the list, and a group in parentheses splits that element again. A list of pairs wants a pattern of groups. A flat list wants a flat pattern.
+
+```tcl
+set D {{1 2} {3 4} {5 6}}
+
+: D -> ((ax,ay),(bx,by),(cx,cy))
+# ax=1 ay=2 bx=3 by=4 cx=5 cy=6
+
+: D -> (ax,ay,bx,by,cx,cy)
+# ax="1 2" ay="3 4" bx="5 6" by="" cx="" cy=""
+```
+
+In the second form nothing splits `1 2` into two values, because the pattern has no group for it. Each name takes a whole element, and the names left over are empty. With `->` and `=` a mismatch is silent: it never gives an error.
+
+### Strict assignment: `=>`
+
+`=>` is `->` with a size check. At every level, a pattern with n slots needs a list of exactly n elements, or it is an error. A skipped `_` counts as a slot.
+
+```tcl
+: D => ((ax,ay),(bx,by),(cx,cy))
+# fine
+
+: D => (ax,ay,bx,by,cx,cy)
+# error: Calc: tuple mismatch: pattern (ax,ay,bx,by,cx,cy) expects 6, data has 3 (use -> to allow a mismatch)
+```
+
+The message names the group that did not match, for example `pattern (bx) expects 1, data has 2`. If the outermost list is the wrong size nothing is assigned. If a group deeper in fails, the names before it have already been set.
+
+`=>` checks sizes only. Two flat names against two pairs has the right count, so it is accepted:
+
+```tcl
+set E {{1 2} {3 4}}
+: E => (p,q)
+# p="1 2" q="3 4", with no error
+```
+
+Use `->` when you want a mismatch to pad or be ignored, for example to take only the first few elements.
+
 
 ### Building a list: `(a,b,c)`
 
