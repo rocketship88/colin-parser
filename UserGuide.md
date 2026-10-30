@@ -431,7 +431,7 @@ This is because array assignment requires different bytecode (`storeArrayStk` wi
 
 ## Functions
 
-Calc supports two types of functions:
+Calc supports three types of functions:
 
 ### 1. Native Bytecode Functions (Fastest)
 
@@ -463,10 +463,31 @@ set cube {{{a b} {c d}} {{e f} {g h}}}
 : lindex(cube, 1, 0, 1)
 # Returns: "f"
 
-# functional list creation
+```
+
+A `list()` function collects multiple values into a list:
+
+```tcl
+
+
+
+: list(1, 2, 3)
+# Returns: {1 2 3}
+
+set x 10
+set y 20
+: list(x, y, x+y)
+# Returns: {10 20 30}
+
+# Useful for returning multiple calculated values
+: list(min(x,y), max(x,y), x+y, x*y)
+# Returns: {10 20 30 200}
+
 : a = 10 ' b = 20 ' c = 30
 : alistof3 = list(a+5, b-5, c+10)
 # returns {15 15 40}
+
+
 ```
 
 **Available native functions:**
@@ -502,10 +523,6 @@ set qy 24
 : distance(px, py, qx, qy)
 # Returns: 5.0
 ```
-**Note: functions in the global or other namespaces**
-
-Functions are checked first in the tcl::math:: namespace and if not found there will be searched for in the global or other namespaces as well. The difference is that these will not be available to `expr` but will be available to calc.
-
 
 **Standard math functions available:**
 - `abs()` `ceil()` `floor()` `round()` `int()`
@@ -515,26 +532,11 @@ Functions are checked first in the tcl::math:: namespace and if not found there 
 - `min()` `max()` (variable arguments)
 - And others defined in `tcl::mathfunc::*`
 
-### The list() Function
+### 3. Functions in the Global or other Namespaces
 
-A `list()` function collects multiple values into a list:
-
-```tcl
+Functions are checked first in the native set, then the  tcl::math:: namespace and if not found there will be searched for in the global or other namespaces as well. The difference is that these will not be available to `expr` but will be available to calc. If they are not found in any of these, they will be assumed to be array reads.
 
 
-
-: list(1, 2, 3)
-# Returns: {1 2 3}
-
-set x 10
-set y 20
-: list(x, y, x+y)
-# Returns: {10 20 30}
-
-# Useful for returning multiple calculated values
-: list(min(x,y), max(x,y), x+y, x*y)
-# Returns: {10 20 30 200}
-```
 
 [Back to top](#contents)
 
