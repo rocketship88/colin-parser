@@ -9,6 +9,7 @@
 - [Operators](#operators)
 - [Variables](#variables)
 - [Assignments](#assignments)
+- [Increment and Decrement](#increment-and-decrement)
 - [Tuples](#tuples)
 - [Arrays](#arrays)
 - [Functions](#functions)
@@ -99,6 +100,10 @@ Calc supports standard operators with C-like precedence:
 **Ternary:**
 - `condition ? true_value : false_value`
 
+**Increment and decrement:**
+- `++i` `--i` (prefix: the value is the new value)
+- `i++` `i--` (postfix: the value is the old value)
+
 **Assignment:**
 - `=` (right associative)
 - `->` takes a list apart into a pattern of variables (see Tuples)
@@ -120,7 +125,8 @@ Calc supports standard operators with C-like precedence:
 12. `+` `-`
 13. `*` `/` `%`
 14. `**` (right associative)
-15. Unary: `+` `-` `!` `~`
+15. Unary: `+` `-` `!` `~`, and prefix `++` `--`
+16. Postfix `++` `--` (attached to a variable name, see Increment and Decrement)
 
 [Back to top](#contents)
 
@@ -223,6 +229,72 @@ set z [: total = x + y + 10]
 - Number literals: `: 10 = 5` → Error
 - Boolean literals: `: true = 3` → Error
 - Array elements (see Arrays section below)
+
+[Back to top](#contents)
+
+## Increment and Decrement
+
+`++` and `--` add or subtract 1 from a variable, like `incr`:
+
+```tcl
+set i 5
+: ++i          ;# returns 6, i is now 6
+: i++          ;# returns 6, i is now 7   (the old value)
+: --i          ;# returns 6, i is now 6
+: i--          ;# returns 6, i is now 5   (the old value)
+```
+
+Both forms change the variable. They differ in the value of the expression:
+
+| Form | Value of the expression | Variable afterward |
+|------|-------------------------|--------------------|
+| `++i` | new value | `i + 1` |
+| `i++` | old value | `i + 1` |
+| `--i` | new value | `i - 1` |
+| `i--` | old value | `i - 1` |
+
+They can be used inside larger expressions, and are evaluated left to right:
+
+```tcl
+set i 5
+: i++ + ++i          ;# 5 + 7 = 12, i is now 7
+: j = i++ + 1        ;# j is 8, i is now 8
+: {m = 3; (m++, m++, m)}   ;# the list 3 4 5
+```
+
+`a+++b` is read as `a++ + b`, the same as in C.
+
+### Rules
+
+- **Plain variables only.** The operand must be a variable name. `++5`, `(a+1)++`
+  and `++data(1)` are errors. Array elements cannot be changed from Calc (see
+  Arrays), so `data(1)++` is an error too. Use plain Tcl to change an array element.
+- **Integers only.** As with `incr`, the variable must hold an integer. A variable
+  holding `2.5` gives `expected integer but got "2.5"`, and the variable is left alone.
+- **Unset variables are created.** As with `incr`, an unset variable is treated as 0.
+  `: ++n` returns 1 and `: n++` returns 0, and in both cases `n` is now 1. This is true
+  of `--` as well, which leaves -1.
+- **`5--3` is an error.** `--` is read as one operator, so `5--3` gives `expected
+  operator but found '--'`. Write `5 - -3` or `5 - (-3)`. This is the same ambiguity
+  as in C. `5 - -3`, `i-1` and `i+1` are unaffected.
+
+### Performance
+
+In a `proc=`, `method=`, `calc=` or a proc rewritten by `Calc::transformProcs`, `++i`
+is a single TAL instruction, `incrImm i 1`. It is the same instruction that Tcl's
+`incr i` compiles to. These are the bodies `proc=` produces:
+
+```
+: ++i          incrImm i 1
+: i++          incrImm i 1; push 1; sub
+: i = i + 1    load i; push 1; add; store i
+```
+
+`i++` increments first and then subtracts 1 to get the old value. That is why it
+creates an unset variable, and it costs no more instructions than loading the old
+value first. When you do not need the old value, `++i` is the shorter form.
+
+Outside a proc, the variable is addressed by name: `push i; incrStkImm 1`.
 
 [Back to top](#contents)
 
@@ -948,6 +1020,7 @@ set years 10
 | Array syntax | `arr(key)` | `$arr(key)` |
 | Performance | Cached bytecode | Compiled per call |
 | Assignment | `x = value` | `set x [expr ...]` |
+| Increment / decrement | `i++` `++i` `i--` `--i` | Not supported (use `incr`) |
 
 [Back to top](#contents)
 
@@ -958,6 +1031,7 @@ Calc provides:
 - ✅ Clean syntax without `$` sigils
 - ✅ Multiple statements and comments
 - ✅ Right-associative assignment chains
+- ✅ `++` and `--` as single `incr` instructions
 - ✅ Native array and list operations
 - ✅ Extensible via `tcl::mathfunc::*`
 - ✅ Performance bug detection (cache overflow)

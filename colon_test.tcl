@@ -862,6 +862,143 @@ foreach {desc script} {
     verify "rejected: $desc" 1 [catch {uplevel #0 $script}]
 }
 
+puts "236 ========== ++ and -- (increment / decrement) =========="
+# ++i / --i give the NEW value, i++ / i-- give the OLD value; all four change the variable
+set i 5
+verify "++i value"            6 [= ++i]
+verify "++i variable"         6 $i
+verify "i++ value"            6 [= i++]
+verify "i++ variable"         7 $i
+verify "--i value"            6 [= --i]
+verify "--i variable"         6 $i
+verify "i-- value"            6 [= i--]
+verify "i-- variable"         5 $i
+# same results as Tcl's incr
+set i 5; set want [incr i];  set i 5; verify "++i same as incr"        $want [= ++i]
+set i 5; set want [incr i -1]; set i 5; verify "--i same as incr -1"   $want [= --i]
+
+puts "246 ========== ++ and -- create unset variables, as incr does =========="
+clr n1 n2 n3 n4
+verify "unset ++n value"      1  [= ++n1]
+verify "unset ++n variable"   1  $n1
+verify "unset n++ value"      0  [= n2++]
+verify "unset n++ variable"   1  $n2
+verify "unset --n value"      -1 [= --n3]
+verify "unset --n variable"   -1 $n3
+verify "unset n-- value"      0  [= n4--]
+verify "unset n-- variable"   -1 $n4
+
+puts "254 ========== ++ and -- inside larger expressions =========="
+set i 5
+verify "i++ + ++i"            12 [= i++ + ++i]       ;# 5 + 7
+verify "i++ + ++i variable"   7  $i
+verify "++i * 2"              16 [= ++i * 2]
+set i 8
+verify "j = i++ + 1"          9  [= j = i++ + 1]
+verify "j = i++ + 1, j"       9  $j
+verify "j = i++ + 1, i"       9  $i
+verify "multi statement"      3  [= {a = 1; a++; a++; a}]
+verify "a+++b is a++ + b"     3  [= {a = 1; b = 2; a+++b}]
+verify "a+++b changed a"      2  $a
+verify "ternary with i++"     1  [= {k = 0; k++ > -1 ? 1 : 0}]
+verify "function args"        2  [= {m = 1; max(m++, m++)}]
+verify "list of postfix"      {3 4 5} [= {m = 3; (m++, m++, m)}]
+verify "negated prefix"       -4 [= {m = 3; -(++m)}]
+verify "prefix of negative"   -4 [= {m = -5; ++m}]
+verify "double value"         7.0 [= {m = 1; m++ * 2.0 + 5.0}]
+
+puts "269 ========== ++ and -- only take whole integer variables =========="
+set z 2.5
+verify "float variable ++"    {expected integer but got "2.5"} [tryerr {= z++}]
+verify "float variable --"    {expected integer but got "2.5"} [tryerr {= --z}]
+set z abc
+verify "string variable ++"   {expected integer but got "abc"} [tryerr {= ++z}]
+verify "number after ++"      "Calc: expected a variable name after '++' but found '5'" [tryerr {= ++5}]
+verify "paren after --"       "Calc: expected a variable name after '--' but found '('" [tryerr {= --(a)}]
+verify "missing name"         1 [catch {= ++}]
+foreach {desc script} {
+    "number postfix"       {= 5++}
+    "expression postfix"   {= (a+1)++}
+    "array element prefix" {= ++data(1)}
+    "array element postfix" {= data(1)++}
+    "double ++"            {= ++ ++a}
+    "i++ ++"               {= i++ ++}
+    "5--3 is not 5 - -3"   {= 5--3}
+} {
+    verify "rejected: $desc" 1 [catch {uplevel #0 $script}]
+}
+
+puts "282 ========== tokenizer: spaced and scientific forms are unchanged =========="
+verify "5 - -3"               8   [= 5 - -3]
+verify "5 - (-3)"             8   [= 5 - (-3)]
+verify "5 + +3"               8   [= 5 + +3]
+verify "- -3"                 3   [= - -3]
+verifyFloat "3.0e-3 * 1000"   3.0 [= 3.0e-3 * 1000]
+verify "-> still works"       2   [= {l = list(1,2); l -> (p, q); q}]
+verify "i - 1 unchanged"      4   [= {i = 5; i - 1}]
+verify "i-1 unchanged"        4   [= {i = 5; i-1}]
+verify "i+1 unchanged"        6   [= {i = 5; i+1}]
+
+puts "291 ========== ++ and -- in procs =========="
+proc plain_count {n} {
+    set i 0; set s 0
+    while {$i < $n} { set s [expr {$s + $i}]; incr i }
+    list $s $i
+}
+proc= incr_count {n} {
+    = {i = 0; s = 0}
+    while {$i < $n} {
+        = s = s + i
+        = i++
+    }
+    list $s $i
+}
+proc= incr_count_pre {n} {
+    = {i = 0; s = 0}
+    while {$i < $n} {
+        = s = s + i
+        = ++i
+    }
+    list $s $i
+}
+proc= decr_count {n} {
+    = k = n
+    set out {}
+    while {$k > 0} {
+        = k--
+        lappend out $k
+    }
+    set out
+}
+verify "proc= i++ loop"       [plain_count 10] [incr_count 10]
+verify "proc= ++i loop"       [plain_count 10] [incr_count_pre 10]
+verify "proc= k-- loop"       {2 1 0} [decr_count 3]
+proc= incr_values {n} { = {x = n++; y = ++n; (x, y, n)} }
+verify "proc= values"         {10 12 12} [incr_values 10]
+proc= incr_unset {} { = {a = nvp++; b = ++nvq; (a, b, nvp, nvq)} }
+verify "proc= unset vars"     {0 1 1 1} [incr_unset]
+proc= incr_tuple {pt} {
+    = pt -> (x, y)
+    = {x++; y--; (x, y)}
+}
+verify "proc= with tuple"     {2 9} [incr_tuple {1 10}]
+proc= incr_float {} { = {f = 2.5; f++} }
+verify "proc= float error"    {expected integer but got "2.5"} [tryerr incr_float]
+proc= incr_global {} { global gcount; = gcount++ }
+set gcount 7
+verify "proc= global value"   7 [incr_global]
+verify "proc= global changed" 8 $gcount
+verify "assembled to incrImm" 1 [string match {*incrImm*} [info body incr_count]]
+verify "no incr in plain +"   0 [string match {*incrImm*} [info body plain_count]]
+
+puts "302 ========== ++ and -- with Calc::transformProcs =========="
+proc tp_incr {n} {
+    = {n++; n++; n}
+}
+Calc::transformProcs tp_incr
+verify "transformProcs ++"    3 [tp_incr 1]
+verify "transformProcs body"  1 [string match {*incrImm*} [info body tp_incr]]
+
 puts "\n=========================================="
 if {$failures == 0} {
     puts "ALL $::tests TESTS PASSED!"

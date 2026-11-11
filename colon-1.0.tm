@@ -99,7 +99,7 @@ proc compile0 {exp {inproc 0}} {
 }
 #instrument+  Calc::compile0  
 proc tokenise {input} {  
-    set op_re  {\*\*|%|/|\*|->|-|\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}  
+    set op_re  {\+\+|--|\*\*|%|/|\*|->|-|\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}  
     #                                                  ^ added = here (after ==)  
     # ... rest stayed the same
   
@@ -291,6 +291,14 @@ proc parse min_prec {
 #instrument+  parse  
 # Parse expression up to the first operator at the same level of parentheses.
 # Returns the bytecode to evaluate the subexpression.
+# TAL for name += delta (delta is +1 or -1); leaves the new value on the stack.
+# Inside a proc the variable is a real local slot (incrImm), otherwise by name.
+proc incrCode {name delta} {
+    variable inprocFlag
+    if {$inprocFlag} { return "incrImm $name $delta; " }
+    return "push $name; incrStkImm $delta; "
+}
+
 proc parsePrefix token {
     variable depth
     variable precode
@@ -302,6 +310,16 @@ proc parsePrefix token {
     set dep [incr depth]
     #deb2 "[string repeat {  } $dep]PARSEPREFIX token`$token` tokpos=$tokpos"
     
+    # ++name / --name : prefix increment/decrement, value is the new value
+    if {$token eq "++" || $token eq "--"} {
+        set vname [lindex $tokens $tokpos]
+        if {![regexp {^[[:alpha:]_][[:alnum:]_]*$} $vname]} {
+            error "Calc: expected a variable name after '$token' but found '$vname'"
+        }
+        incr tokpos
+        return [incrCode $vname [expr {$token eq "++" ? 1 : -1}]]
+    }
+
     # Is it a number? In C might use Tcl_GetNumberFromObj() here
     # remove underscores from numbers so works in 8.6, normalize 0dxxx numbers also
     if {[string is digit -strict [string index $token 0]]} {
@@ -441,6 +459,13 @@ proc parsePrefix token {
 		        append opcodes "storeStk; "
 		        return $opcodes
 		    }
+            # name++ / name-- : postfix, value is the old value. Increment first and
+            # subtract the delta again, so an unset variable is created (as incr does)
+            if {$token eq "++" || $token eq "--"} {
+                incr tokpos
+                set delta [expr {$token eq "++" ? 1 : -1}]
+                return "[incrCode $name $delta]push $delta; sub; "
+            }
             # It's a variable reference
             set opcodes "push $name; "
             append opcodes "loadStk; "

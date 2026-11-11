@@ -1950,6 +1950,257 @@ test calc-43.13 {>= and == are unaffected by the => token} -constraints hasCalcC
 } -result {1 1 0}
 
 # ============================================================================
+# INCREMENT AND DECREMENT  (++i --i i++ i--)
+# prefix gives the new value, postfix gives the old value, both change the
+# variable and both create an unset variable, as Tcl's incr does
+# ============================================================================
+
+test calc-44.1 {++i returns the new value and increments} -constraints hasCalcCmd -body {
+    set i 5
+    list [= ++i] $i
+} -result {6 6} -cleanup {
+    unset -nocomplain i
+}
+
+test calc-44.2 {i++ returns the old value and increments} -constraints hasCalcCmd -body {
+    set i 5
+    list [= i++] $i
+} -result {5 6} -cleanup {
+    unset -nocomplain i
+}
+
+test calc-44.3 {--i returns the new value and decrements} -constraints hasCalcCmd -body {
+    set i 5
+    list [= --i] $i
+} -result {4 4} -cleanup {
+    unset -nocomplain i
+}
+
+test calc-44.4 {i-- returns the old value and decrements} -constraints hasCalcCmd -body {
+    set i 5
+    list [= i--] $i
+} -result {5 4} -cleanup {
+    unset -nocomplain i
+}
+
+test calc-44.5 {++ and -- agree with incr} -constraints hasCalcCmd -body {
+    set a 5; set b 5; set c 5; set d 5
+    list [= ++a] [incr b] [= --c] [incr d -1] $a $b $c $d
+} -result {6 6 4 4 6 6 4 4} -cleanup {
+    unset -nocomplain a b c d
+}
+
+test calc-44.6 {prefix ++ creates an unset variable} -constraints hasCalcCmd -body {
+    unset -nocomplain n
+    list [= ++n] $n
+} -result {1 1} -cleanup {
+    unset -nocomplain n
+}
+
+test calc-44.7 {postfix ++ creates an unset variable} -constraints hasCalcCmd -body {
+    unset -nocomplain n
+    list [= n++] $n
+} -result {0 1} -cleanup {
+    unset -nocomplain n
+}
+
+test calc-44.8 {prefix -- creates an unset variable} -constraints hasCalcCmd -body {
+    unset -nocomplain n
+    list [= --n] $n
+} -result {-1 -1} -cleanup {
+    unset -nocomplain n
+}
+
+test calc-44.9 {postfix -- creates an unset variable} -constraints hasCalcCmd -body {
+    unset -nocomplain n
+    list [= n--] $n
+} -result {0 -1} -cleanup {
+    unset -nocomplain n
+}
+
+test calc-44.10 {i++ + ++i evaluates left to right} -constraints hasCalcCmd -body {
+    set i 5
+    list [= i++ + ++i] $i
+} -result {12 7} -cleanup {
+    unset -nocomplain i
+}
+
+test calc-44.11 {++i binds tighter than *} -constraints hasCalcCmd -body {
+    set i 7
+    list [= ++i * 2] $i
+} -result {16 8} -cleanup {
+    unset -nocomplain i
+}
+
+test calc-44.12 {postfix in an assignment} -constraints hasCalcCmd -body {
+    set i 8
+    list [= j = i++ + 1] $j $i
+} -result {9 9 9} -cleanup {
+    unset -nocomplain i j
+}
+
+test calc-44.13 {a+++b reads as a++ + b} -constraints hasCalcCmd -body {
+    list [= {a = 1; b = 2; a+++b}] $a $b
+} -result {3 2 2} -cleanup {
+    unset -nocomplain a b
+}
+
+test calc-44.14 {++ and -- inside function arguments} -constraints hasCalcCmd -body {
+    = {m = 1; max(m++, m++)}
+} -result 2 -cleanup {
+    unset -nocomplain m
+}
+
+test calc-44.15 {postfix values in a list} -constraints hasCalcCmd -body {
+    = {m = 3; (m++, m++, m)}
+} -result {3 4 5} -cleanup {
+    unset -nocomplain m
+}
+
+test calc-44.16 {++ and -- in a ternary} -constraints hasCalcCmd -body {
+    = {k = 0; k++ > -1 ? 10 : 20}
+} -result 10 -cleanup {
+    unset -nocomplain k
+}
+
+test calc-44.17 {++ on a non-integer variable is an error} -constraints hasCalcCmd -body {
+    set z 2.5
+    = z++
+} -returnCodes error -result {expected integer but got "2.5"} -cleanup {
+    unset -nocomplain z
+}
+
+test calc-44.18 {-- on a non-integer variable is an error and leaves it alone} -constraints hasCalcCmd -body {
+    set z abc
+    list [catch {= --z} msg] $msg $z
+} -result {1 {expected integer but got "abc"} abc} -cleanup {
+    unset -nocomplain z msg
+}
+
+test calc-44.19 {++ needs a variable name after it} -constraints hasCalcCmd -body {
+    = ++5
+} -returnCodes error -result {Calc: expected a variable name after '++' but found '5'}
+
+test calc-44.20 {-- needs a variable name after it} -constraints hasCalcCmd -body {
+    = --(a)
+} -returnCodes error -result {Calc: expected a variable name after '--' but found '('}
+
+test calc-44.21 {postfix on a number or expression is an error} -constraints hasCalcCmd -body {
+    list [catch {= 5++}] [catch {= (a+1)++}]
+} -result {1 1}
+
+test calc-44.22 {++ on an array element is an error} -constraints hasCalcCmd -body {
+    array set data {1 10}
+    list [catch {= ++data(1)}] [catch {= data(1)++}] $data(1)
+} -result {1 1 10} -cleanup {
+    unset -nocomplain data
+}
+
+test calc-44.23 {5 - -3 still works} -constraints hasCalcCmd -body {
+    list [= 5 - -3] [= 5 - (-3)] [= 5 + +3] [= - -3]
+} -result {8 8 8 3}
+
+test calc-44.24 {5--3 is not 5 - -3} -constraints hasCalcCmd -body {
+    = 5--3
+} -returnCodes error -result {Calc: expected operator but found '--'}
+
+test calc-44.25 {i-1 and i+1 are not affected} -constraints hasCalcCmd -body {
+    set i 5
+    list [= i-1] [= i+1] [= i - 1] $i
+} -result {4 6 4 5} -cleanup {
+    unset -nocomplain i
+}
+
+test calc-44.26 {scientific notation is not affected} -constraints hasCalcCmd -body {
+    = 3.0e-3 * 1000
+} -result 3.0
+
+test calc-44.27 {-> still works next to the new tokens} -constraints hasCalcCmd -body {
+    = {l = list(1,2); l -> (p, q); q}
+} -result 2 -cleanup {
+    unset -nocomplain l p q
+}
+
+test calc-44.28 {++ and -- in proc= use incrImm} -constraints hasCalcCmd -body {
+    proc= t44 {n} {
+        = {i = 0; s = 0}
+        while {$i < $n} {
+            = s = s + i
+            = i++
+        }
+        list $s $i
+    }
+    list [t44 10] [string match *incrImm* [info body t44]]
+} -result {{45 10} 1} -cleanup {
+    rename t44 {}
+}
+
+test calc-44.29 {values of postfix and prefix in proc=} -constraints hasCalcCmd -body {
+    proc= t44 {n} { = {x = n++; y = ++n; (x, y, n)} }
+    t44 10
+} -result {10 12 12} -cleanup {
+    rename t44 {}
+}
+
+test calc-44.30 {proc= creates unset variables with ++} -constraints hasCalcCmd -body {
+    proc= t44 {} { = {a = nvp++; b = ++nvq; (a, b, nvp, nvq)} }
+    t44
+} -result {0 1 1 1} -cleanup {
+    rename t44 {}
+}
+
+test calc-44.31 {-- loop in proc=} -constraints hasCalcCmd -body {
+    proc= t44 {n} {
+        = k = n
+        set out {}
+        while {$k > 0} {
+            = k--
+            lappend out $k
+        }
+        set out
+    }
+    t44 3
+} -result {2 1 0} -cleanup {
+    rename t44 {}
+}
+
+test calc-44.32 {++ works on a global linked into a proc} -constraints hasCalcCmd -body {
+    proc= t44 {} { global gcount; = gcount++ }
+    set gcount 7
+    list [t44] $gcount
+} -result {7 8} -cleanup {
+    rename t44 {}
+    unset -nocomplain gcount
+}
+
+test calc-44.33 {++ with a tuple in proc=} -constraints hasCalcCmd -body {
+    proc= t44 {pt} {
+        = pt -> (x, y)
+        = {x++; y--; (x, y)}
+    }
+    t44 {1 10}
+} -result {2 9} -cleanup {
+    rename t44 {}
+}
+
+test calc-44.34 {++ and -- error in proc= on a float} -constraints hasCalcCmd -body {
+    proc= t44 {} { = {f = 2.5; f++} }
+    t44
+} -returnCodes error -result {expected integer but got "2.5"} -cleanup {
+    rename t44 {}
+}
+
+test calc-44.35 {Calc::transformProcs handles ++} -constraints hasCalcCmd -body {
+    proc t44 {n} {
+        = {n++; n++; n}
+    }
+    Calc::transformProcs t44
+    list [t44 1] [string match *incrImm* [info body t44]]
+} -result {3 1} -cleanup {
+    rename t44 {}
+}
+
+# ============================================================================
 # CLEANUP
 # ============================================================================
 
