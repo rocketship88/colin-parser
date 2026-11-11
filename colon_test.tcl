@@ -999,6 +999,375 @@ Calc::transformProcs tp_incr
 verify "transformProcs ++"    3 [tp_incr 1]
 verify "transformProcs body"  1 [string match {*incrImm*} [info body tp_incr]]
 
+puts "320 ========== Found by mutation testing (see the mutation folder) =========="
+# --- precedence and associativity of every pair of binary operators, against expr
+set mutOps {|| && | ^ & == != < > <= >= << >> + - * / % **}
+array unset ::Calc::cache
+set bad {}
+foreach a $mutOps { foreach b $mutOps {
+    set text "x $a y $b z"
+    set vals [expr {$a in {/ %} || $b in {/ %} ? {1 2 3} : {0 1 2 3}}]
+    foreach x $vals { foreach y $vals { foreach z $vals {
+        set want [expr {[catch {expr "$x $a $y $b $z"} w] ? "ERR" : $w}]
+        set got  [expr {[catch {= $text} g] ? "ERR" : $g}]
+        if {$want ne $got} {lappend bad "$text with $x $y $z: got $got want $want"}
+    }}}
+}}
+verify "all pairs of binary operators agree with expr" {} [lrange $bad 0 2]
+set bad {}
+foreach u {- + ! ~} { foreach op $mutOps {
+    set vals [expr {$op in {/ %} ? {1 2 3} : {0 1 2 3}}]
+    foreach {ctext etext} [list "$u x $op y" "\$u \$x $op \$y" "x $op $u y" "\$x $op \$u \$y"] {
+        foreach x $vals { foreach y $vals {
+            set want [expr {[catch {expr [subst -nocommands $etext]} w] ? "ERR" : $w}]
+            set got  [expr {[catch {= $ctext} g] ? "ERR" : $g}]
+            if {$want ne $got} {lappend bad "$ctext with $x $y: got $got want $want"}
+        }}
+    }
+}}
+verify "unary operators bind tighter than binary ones" {} [lrange $bad 0 2]
+array unset ::Calc::cache
+set out {}
+foreach {x y} {1 2 2 2 3 2} { lappend out [= x <= y] [= x >= y] [= x < y] [= x > y] }
+verify "<= and >= around equality" {1 0 1 0 1 1 0 0 0 1 0 1} $out
+set bad {}
+foreach text {
+    {a ? b : c} {a ? b + 1 : c + 2} {a || b ? c : d} {a ? b : c || d} {a ? b : (c ? d : e)}
+    {a ? (b ? c : d) : e} {(a ? b : c) ? d : e} {a == b ? c : d} {a + b ? c : d} {a ? b : c + d * e}
+    {a && b ? c : d} {a < b ? c : d} {a ? b : c == d} {a ? b : c << d} {a | b ? c : d}
+} {
+    set etext [regsub -all {\m([a-e])\M} $text {$\1}]
+    foreach a {0 1 2} { foreach b {0 1 2} { foreach c {0 1 2} { foreach d {0 1 2} { foreach e {0 1 2} {
+        if {[expr $etext] ne [= $text]} {lappend bad "$text with $a $b $c $d $e"}
+    }}}}}
+}
+verify "ternary mixed with other operators" {} [lrange $bad 0 2]
+set a 1; set b 2
+verify "assignment is lower than ternary" {5 10 1 5 10 1 1} [list [= r = a + b * 2] [= s = a < b ? 10 : 20] [= t = u = a || 0] $r $s $t $u]
+
+# --- one-element parentheses only group
+set x {a b}
+verify "(x) is just x" {{a b} {a b} {{a b} 1}} [list [= (x)] [= ((x))] [= (x, 1)]]
+
+# --- native functions
+set s abc; set l {x y z}
+verify "native functions" {3 3 y {1 2 3} ABC abc b ab} \
+    [list [= strlen(s)] [= llength(l)] [= lindex(l, 1)] [= list(1, 2, 3)] [= xtoupper(s)] [= xtolower(xtoupper(s))] [= xstrindex(s, 1)] [= xstrrange(s, 0, 1)]]
+foreach {e msg} {
+    {strlen(s, s)}      "Calc: strlen expects exactly 1 args, got 2"
+    {llength()}         "Calc: llength expects exactly 1 args, got 0"
+    {lindex(l)}         "Calc: lindex expects at least 2 args, got 1"
+    {list()}            "Calc: list expects at least 1 args, got 0"
+    {xtoupper(s, s)}    "Calc: xtoupper expects exactly 1 args, got 2"
+    {xstrindex(s)}      "Calc: xstrindex expects exactly 2 args, got 1"
+    {xstrrange(s, 0)}   "Calc: xstrrange expects exactly 3 args, got 2"
+} {
+    verify "arity: $e" $msg [tryerr [list = $e]]
+}
+proc= nf_shape {l s} { = {a = llength(l); b = strlen(s); c = lindex(l, 1); d = list(a, b)} }
+set body [info body nf_shape]
+verify "native function results in proc=" {3 5} [nf_shape {p q r} hello]
+verify "native function instructions" {1 1 1 1} [list [string match *listLength* $body] [string match *strlen* $body] [string match *lindexMulti* $body] [string match {*list 2*} $body]]
+proc nf_add {a b} {expr {$a + $b}}
+proc= nf_call {x} { = {r = nf_add(x, 10); s = max(r, 3); sqrt(s)} }
+verify "proc and mathfunc calls" {4.0 1} [list [nf_call 6] [string match *invokeStk* [info body nf_call]]]
+
+# --- messages for malformed input
+foreach {e msg} {
+    {1 )}            "Calc: unexpected token ')' in expression '1 )'"
+    {(1, 2}          "Calc: expected ')' but found ''"
+    {(1}             "Calc: expected ')' but found ''"
+    {max(1, 2}       "Calc: expected ')' or ',' but found ''"
+    {nosuch(1, 2}    "Calc: expected ')' but found ''"
+    {x ? 1}          "Calc: expected ':' but found ''"
+    {5 = 3}          "Calc: cannot assign to number literal '5'"
+    {true = 1}       "Calc: cannot assign to boolean literal 'true'"
+    {false = 1}      "Calc: cannot assign to boolean literal 'false'"
+    {a = 1 ) ; 3}    "Calc: unexpected token ')' in statement 'a = 1 )'"
+    {a = 1; 2 3}     "Calc: expected start of expression but found '2 3'"
+} {
+    verify "error: $e" $msg [tryerr [list = $e]]
+}
+# --- the compile cache is limited to 1000 expressions
+array unset ::Calc::cache
+for {set i 0} {$i < 1000} {incr i} {set ::Calc::cache(fake$i) {}}
+verify "cache: 1000 entries still compile" {0 8} [list [catch {= 7 + 1} m1] $m1]
+verify "cache: the 1001st is refused"      {1 {Calc: Cache exhausted with expression: 8 + 1}} [list [catch {= 8 + 1} m2] $m2]
+array unset ::Calc::cache
+# --- numbers
+set e 5
+verify "number forms" {1001 12 6 1.0 1.0 1.0 20.0 20.0 2 2} \
+    [list [= 1_000 + 1] [= 0d12] [= 0D5 + 1] [= 1e-2 * 100] [= 5e-1 * 2] [= 1E-1 * 10] [= 2e+1 * 1] [= 2E+1 * 1] [= e-3] [= e - 3]]
+set a_b 4; set _c 5; set d0 6
+verify "names with underscores" {5 6 7} [list [= a_b + 1] [= _c + 1] [= d0 + 1]]
+verify "trailing comments" 6 [= {p = 3 ;# set p
+                                 p * 2 # double it
+                                }]
+
+puts "338 ========== several && and || in one body (labels must be unique) =========="
+proc= lab1 {a b c} {= (a < 0) || (b < 0) || (c < 0)}
+verify "three || in one expression" {0 1 1 1} [list [lab1 1 1 1] [lab1 1 -1 1] [lab1 1 1 -1] [lab1 -1 1 1]]
+proc= lab2 {a b c} { = { x = (a < 0) || (b < 0); y = (b < 0) || (c < 0); x*2 + y } }
+verify "|| in two statements" {0 2 3 1} [list [lab2 1 1 1] [lab2 -1 1 1] [lab2 1 -1 1] [lab2 1 1 -1]]
+proc= lab3c {a b c} {= !(((a<0)||(b<0)||(c<0)) && ((a>0)||(b>0)||(c>0)))}
+proc lab3e {a b c} {expr {!((($a<0)||($b<0)||($c<0)) && (($a>0)||($b>0)||($c>0)))}}
+set bad {}
+foreach a {-2 0 3} {foreach b {-1 0 5} {foreach c {-4 0 7} {
+    if {[lab3c $a $b $c] != [lab3e $a $b $c]} {lappend bad [list $a $b $c]}
+}}}
+verify "|| mixed with &&, against expr" {} $bad
+proc= lab4 {a b c} {= a > 0 ? (b > 0 && c > 0 ? 1 : 2) : (b < 0 || c < 0 ? 3 : 4)}
+verify "&& and || in ternary branches" {1 2 3 4} [list [lab4 1 1 1] [lab4 1 1 -1] [lab4 -1 -1 1] [lab4 -1 1 1]]
+proc lab5 {a b c} {= (a > 0) && (b > 0) && (c > 0)}
+Calc::transformProcs lab5
+verify "two && through transformProcs" {1 0 0} [list [lab5 1 1 1] [lab5 1 1 0] [lab5 0 1 1]]
+
+puts "345 ========== proc= / calc= / method= output and errors =========="
+proc= pp1 {x} {
+    = y = x + 1
+    = {z = y * 2}
+    set r [= z + 1]
+    set s [: {
+        w = z + 2
+    }]
+    return [list $r $s]
+}
+set b [info body pp1]
+verify "proc= results" {11 12} [pp1 4]
+verify "proc= uses locals" {0 0 1 1 1 1} [list [string match *loadStk* $b] [string match *storeStk* $b] [string match {*store y*} $b] [string match {*store z*} $b] [string match {*store w*} $b] [string match {*load x*} $b]]
+proc= pp2 {x} {
+    = y = x + 1
+    return $y
+}
+proc= pp3 {x} {
+    = y = x + 1
+    return $y
+} 0
+verify "proc= keeps source unless debug is 0" {2 2 1 0 1} [list [pp2 1] [pp3 1] [string match {*if {0}*= y = x + 1*} [info body pp2]] [string match *if* [info body pp3]] [string match *assemble* [info body pp3]]]
+proc= pp4 {x} {
+    set v [: {
+        t = x +
+            10;
+        t * 2
+    }] ; set w 5
+    set u [: x + 1 ]
+    set k "<[= {x * 3}]>"
+    set m [list [= x + 2] [: {x + 3}]]
+    return [list $v $w $u $k $m]
+}
+verify "inline forms with text around them" {22 5 2 <3> {3 4}} [pp4 1]
+proc= pp5 {x} {
+    set v [: {
+        x + 1
+    }
+    ]
+    return $v
+}
+verify "closing bracket on a later line" {2 1} [list [pp5 1] [string match *assemble* [info body pp5]]]
+foreach {name body msg} {
+    e1 {
+    set q 1
+    = 1 + )
+}            "Proc= error compiling 'e1'  line 3: Calc: expected start of expression but found ')'"
+    e2 {
+    set q 1
+    set z [= 1 + )]
+}            "Proc= error compiling 'e2'  line 3: Calc: expected start of expression but found ')'"
+    e3 {
+    set q 1
+    = {
+        a = 1;
+        b = 2 )
+    }
+}            "Proc= error compiling 'e3'  line 6: Calc: unexpected token ')' in statement 'b = 2 )'"
+    e4 {
+    set q 1
+    set z [= {
+       1 + )
+    }]
+}            "Proc= error compiling 'e4'  line 5: Calc: expected start of expression but found ')'"
+} {
+    verify "proc= error $name" $msg [tryerr [list proc= $name {} $body]]
+}
+verify "calc= error" "Calc= error in section 'sect' line 3: Calc: expected start of expression but found ')'" [tryerr {calc= sect {
+    set q 1
+    = 1 + )
+}}]
+oo::class create T48
+verify "method= error" "Method= error compiling 'm'  line 2: Calc: expected start of expression but found ')'" [tryerr {oo::define T48 {method= m {} {
+    = 1 + )
+}}}]
+array unset ::Calc::calc
+set q 3
+calc= first {
+    = q2 = q * 2
+}
+calc= second {
+    = q3 = q * 3
+} 0
+verify "calc= runs in the caller, records unless debug is 0" {6 9 {{"calc=first"}}} [list $q2 $q3 [lsort [array names ::Calc::calc]]]
+namespace eval ns48 {
+    proc= f {x} { = x + 1 }
+}
+oo::class create T48b { method= m {x} { = x * 2 } }
+verify "proc= and method= define in the caller's namespace" {2 {} 8} [list [ns48::f 1] [info procs ::f] [[T48b new] m 4]]
+
+puts "362 ========== Calc::transformProcs options =========="
+namespace eval ::tp49 {
+    proc a {x {y 5}} {
+        = x + y
+    }
+    proc b {x} {
+        = {x * 2}
+    }
+    namespace eval inner {
+        proc c {x} {
+            = x - 1
+        }
+    }
+}
+proc tp49top {x} {
+    = x + 100
+}
+verify "-listonly" {{::tp49::a ::tp49::b} ::tp49::inner::c {::tp49::a ::tp49::b} ::tp49top 0 0} \
+    [list [Calc::transformProcs -listonly ::tp49::*] [Calc::transformProcs -listonly ::tp49::inner::*] \
+          [Calc::transformProcs -listonly ::tp49::a ::tp49::b] [Calc::transformProcs -listonly tp49top] \
+          [string match *assemble* [info body ::tp49::a]] [string match *assemble* [info body tp49top]]]
+verify "-regex and globs" {{::tp49::a ::tp49::b} ::tp49top ::tp49top {} {}} \
+    [list [Calc::transformProcs -listonly -regex {^::tp49::[ab]$}] [Calc::transformProcs -listonly -regex {^tp49t}] \
+          [Calc::transformProcs -listonly {tp49t?p}] [Calc::transformProcs -listonly {tp49t?}] [Calc::transformProcs -listonly nosuchproc]]
+set done [Calc::transformProcs ::tp49::a]
+info default ::tp49::a y d
+verify "transformProcs result, args and defaults" {::tp49::a {x y} 5 6 11 1} [list $done [info args ::tp49::a] $d [::tp49::a 1] [::tp49::a 1 10] [string match *assemble* [info body ::tp49::a]]]
+Calc::transformProcs -preserve 0 ::tp49::b
+set b1 [info body ::tp49::b]
+Calc::transformProcs -preserve 1 tp49top
+set b2 [info body tp49top]
+verify "-preserve" {0 1 8 101} [list [string match *if* $b1] [string match {*if {0}*} $b2] [::tp49::b 4] [tp49top 1]]
+set before [string match *assemble* [info body ::tp49::inner::c]]
+Calc::transformProcs ::tp49::*
+set mid [string match *assemble* [info body ::tp49::inner::c]]
+Calc::transformProcs ::tp49::inner::*
+verify "nested namespaces need their own pattern" {0 0 1 3} [list $before $mid [string match *assemble* [info body ::tp49::inner::c]] [::tp49::inner::c 4]]
+set all [Calc::AllProcsRecursive]
+verify "AllProcsRecursive" {1 1 1 0} [list [expr {[lsearch -exact $all ::tp49top] >= 0}] [expr {[lsearch -exact $all ::tp49::a] >= 0}] [expr {[lsearch -exact $all ::tp49::inner::c] >= 0}] [expr {[lsearch -exact $all ::tp49::nosuch] >= 0}]]
+foreach {desc argv0 msg} {
+    "no pattern"        {}           "Calc::transformProcs: no proc name pattern(s) given"
+    "-preserve alone"   {-preserve}  "Calc::transformProcs: -preserve requires a value"
+    "-listonly alone"   {-listonly}  "Calc::transformProcs: no proc name pattern(s) given"
+} {
+    verify "transformProcs: $desc" $msg [tryerr "Calc::transformProcs $argv0"]
+}
+proc tp49bad {} {
+    = 1 + )
+}
+verify "transformProcs reports the proc" 1 [string match "Calc::transformProcs error compiling '::tp49bad'*expected start of expression but found ')'" [tryerr {Calc::transformProcs tp49bad}]]
+proc tp49plain {a {b 2}} {expr {$a * $b}}
+Calc::transformProcs tp49plain
+verify "transformProcs on plain Tcl" {6 12} [list [tp49plain 3] [tp49plain 3 4]]
+
+puts "379 ========== a fresh interpreter =========="
+set ip [interp create]
+$ip eval [list ::tcl::tm::path add [file dirname [info script]]]
+$ip eval {package require colon}
+$ip eval {set pt {3 4 5}}
+set out {}
+lappend out [$ip eval {= pt -> (a, b, c); list $a $b $c}]
+lappend out [$ip eval {= pt => (d, e, f); list $d $e $f}]
+lappend out [$ip eval {= 1 ? 2 : 3}] [$ip eval {= 1 && 0}] [$ip eval {= 0 || 2}]
+lappend out [$ip eval {= ++n}] [$ip eval {= n++}] [$ip eval {= n}]
+lappend out [$ip eval {proc= f {x} { = x * 2 }; f 4}]
+interp delete $ip
+verify "fresh interpreter, tuples first" {{3 4 5} {3 4 5} 2 0 1 1 1 2 8} $out
+
+puts "395 ========== Preprocessor output, the debug hook, nesting, defaults =========="
+proc esc53 {s} {string map [list \n {\n}] $s}
+proc= ms1 {x} {
+    = {a = x + 1; b = a * 2}
+}
+set body [info body ms1]
+verify "multi statement braces use locals" {8 0 0 1 1 1} [list [ms1 3] [string match *loadStk* $body] [string match *storeStk* $body] [string match {*store a*} $body] [string match {*store b*} $body] [string match {*load x*} $body]]
+set lst {p q r}
+proc= ms2 {l} {
+    = l -> w2
+    return $w2
+}
+verify "single name target" {{p q r} {p q r} {p q r} {p q r} {x y} 1 1} \
+    [list [= lst -> w] $w [= lst => v] $v [ms2 {x y}] [string match {*store w2*} [info body ms2]] [string match {*load l*} [info body ms2]]]
+verify "tuple RHS is a full expression" {{1 2} 1 2 {1 2}} [list [= (a, b) = c = list(1, 2)] $a $b $c]
+verify "1e- is not a number" "Calc: expected start of expression but found '1e'" [tryerr {= 1e-}]
+verify "transform= defaults" {\n    if {0} {     = y = x + 1 } { tcl::unsupported::assemble {push y; push x; loadStk; push 1; add; storeStk; } }\n\n} [esc53 [Calc::transform= {} "\n    = y = x + 1\n"]]
+verify "transform= unbraced" {{\n    tcl::unsupported::assemble {load x; push 1; add; store y; }\n\n} {\n    if {0} {     = y = x + 1 } { tcl::unsupported::assemble {load x; push 1; add; store y; } }\n\n}} \
+    [list [esc53 [Calc::transform= {} "\n    = y = x + 1\n" 1 0]] [esc53 [Calc::transform= {} "\n    = y = x + 1\n" 1 1]]]
+verify "transform= braced" {{\n    tcl::unsupported::assemble {load x; store a; pop; load a; push 1; add; store b; }\n\n} {\n    if {0} {     = {z = x} } { tcl::unsupported::assemble {load x; store z; } }\n\n} {\n    tcl::unsupported::assemble {load x; push 1; add; store a; pop; load a; push 2; mult; store b; }\n\n}} \
+    [list [esc53 [Calc::transform= {} "\n    = \{\n      a = x;\n      b = a + 1\n    \}\n" 1 0]] \
+          [esc53 [Calc::transform= {} "\n    = \{z = x\}\n" 1 1]] \
+          [esc53 [Calc::transform= {} "\n    = \{a = x + 1; b = a * 2\}\n" 1 0]]]
+verify "transform= inline braced" {{\n    set v [tcl::unsupported::assemble {load x; push 1; add; }] ; set w 5\n\n} {\n    set v [if {0} {[: { x + 1 }]} {tcl::unsupported::assemble {load x; push 1; add; }}]\n\n}} \
+    [list [esc53 [Calc::transform= {} "\n    set v \[: \{\n x + 1\n \}\] ; set w 5\n" 1 0]] \
+          [esc53 [Calc::transform= {} "\n    set v \[: \{ x + 1 \}\]\n" 1 1]]]
+verify "transform= inline" {{\n    list [tcl::unsupported::assemble {load x; push 1; add; }] and [tcl::unsupported::assemble {load x; push 2; mult; }] end\n\n} {\n    list [if {0} {= x + 1} {tcl::unsupported::assemble {load x; push 1; add; }}] and [if {0} {: x * 2} {tcl::unsupported::assemble {load x; push 2; mult; }}] end\n\n} {[tcl::unsupported::assemble {load x; push 1; add; }] tail\n\n}} \
+    [list [esc53 [Calc::transform= {} "\n    list \[= x + 1\] and \[: x * 2\] end\n" 1 0]] \
+          [esc53 [Calc::transform= {} "\n    list \[= x + 1\] and \[: x * 2\] end\n" 1 1]] \
+          [esc53 [Calc::transform= {} "\[= x + 1\] tail\n" 1 0]]]
+verify "transform= passthrough" {\n    set q 1\n    puts hi\n\n} [esc53 [Calc::transform= {} "\n    set q 1\n    puts hi\n" 1 0]]
+
+rename Calc::debug Calc::debug.saved
+proc Calc::debug {args} {lappend ::dbgcalls [lindex $args 0]}
+set ::dbgcalls {}
+set rc [catch {
+    proc= dbg1 {x} { = x + 1 } 2
+    proc= dbg1n {x} { = x + 1 } -2
+    proc= dbg1x {x} { = x + 1 } 1
+    proc= dbg1z {x} { = x + 1 } 0
+    calc= dbg2 { = zz = 1 } 2
+    calc= dbg2x { = zz = 1 } 1
+    oo::class create DC53
+    oo::define DC53 { method= m {x} { = x + 1 } 2 }
+    oo::define DC53 { method= m1 {x} { = x + 1 } 1 }
+    proc dbg4 {x} { = x + 1 }
+    Calc::transformProcs -preserve 2 dbg4
+    Calc::transformProcs -preserve 1 dbg4
+} msg]
+rename Calc::debug {}
+rename Calc::debug.saved Calc::debug
+verify "debug above 1 calls Calc::debug" {0 {dbg1 dbg1n dbg2 m ::dbg4}} [list $rc $::dbgcalls]
+
+oo::class create DC53b
+oo::define DC53b { method= m1 {x} { = x + 1 } 1 }
+oo::define DC53b { method= m0 {x} { = x + 1 } 0 }
+oo::define DC53b { method= md {x} { = x + 1 } }
+set out {}
+foreach m {m1 m0 md} {
+    set b [lindex [info class definition DC53b $m] 1]
+    lappend out [string match *if* $b] [string match {*load x*} $b] [string match *loadStk* $b]
+}
+lappend out [[DC53b new] md 4]
+verify "method= output" {1 1 0 0 1 0 1 1 0 5} $out
+
+proc tp53d {x} { = x + 1 }
+Calc::transformProcs tp53d
+verify "transformProcs: each match once" {{::tp49::a ::tp49::b} {::tp49::a ::tp49::b} 1 2} \
+    [list [Calc::transformProcs -listonly ::tp49::a ::tp49::*] [Calc::transformProcs -listonly ::tp49::b ::tp49::a] [string match {*if {0}*} [info body tp53d]] [tp53d 1]]
+verify "transformProcs: -preserve and no pattern" {1 {Calc::transformProcs: no proc name pattern(s) given} 1 {Calc::transformProcs: no proc name pattern(s) given}} \
+    [list [catch {Calc::transformProcs -preserve 0} m1] $m1 [catch {Calc::transformProcs -preserve 0 -listonly} m2] $m2]
+namespace eval ::tq53 {
+    proc pt {} {}
+    namespace eval a { proc pa {} {}
+        namespace eval b { proc pb {} {}
+            namespace eval c { proc pc {} {} } }
+        namespace eval d { proc pd {} {} } }
+    namespace eval e { proc pe {} {} }
+    namespace eval f { namespace eval g { proc pg {} {} } }
+}
+set all [Calc::AllProcsRecursive]
+set out {}
+foreach p {::tq53::pt ::tq53::a::pa ::tq53::a::b::pb ::tq53::a::b::c::pc ::tq53::a::d::pd ::tq53::e::pe ::tq53::f::g::pg} {
+    lappend out [expr {[lsearch -exact $all $p] >= 0}]
+}
+verify "AllProcsRecursive deep and sibling namespaces" {1 1 1 1 1 1 1} $out
+namespace delete ::tq53
+
 puts "\n=========================================="
 if {$failures == 0} {
     puts "ALL $::tests TESTS PASSED!"

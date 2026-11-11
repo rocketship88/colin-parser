@@ -1,0 +1,9030 @@
+[
+ {
+  "id": 1,
+  "line": 8,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "7": "    if { [llength $args] != 1 } {"
+  }
+ },
+ {
+  "id": 2,
+  "line": 8,
+  "kind": "cmp",
+  "desc": "!= -> ==",
+  "edits": {
+   "7": "    if { [llength $args] == 0 } {"
+  }
+ },
+ {
+  "id": 3,
+  "line": 8,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "7": "    if {!( [llength $args] != 0 )} {"
+  }
+ },
+ {
+  "id": 4,
+  "line": 9,
+  "kind": "del",
+  "desc": "delete: set arg [join \"$arg $args\"]",
+  "edits": {
+   "8": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 5,
+  "line": 11,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "10": "    if {!([info exist ::Calc::cache($arg)]  )} {"
+  }
+ },
+ {
+  "id": 6,
+  "line": 18,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "17": "    if { [llength $args] != 1 } {"
+  }
+ },
+ {
+  "id": 7,
+  "line": 18,
+  "kind": "cmp",
+  "desc": "!= -> ==",
+  "edits": {
+   "17": "    if { [llength $args] == 0 } {"
+  }
+ },
+ {
+  "id": 8,
+  "line": 18,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "17": "    if {!( [llength $args] != 0 )} {"
+  }
+ },
+ {
+  "id": 9,
+  "line": 19,
+  "kind": "del",
+  "desc": "delete: set arg [join \"$arg $args\"]",
+  "edits": {
+   "18": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 10,
+  "line": 21,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "20": "    if {!( [info exist ::Calc::cache($arg)]  )} {"
+  }
+ },
+ {
+  "id": 11,
+  "line": 30,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "29": "variable strictFlag 1"
+  }
+ },
+ {
+  "id": 12,
+  "line": 30,
+  "kind": "del",
+  "desc": "delete: variable strictFlag 0",
+  "edits": {
+   "29": ";# MUTANT deleted"
+  }
+ },
+ {
+  "id": 13,
+  "line": 38,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "37": "proc compile0 {exp {inproc 1}} {"
+  }
+ },
+ {
+  "id": 14,
+  "line": 39,
+  "kind": "del",
+  "desc": "delete: variable tokens",
+  "edits": {
+   "38": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 15,
+  "line": 40,
+  "kind": "del",
+  "desc": "delete: variable tokpos",
+  "edits": {
+   "39": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 16,
+  "line": 41,
+  "kind": "del",
+  "desc": "delete: variable inprocFlag",
+  "edits": {
+   "40": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 17,
+  "line": 42,
+  "kind": "del",
+  "desc": "delete: set inprocFlag $inproc",
+  "edits": {
+   "41": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 18,
+  "line": 43,
+  "kind": "num",
+  "desc": "1000 -> 1001",
+  "edits": {
+   "42": "    if { [array size ::Calc::cache] > 1001 } {"
+  }
+ },
+ {
+  "id": 19,
+  "line": 43,
+  "kind": "num",
+  "desc": "1000 -> 999",
+  "edits": {
+   "42": "    if { [array size ::Calc::cache] > 999 } {"
+  }
+ },
+ {
+  "id": 20,
+  "line": 43,
+  "kind": "cmp",
+  "desc": "> -> >=",
+  "edits": {
+   "42": "    if { [array size ::Calc::cache] >= 1000 } {"
+  }
+ },
+ {
+  "id": 21,
+  "line": 43,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "42": "    if {!( [array size ::Calc::cache] > 1000 )} {"
+  }
+ },
+ {
+  "id": 22,
+  "line": 44,
+  "kind": "del",
+  "desc": "delete: error \"Calc: Cache exhausted with expression: $exp\"",
+  "edits": {
+   "43": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 23,
+  "line": 48,
+  "kind": "del",
+  "desc": "delete: regsub -all  {#[^\\n]*}  $exp {} exp",
+  "edits": {
+   "47": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 24,
+  "line": 50,
+  "kind": "del",
+  "desc": "delete: set exp [string map {\"'\" \";\" \"\\n\" \" \" \"\\$\" \"\"} $exp]",
+  "edits": {
+   "49": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 25,
+  "line": 54,
+  "kind": "cmp",
+  "desc": "== -> !=",
+  "edits": {
+   "53": "    if {[string first \";\" $exp] != -1} {"
+  }
+ },
+ {
+  "id": 26,
+  "line": 54,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "53": "    if {!([string first \";\" $exp] == -1)} {"
+  }
+ },
+ {
+  "id": 27,
+  "line": 55,
+  "kind": "del",
+  "desc": "delete: set stmtcode [compile [tokenise $exp]]",
+  "edits": {
+   "54": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 28,
+  "line": 56,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "55": "        if {$tokpos <= [llength $tokens]} {"
+  }
+ },
+ {
+  "id": 29,
+  "line": 56,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "55": "        if {!($tokpos < [llength $tokens])} {"
+  }
+ },
+ {
+  "id": 30,
+  "line": 57,
+  "kind": "cmp",
+  "desc": "in -> ni",
+  "edits": {
+   "56": "            error \"Calc: unexpected token '[lindex $tokens $tokpos]' ni expression '$exp'\""
+  }
+ },
+ {
+  "id": 31,
+  "line": 57,
+  "kind": "del",
+  "desc": "delete: error \"Calc: unexpected token '[lindex $tokens $tokpos]' in ",
+  "edits": {
+   "56": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 32,
+  "line": 59,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "58": "        if {!($inproc)} {"
+  }
+ },
+ {
+  "id": 33,
+  "line": 60,
+  "kind": "swap",
+  "desc": "storeStk -> loadStk",
+  "edits": {
+   "59": "            if {[regexp {^push ([[:alpha:]_][^:;\\s]*); (.*); loadStk; $} $stmtcode -> name expr]} {"
+  }
+ },
+ {
+  "id": 34,
+  "line": 60,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "59": "            if {[regexp {^pop ([[:alpha:]_][^:;\\s]*); (.*); storeStk; $} $stmtcode -> name expr]} {"
+  }
+ },
+ {
+  "id": 35,
+  "line": 60,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "59": "            if {!([regexp {^push ([[:alpha:]_][^:;\\s]*); (.*); storeStk; $} $stmtcode -> name expr])} {"
+  }
+ },
+ {
+  "id": 36,
+  "line": 61,
+  "kind": "swap",
+  "desc": "store -> load",
+  "edits": {
+   "60": "                set stmtcode \"$expr; load $name; \""
+  }
+ },
+ {
+  "id": 37,
+  "line": 61,
+  "kind": "del",
+  "desc": "delete: set stmtcode \"$expr; store $name; \"",
+  "edits": {
+   "60": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 38,
+  "line": 64,
+  "kind": "del",
+  "desc": "delete: return $stmtcode",
+  "edits": {
+   "63": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 39,
+  "line": 68,
+  "kind": "del",
+  "desc": "delete: set statements [split $exp \";\"]",
+  "edits": {
+   "67": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 40,
+  "line": 69,
+  "kind": "del",
+  "desc": "delete: set bytecode \"\"",
+  "edits": {
+   "68": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 41,
+  "line": 70,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "69": "    set count 1"
+  }
+ },
+ {
+  "id": 42,
+  "line": 70,
+  "kind": "del",
+  "desc": "delete: set count 0",
+  "edits": {
+   "69": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 43,
+  "line": 72,
+  "kind": "del",
+  "desc": "delete: set stmt [string trim $stmt]",
+  "edits": {
+   "71": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 44,
+  "line": 73,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "72": "        if {$stmt neq \"\"} continue"
+  }
+ },
+ {
+  "id": 45,
+  "line": 73,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "72": "        if {$stmt ne \"\"} continue"
+  }
+ },
+ {
+  "id": 46,
+  "line": 73,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "72": "        if {!($stmt eq \"\")} continue"
+  }
+ },
+ {
+  "id": 47,
+  "line": 75,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "74": "        if {$count > 1} {"
+  }
+ },
+ {
+  "id": 48,
+  "line": 75,
+  "kind": "cmp",
+  "desc": "> -> >=",
+  "edits": {
+   "74": "        if {$count >= 0} {"
+  }
+ },
+ {
+  "id": 49,
+  "line": 75,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "74": "        if {!($count > 0)} {"
+  }
+ },
+ {
+  "id": 50,
+  "line": 76,
+  "kind": "del",
+  "desc": "delete: append bytecode \"pop; \"",
+  "edits": {
+   "75": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 51,
+  "line": 78,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "77": "        if {!( $inproc )} {"
+  }
+ },
+ {
+  "id": 52,
+  "line": 79,
+  "kind": "del",
+  "desc": "delete: set stmtcode [compile [tokenise $stmt]]",
+  "edits": {
+   "78": "        \t;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 53,
+  "line": 80,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "79": "            if {$tokpos <= [llength $tokens]} {"
+  }
+ },
+ {
+  "id": 54,
+  "line": 80,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "79": "            if {!($tokpos < [llength $tokens])} {"
+  }
+ },
+ {
+  "id": 55,
+  "line": 81,
+  "kind": "cmp",
+  "desc": "in -> ni",
+  "edits": {
+   "80": "                error \"Calc: unexpected token '[lindex $tokens $tokpos]' ni statement '$stmt'\""
+  }
+ },
+ {
+  "id": 56,
+  "line": 81,
+  "kind": "del",
+  "desc": "delete: error \"Calc: unexpected token '[lindex $tokens $tokpos]' in ",
+  "edits": {
+   "80": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 57,
+  "line": 84,
+  "kind": "swap",
+  "desc": "storeStk -> loadStk",
+  "edits": {
+   "83": "            if {[regexp {^push ([[:alpha:]_][^:;\\s]*); (.*); loadStk; $} $stmtcode -> name expr]} {"
+  }
+ },
+ {
+  "id": 58,
+  "line": 84,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "83": "            if {[regexp {^pop ([[:alpha:]_][^:;\\s]*); (.*); storeStk; $} $stmtcode -> name expr]} {"
+  }
+ },
+ {
+  "id": 59,
+  "line": 84,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "83": "            if {!([regexp {^push ([[:alpha:]_][^:;\\s]*); (.*); storeStk; $} $stmtcode -> name expr])} {"
+  }
+ },
+ {
+  "id": 60,
+  "line": 85,
+  "kind": "swap",
+  "desc": "store -> load",
+  "edits": {
+   "84": "                set stmtcode \"$expr; load $name; \""
+  }
+ },
+ {
+  "id": 61,
+  "line": 85,
+  "kind": "del",
+  "desc": "delete: set stmtcode \"$expr; store $name; \"",
+  "edits": {
+   "84": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 62,
+  "line": 87,
+  "kind": "del",
+  "desc": "delete: append bytecode $stmtcode",
+  "edits": {
+   "86": "        \t;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 63,
+  "line": 89,
+  "kind": "del",
+  "desc": "delete: append bytecode [compile [tokenise $stmt]]",
+  "edits": {
+   "88": "        \t;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 64,
+  "line": 90,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "89": "            if {$tokpos <= [llength $tokens]} {"
+  }
+ },
+ {
+  "id": 65,
+  "line": 90,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "89": "            if {!($tokpos < [llength $tokens])} {"
+  }
+ },
+ {
+  "id": 66,
+  "line": 91,
+  "kind": "cmp",
+  "desc": "in -> ni",
+  "edits": {
+   "90": "                error \"Calc: unexpected token '[lindex $tokens $tokpos]' ni statement '$stmt'\""
+  }
+ },
+ {
+  "id": 67,
+  "line": 91,
+  "kind": "del",
+  "desc": "delete: error \"Calc: unexpected token '[lindex $tokens $tokpos]' in ",
+  "edits": {
+   "90": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 68,
+  "line": 95,
+  "kind": "del",
+  "desc": "delete: incr count",
+  "edits": {
+   "94": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 69,
+  "line": 95,
+  "kind": "incr",
+  "desc": "incr count -> incr count -1",
+  "edits": {
+   "94": "        incr count -1"
+  }
+ },
+ {
+  "id": 70,
+  "line": 98,
+  "kind": "del",
+  "desc": "delete: return $bytecode",
+  "edits": {
+   "97": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 71,
+  "line": 102,
+  "kind": "del",
+  "desc": "delete: set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|=",
+  "edits": {
+   "101": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 72,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative \\+\\+",
+  "edits": {
+   "101": "    set op_re  {--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 73,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative --",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 74,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative \\*\\*",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 75,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative %",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 76,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative /",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 77,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative \\*",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 78,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative ->",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 79,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative -",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 80,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative \\+",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 81,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative >>",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 82,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative <<",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 83,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative >=",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 84,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative <=",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 85,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative >",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 86,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative <",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 87,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative !=",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 88,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative ==",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 89,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative =>",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 90,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative =",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 91,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative &&",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 92,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative &",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 93,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative \\|\\|",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 94,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative \\|",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\^|::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 95,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative \\^",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||::|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 96,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative ::",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|:|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 97,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative :",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|\\?|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 98,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative \\?",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|,|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 99,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative ,",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|!|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 100,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative !",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|~|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 101,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative ~",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|\\(|\\)}  "
+  }
+ },
+ {
+  "id": 102,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative \\(",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\)}  "
+  }
+ },
+ {
+  "id": 103,
+  "line": 102,
+  "kind": "opre",
+  "desc": "tokenizer: drop alternative \\)",
+  "edits": {
+   "101": "    set op_re  {\\+\\+|--|\\*\\*|%|/|\\*|->|-|\\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\\|\\||\\||\\^|::|:|\\?|,|!|~|\\(}  "
+  }
+ },
+ {
+  "id": 104,
+  "line": 106,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "105": "    set pos 1  "
+  }
+ },
+ {
+  "id": 105,
+  "line": 106,
+  "kind": "del",
+  "desc": "delete: set pos 0",
+  "edits": {
+   "105": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 106,
+  "line": 107,
+  "kind": "del",
+  "desc": "delete: set output {}",
+  "edits": {
+   "106": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 107,
+  "line": 108,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "107": "    set needsMerge 1"
+  }
+ },
+ {
+  "id": 108,
+  "line": 108,
+  "kind": "del",
+  "desc": "delete: set needsMerge 0",
+  "edits": {
+   "107": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 109,
+  "line": 111,
+  "kind": "del",
+  "desc": "delete: set prev [string trim [string range $input $pos $start-1]]",
+  "edits": {
+   "110": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 110,
+  "line": 112,
+  "kind": "cmp",
+  "desc": "ne -> eq",
+  "edits": {
+   "111": "        if {$prev eq {}} {"
+  }
+ },
+ {
+  "id": 111,
+  "line": 112,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "111": "        if {!($prev ne {})} {"
+  }
+ },
+ {
+  "id": 112,
+  "line": 113,
+  "kind": "del",
+  "desc": "delete: lappend output $prev",
+  "edits": {
+   "112": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 113,
+  "line": 114,
+  "kind": "del",
+  "desc": "delete: set last [string index $prev end]",
+  "edits": {
+   "113": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 114,
+  "line": 115,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "114": "            if {($last neq \"e\" || $last eq \"E\") && [string is double -strict \"${prev}0\"]} {"
+  }
+ },
+ {
+  "id": 115,
+  "line": 115,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "114": "            if {($last eq \"e\" || $last neq \"E\") && [string is double -strict \"${prev}0\"]} {"
+  }
+ },
+ {
+  "id": 116,
+  "line": 115,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "114": "            if {($last eq \"e\" || $last eq \"E\") && [string is double -strict \"${prev}1\"]} {"
+  }
+ },
+ {
+  "id": 117,
+  "line": 115,
+  "kind": "cmp",
+  "desc": "&& -> ||",
+  "edits": {
+   "114": "            if {($last eq \"e\" || $last eq \"E\") || [string is double -strict \"${prev}0\"]} {"
+  }
+ },
+ {
+  "id": 118,
+  "line": 115,
+  "kind": "cmp",
+  "desc": "|| -> &&",
+  "edits": {
+   "114": "            if {($last eq \"e\" && $last eq \"E\") && [string is double -strict \"${prev}0\"]} {"
+  }
+ },
+ {
+  "id": 119,
+  "line": 115,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "114": "            if {($last ne \"e\" || $last eq \"E\") && [string is double -strict \"${prev}0\"]} {"
+  }
+ },
+ {
+  "id": 120,
+  "line": 115,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "114": "            if {($last eq \"e\" || $last ne \"E\") && [string is double -strict \"${prev}0\"]} {"
+  }
+ },
+ {
+  "id": 121,
+  "line": 115,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "114": "            if {!(($last eq \"e\" || $last eq \"E\") && [string is double -strict \"${prev}0\"])} {"
+  }
+ },
+ {
+  "id": 122,
+  "line": 116,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "115": "                set needsMerge 2"
+  }
+ },
+ {
+  "id": 123,
+  "line": 116,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "115": "                set needsMerge 0"
+  }
+ },
+ {
+  "id": 124,
+  "line": 116,
+  "kind": "del",
+  "desc": "delete: set needsMerge 1",
+  "edits": {
+   "115": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 125,
+  "line": 119,
+  "kind": "del",
+  "desc": "delete: lappend output [string range $input $start $end]",
+  "edits": {
+   "118": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 126,
+  "line": 120,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "119": "        set pos [expr {$end + 2}]  "
+  }
+ },
+ {
+  "id": 127,
+  "line": 120,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "119": "        set pos [expr {$end + 0}]  "
+  }
+ },
+ {
+  "id": 128,
+  "line": 120,
+  "kind": "del",
+  "desc": "delete: set pos [expr {$end + 1}]",
+  "edits": {
+   "119": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 129,
+  "line": 122,
+  "kind": "del",
+  "desc": "delete: set rest [string trim [string range $input $pos end]]",
+  "edits": {
+   "121": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 130,
+  "line": 123,
+  "kind": "cmp",
+  "desc": "ne -> eq",
+  "edits": {
+   "122": "    if {$rest eq {}} {lappend output $rest}"
+  }
+ },
+ {
+  "id": 131,
+  "line": 123,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "122": "    if {!($rest ne {})} {lappend output $rest}"
+  }
+ },
+ {
+  "id": 132,
+  "line": 125,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "124": "    if {!(!$needsMerge)} {return $output}"
+  }
+ },
+ {
+  "id": 133,
+  "line": 128,
+  "kind": "del",
+  "desc": "delete: set merged {}",
+  "edits": {
+   "127": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 134,
+  "line": 129,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "128": "    set j 1"
+  }
+ },
+ {
+  "id": 135,
+  "line": 129,
+  "kind": "del",
+  "desc": "delete: set j 0",
+  "edits": {
+   "128": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 136,
+  "line": 130,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "129": "    while {$j <= [llength $output]} {"
+  }
+ },
+ {
+  "id": 137,
+  "line": 130,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "129": "    while {!($j < [llength $output])} {"
+  }
+ },
+ {
+  "id": 138,
+  "line": 131,
+  "kind": "del",
+  "desc": "delete: set tok [lindex $output $j]",
+  "edits": {
+   "130": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 139,
+  "line": 132,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "131": "        if {[regexp {^[1-9]*\\.?[0-9]+[eE]$} $tok] && "
+  }
+ },
+ {
+  "id": 140,
+  "line": 132,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "131": "        if {[regexp {^[0-9]*\\.?[1-9]+[eE]$} $tok] && "
+  }
+ },
+ {
+  "id": 141,
+  "line": 132,
+  "kind": "cmp",
+  "desc": "&& -> ||",
+  "edits": {
+   "131": "        if {[regexp {^[0-9]*\\.?[0-9]+[eE]$} $tok] || "
+  }
+ },
+ {
+  "id": 142,
+  "line": 133,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "132": "            $j+3 < [llength $output] &&"
+  }
+ },
+ {
+  "id": 143,
+  "line": 133,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "132": "            $j+1 < [llength $output] &&"
+  }
+ },
+ {
+  "id": 144,
+  "line": 133,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "132": "            $j+2 <= [llength $output] &&"
+  }
+ },
+ {
+  "id": 145,
+  "line": 134,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "133": "            [lindex $output [expr {$j+2}]] in {- +} &&"
+  }
+ },
+ {
+  "id": 146,
+  "line": 134,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "133": "            [lindex $output [expr {$j+0}]] in {- +} &&"
+  }
+ },
+ {
+  "id": 147,
+  "line": 134,
+  "kind": "cmp",
+  "desc": "in -> ni",
+  "edits": {
+   "133": "            [lindex $output [expr {$j+1}]] ni {- +} &&"
+  }
+ },
+ {
+  "id": 148,
+  "line": 135,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "134": "            [string is digit [lindex $output [expr {$j+3}]]]} {"
+  }
+ },
+ {
+  "id": 149,
+  "line": 135,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "134": "            [string is digit [lindex $output [expr {$j+1}]]]} {"
+  }
+ },
+ {
+  "id": 150,
+  "line": 136,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "135": "            lappend merged \"$tok[lindex $output [expr {$j+2}]][lindex $output [expr {$j+2}]]\""
+  }
+ },
+ {
+  "id": 151,
+  "line": 136,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "135": "            lappend merged \"$tok[lindex $output [expr {$j+0}]][lindex $output [expr {$j+2}]]\""
+  }
+ },
+ {
+  "id": 152,
+  "line": 136,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "135": "            lappend merged \"$tok[lindex $output [expr {$j+1}]][lindex $output [expr {$j+3}]]\""
+  }
+ },
+ {
+  "id": 153,
+  "line": 136,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "135": "            lappend merged \"$tok[lindex $output [expr {$j+1}]][lindex $output [expr {$j+1}]]\""
+  }
+ },
+ {
+  "id": 154,
+  "line": 136,
+  "kind": "del",
+  "desc": "delete: lappend merged \"$tok[lindex $output [expr {$j+1}]][lindex $o",
+  "edits": {
+   "135": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 155,
+  "line": 137,
+  "kind": "num",
+  "desc": "3 -> 4",
+  "edits": {
+   "136": "            incr j 4"
+  }
+ },
+ {
+  "id": 156,
+  "line": 137,
+  "kind": "num",
+  "desc": "3 -> 2",
+  "edits": {
+   "136": "            incr j 2"
+  }
+ },
+ {
+  "id": 157,
+  "line": 137,
+  "kind": "del",
+  "desc": "delete: incr j 3",
+  "edits": {
+   "136": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 158,
+  "line": 139,
+  "kind": "del",
+  "desc": "delete: lappend merged $tok",
+  "edits": {
+   "138": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 159,
+  "line": 140,
+  "kind": "del",
+  "desc": "delete: incr j",
+  "edits": {
+   "139": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 160,
+  "line": 140,
+  "kind": "incr",
+  "desc": "incr j -> incr j -1",
+  "edits": {
+   "139": "            incr j -1"
+  }
+ },
+ {
+  "id": 161,
+  "line": 143,
+  "kind": "del",
+  "desc": "delete: return $merged",
+  "edits": {
+   "142": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 162,
+  "line": 148,
+  "kind": "del",
+  "desc": "delete: variable depth",
+  "edits": {
+   "147": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 163,
+  "line": 149,
+  "kind": "del",
+  "desc": "delete: variable tokens",
+  "edits": {
+   "148": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 164,
+  "line": 150,
+  "kind": "del",
+  "desc": "delete: variable tokpos",
+  "edits": {
+   "149": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 165,
+  "line": 152,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "151": "    if {[llength $toks] == 1} {error \"Calc: nothing to calculate\"}"
+  }
+ },
+ {
+  "id": 166,
+  "line": 152,
+  "kind": "cmp",
+  "desc": "== -> !=",
+  "edits": {
+   "151": "    if {[llength $toks] != 0} {error \"Calc: nothing to calculate\"}"
+  }
+ },
+ {
+  "id": 167,
+  "line": 152,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "151": "    if {!([llength $toks] == 0)} {error \"Calc: nothing to calculate\"}"
+  }
+ },
+ {
+  "id": 168,
+  "line": 153,
+  "kind": "del",
+  "desc": "delete: set tokens $toks",
+  "edits": {
+   "152": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 169,
+  "line": 154,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "153": "    set tokpos 1"
+  }
+ },
+ {
+  "id": 170,
+  "line": 154,
+  "kind": "del",
+  "desc": "delete: set tokpos 0",
+  "edits": {
+   "153": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 171,
+  "line": 155,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "154": "    set depth 1"
+  }
+ },
+ {
+  "id": 172,
+  "line": 155,
+  "kind": "del",
+  "desc": "delete: set depth 0",
+  "edits": {
+   "154": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 173,
+  "line": 156,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "155": "    return [parse 1] "
+  }
+ },
+ {
+  "id": 174,
+  "line": 156,
+  "kind": "del",
+  "desc": "delete: return [parse 0]",
+  "edits": {
+   "155": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 175,
+  "line": 164,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "163": "    )  1 -"
+  }
+ },
+ {
+  "id": 176,
+  "line": 165,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "164": "    ,  1 -"
+  }
+ },
+ {
+  "id": 177,
+  "line": 166,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "165": "    =  1 -"
+  }
+ },
+ {
+  "id": 178,
+  "line": 169,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "168": "    ?  2 -"
+  }
+ },
+ {
+  "id": 179,
+  "line": 169,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "168": "    ?  0 -"
+  }
+ },
+ {
+  "id": 180,
+  "line": 170,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "169": "    :  2 -"
+  }
+ },
+ {
+  "id": 181,
+  "line": 170,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "169": "    :  0 -"
+  }
+ },
+ {
+  "id": 182,
+  "line": 171,
+  "kind": "swap",
+  "desc": "jumpTrue -> jumpFalse",
+  "edits": {
+   "170": "    || 2 {jumpFalse true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 183,
+  "line": 171,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "170": "    || 2 {jumpTrue true_res; jumpFalse pop_A; pop 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 184,
+  "line": 171,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "170": "    || 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; pop 0; jump end_res; label true_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 185,
+  "line": 171,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "170": "    || 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; pop 1; label end_res}"
+  }
+ },
+ {
+  "id": 186,
+  "line": 171,
+  "kind": "swap",
+  "desc": "true_res -> false_res",
+  "edits": {
+   "170": "    || 2 {jumpTrue false_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 187,
+  "line": 171,
+  "kind": "swap",
+  "desc": "true_res -> false_res",
+  "edits": {
+   "170": "    || 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label false_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 188,
+  "line": 171,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "170": "    || 3 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 189,
+  "line": 171,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "170": "    || 1 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 190,
+  "line": 171,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "170": "    || 2 {jumpTrue true_res; jumpFalse pop_A; push 2; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 191,
+  "line": 171,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "170": "    || 2 {jumpTrue true_res; jumpFalse pop_A; push 0; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 192,
+  "line": 171,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "170": "    || 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 1; jump end_res; label true_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 193,
+  "line": 171,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "170": "    || 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 2; label end_res}"
+  }
+ },
+ {
+  "id": 194,
+  "line": 171,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "170": "    || 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 0; label end_res}"
+  }
+ },
+ {
+  "id": 195,
+  "line": 171,
+  "kind": "cmp",
+  "desc": "|| -> &&",
+  "edits": {
+   "170": "    && 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 196,
+  "line": 172,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "171": "    && 3 {jumpFalse pop_A; jumpFalse false_res; pop 1; jump end_res; label pop_A; pop; label false_res; push 0; label end_res}"
+  }
+ },
+ {
+  "id": 197,
+  "line": 172,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "171": "    && 3 {jumpFalse pop_A; jumpFalse false_res; push 1; jump end_res; label pop_A; pop; label false_res; pop 0; label end_res}"
+  }
+ },
+ {
+  "id": 198,
+  "line": 172,
+  "kind": "num",
+  "desc": "3 -> 4",
+  "edits": {
+   "171": "    && 4 {jumpFalse pop_A; jumpFalse false_res; push 1; jump end_res; label pop_A; pop; label false_res; push 0; label end_res}"
+  }
+ },
+ {
+  "id": 199,
+  "line": 172,
+  "kind": "num",
+  "desc": "3 -> 2",
+  "edits": {
+   "171": "    && 2 {jumpFalse pop_A; jumpFalse false_res; push 1; jump end_res; label pop_A; pop; label false_res; push 0; label end_res}"
+  }
+ },
+ {
+  "id": 200,
+  "line": 172,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "171": "    && 3 {jumpFalse pop_A; jumpFalse false_res; push 2; jump end_res; label pop_A; pop; label false_res; push 0; label end_res}"
+  }
+ },
+ {
+  "id": 201,
+  "line": 172,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "171": "    && 3 {jumpFalse pop_A; jumpFalse false_res; push 0; jump end_res; label pop_A; pop; label false_res; push 0; label end_res}"
+  }
+ },
+ {
+  "id": 202,
+  "line": 172,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "171": "    && 3 {jumpFalse pop_A; jumpFalse false_res; push 1; jump end_res; label pop_A; pop; label false_res; push 1; label end_res}"
+  }
+ },
+ {
+  "id": 203,
+  "line": 172,
+  "kind": "cmp",
+  "desc": "&& -> ||",
+  "edits": {
+   "171": "    || 3 {jumpFalse pop_A; jumpFalse false_res; push 1; jump end_res; label pop_A; pop; label false_res; push 0; label end_res}"
+  }
+ },
+ {
+  "id": 204,
+  "line": 173,
+  "kind": "num",
+  "desc": "4 -> 5",
+  "edits": {
+   "172": "    |  5 bitor"
+  }
+ },
+ {
+  "id": 205,
+  "line": 173,
+  "kind": "num",
+  "desc": "4 -> 3",
+  "edits": {
+   "172": "    |  3 bitor"
+  }
+ },
+ {
+  "id": 206,
+  "line": 174,
+  "kind": "swap",
+  "desc": "bitxor -> bitor",
+  "edits": {
+   "173": "    ^  5 bitor"
+  }
+ },
+ {
+  "id": 207,
+  "line": 174,
+  "kind": "num",
+  "desc": "5 -> 6",
+  "edits": {
+   "173": "    ^  6 bitxor"
+  }
+ },
+ {
+  "id": 208,
+  "line": 174,
+  "kind": "num",
+  "desc": "5 -> 4",
+  "edits": {
+   "173": "    ^  4 bitxor"
+  }
+ },
+ {
+  "id": 209,
+  "line": 175,
+  "kind": "swap",
+  "desc": "bitand -> bitor",
+  "edits": {
+   "174": "    &  6 bitor"
+  }
+ },
+ {
+  "id": 210,
+  "line": 175,
+  "kind": "num",
+  "desc": "6 -> 7",
+  "edits": {
+   "174": "    &  7 bitand"
+  }
+ },
+ {
+  "id": 211,
+  "line": 175,
+  "kind": "num",
+  "desc": "6 -> 5",
+  "edits": {
+   "174": "    &  5 bitand"
+  }
+ },
+ {
+  "id": 212,
+  "line": 176,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "175": "    == 7 neq"
+  }
+ },
+ {
+  "id": 213,
+  "line": 176,
+  "kind": "num",
+  "desc": "7 -> 8",
+  "edits": {
+   "175": "    == 8 eq"
+  }
+ },
+ {
+  "id": 214,
+  "line": 176,
+  "kind": "num",
+  "desc": "7 -> 6",
+  "edits": {
+   "175": "    == 6 eq"
+  }
+ },
+ {
+  "id": 215,
+  "line": 176,
+  "kind": "cmp",
+  "desc": "== -> !=",
+  "edits": {
+   "175": "    != 7 eq"
+  }
+ },
+ {
+  "id": 216,
+  "line": 177,
+  "kind": "num",
+  "desc": "7 -> 8",
+  "edits": {
+   "176": "    != 8 neq"
+  }
+ },
+ {
+  "id": 217,
+  "line": 177,
+  "kind": "num",
+  "desc": "7 -> 6",
+  "edits": {
+   "176": "    != 6 neq"
+  }
+ },
+ {
+  "id": 218,
+  "line": 177,
+  "kind": "cmp",
+  "desc": "!= -> ==",
+  "edits": {
+   "176": "    == 7 neq"
+  }
+ },
+ {
+  "id": 219,
+  "line": 178,
+  "kind": "swap",
+  "desc": "lt -> gt",
+  "edits": {
+   "177": "    <  8 gt"
+  }
+ },
+ {
+  "id": 220,
+  "line": 178,
+  "kind": "swap",
+  "desc": "lt -> le",
+  "edits": {
+   "177": "    <  8 le"
+  }
+ },
+ {
+  "id": 221,
+  "line": 178,
+  "kind": "num",
+  "desc": "8 -> 9",
+  "edits": {
+   "177": "    <  9 lt"
+  }
+ },
+ {
+  "id": 222,
+  "line": 178,
+  "kind": "num",
+  "desc": "8 -> 7",
+  "edits": {
+   "177": "    <  7 lt"
+  }
+ },
+ {
+  "id": 223,
+  "line": 178,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "177": "    <=  8 lt"
+  }
+ },
+ {
+  "id": 224,
+  "line": 179,
+  "kind": "swap",
+  "desc": "gt -> ge",
+  "edits": {
+   "178": "    >  8 ge"
+  }
+ },
+ {
+  "id": 225,
+  "line": 179,
+  "kind": "num",
+  "desc": "8 -> 9",
+  "edits": {
+   "178": "    >  9 gt"
+  }
+ },
+ {
+  "id": 226,
+  "line": 179,
+  "kind": "num",
+  "desc": "8 -> 7",
+  "edits": {
+   "178": "    >  7 gt"
+  }
+ },
+ {
+  "id": 227,
+  "line": 179,
+  "kind": "cmp",
+  "desc": "> -> >=",
+  "edits": {
+   "178": "    >=  8 gt"
+  }
+ },
+ {
+  "id": 228,
+  "line": 180,
+  "kind": "swap",
+  "desc": "le -> ge",
+  "edits": {
+   "179": "    <= 8 ge"
+  }
+ },
+ {
+  "id": 229,
+  "line": 180,
+  "kind": "num",
+  "desc": "8 -> 9",
+  "edits": {
+   "179": "    <= 9 le"
+  }
+ },
+ {
+  "id": 230,
+  "line": 180,
+  "kind": "num",
+  "desc": "8 -> 7",
+  "edits": {
+   "179": "    <= 7 le"
+  }
+ },
+ {
+  "id": 231,
+  "line": 180,
+  "kind": "cmp",
+  "desc": "<= -> <",
+  "edits": {
+   "179": "    < 8 le"
+  }
+ },
+ {
+  "id": 232,
+  "line": 181,
+  "kind": "num",
+  "desc": "8 -> 9",
+  "edits": {
+   "180": "    >= 9 ge"
+  }
+ },
+ {
+  "id": 233,
+  "line": 181,
+  "kind": "num",
+  "desc": "8 -> 7",
+  "edits": {
+   "180": "    >= 7 ge"
+  }
+ },
+ {
+  "id": 234,
+  "line": 181,
+  "kind": "cmp",
+  "desc": ">= -> >",
+  "edits": {
+   "180": "    > 8 ge"
+  }
+ },
+ {
+  "id": 235,
+  "line": 182,
+  "kind": "swap",
+  "desc": "lshift -> rshift",
+  "edits": {
+   "181": "    << 9 rshift"
+  }
+ },
+ {
+  "id": 236,
+  "line": 182,
+  "kind": "num",
+  "desc": "9 -> 10",
+  "edits": {
+   "181": "    << 10 lshift"
+  }
+ },
+ {
+  "id": 237,
+  "line": 182,
+  "kind": "num",
+  "desc": "9 -> 8",
+  "edits": {
+   "181": "    << 8 lshift"
+  }
+ },
+ {
+  "id": 238,
+  "line": 183,
+  "kind": "num",
+  "desc": "9 -> 10",
+  "edits": {
+   "182": "    >> 10 rshift"
+  }
+ },
+ {
+  "id": 239,
+  "line": 183,
+  "kind": "num",
+  "desc": "9 -> 8",
+  "edits": {
+   "182": "    >> 8 rshift"
+  }
+ },
+ {
+  "id": 240,
+  "line": 184,
+  "kind": "swap",
+  "desc": "add -> sub",
+  "edits": {
+   "183": "    +  10 sub"
+  }
+ },
+ {
+  "id": 241,
+  "line": 184,
+  "kind": "num",
+  "desc": "10 -> 11",
+  "edits": {
+   "183": "    +  11 add"
+  }
+ },
+ {
+  "id": 242,
+  "line": 184,
+  "kind": "num",
+  "desc": "10 -> 9",
+  "edits": {
+   "183": "    +  9 add"
+  }
+ },
+ {
+  "id": 243,
+  "line": 185,
+  "kind": "swap",
+  "desc": "sub -> add",
+  "edits": {
+   "184": "    -  10 add"
+  }
+ },
+ {
+  "id": 244,
+  "line": 185,
+  "kind": "num",
+  "desc": "10 -> 11",
+  "edits": {
+   "184": "    -  11 sub"
+  }
+ },
+ {
+  "id": 245,
+  "line": 185,
+  "kind": "num",
+  "desc": "10 -> 9",
+  "edits": {
+   "184": "    -  9 sub"
+  }
+ },
+ {
+  "id": 246,
+  "line": 186,
+  "kind": "swap",
+  "desc": "mult -> div",
+  "edits": {
+   "185": "    *  11 div"
+  }
+ },
+ {
+  "id": 247,
+  "line": 186,
+  "kind": "num",
+  "desc": "11 -> 12",
+  "edits": {
+   "185": "    *  12 mult"
+  }
+ },
+ {
+  "id": 248,
+  "line": 186,
+  "kind": "num",
+  "desc": "11 -> 10",
+  "edits": {
+   "185": "    *  10 mult"
+  }
+ },
+ {
+  "id": 249,
+  "line": 187,
+  "kind": "num",
+  "desc": "11 -> 12",
+  "edits": {
+   "186": "    /  12 div"
+  }
+ },
+ {
+  "id": 250,
+  "line": 187,
+  "kind": "num",
+  "desc": "11 -> 10",
+  "edits": {
+   "186": "    /  10 div"
+  }
+ },
+ {
+  "id": 251,
+  "line": 188,
+  "kind": "swap",
+  "desc": "mod -> div",
+  "edits": {
+   "187": "    %  11 div"
+  }
+ },
+ {
+  "id": 252,
+  "line": 188,
+  "kind": "num",
+  "desc": "11 -> 12",
+  "edits": {
+   "187": "    %  12 mod"
+  }
+ },
+ {
+  "id": 253,
+  "line": 188,
+  "kind": "num",
+  "desc": "11 -> 10",
+  "edits": {
+   "187": "    %  10 mod"
+  }
+ },
+ {
+  "id": 254,
+  "line": 189,
+  "kind": "swap",
+  "desc": "expon -> mult",
+  "edits": {
+   "188": "    ** 12 mult"
+  }
+ },
+ {
+  "id": 255,
+  "line": 189,
+  "kind": "num",
+  "desc": "12 -> 13",
+  "edits": {
+   "188": "    ** 13 expon"
+  }
+ },
+ {
+  "id": 256,
+  "line": 189,
+  "kind": "num",
+  "desc": "12 -> 11",
+  "edits": {
+   "188": "    ** 11 expon"
+  }
+ },
+ {
+  "id": 257,
+  "line": 191,
+  "kind": "del",
+  "desc": "delete: set inprec($op) $prec",
+  "edits": {
+   "190": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 258,
+  "line": 192,
+  "kind": "del",
+  "desc": "delete: set incode($op) $code",
+  "edits": {
+   "191": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 259,
+  "line": 198,
+  "kind": "swap",
+  "desc": "uminus -> uplus",
+  "edits": {
+   "197": "    - uplus"
+  }
+ },
+ {
+  "id": 260,
+  "line": 199,
+  "kind": "swap",
+  "desc": "not -> bitnot",
+  "edits": {
+   "198": "    ! bitnot"
+  }
+ },
+ {
+  "id": 261,
+  "line": 202,
+  "kind": "del",
+  "desc": "delete: set precode($op) $code",
+  "edits": {
+   "201": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 262,
+  "line": 207,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "206": "    strlen      {strlen 2}"
+  }
+ },
+ {
+  "id": 263,
+  "line": 207,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "206": "    strlen      {strlen 0}"
+  }
+ },
+ {
+  "id": 264,
+  "line": 208,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "207": "    llength     {listLength 2}"
+  }
+ },
+ {
+  "id": 265,
+  "line": 208,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "207": "    llength     {listLength 0}"
+  }
+ },
+ {
+  "id": 266,
+  "line": 211,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "210": "    xstrcat      {strcat 3}"
+  }
+ },
+ {
+  "id": 267,
+  "line": 211,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "210": "    xstrcat      {strcat 1}"
+  }
+ },
+ {
+  "id": 268,
+  "line": 212,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "211": "    xtoupper     {strcaseUpper 2}"
+  }
+ },
+ {
+  "id": 269,
+  "line": 212,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "211": "    xtoupper     {strcaseUpper 0}"
+  }
+ },
+ {
+  "id": 270,
+  "line": 213,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "212": "    xtolower     {strcaseLower 2}"
+  }
+ },
+ {
+  "id": 271,
+  "line": 213,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "212": "    xtolower     {strcaseLower 0}"
+  }
+ },
+ {
+  "id": 272,
+  "line": 214,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "213": "    xstrindex    {strindex 3}"
+  }
+ },
+ {
+  "id": 273,
+  "line": 214,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "213": "    xstrindex    {strindex 1}"
+  }
+ },
+ {
+  "id": 274,
+  "line": 215,
+  "kind": "num",
+  "desc": "3 -> 4",
+  "edits": {
+   "214": "    xstrrange    {strrange 4}"
+  }
+ },
+ {
+  "id": 275,
+  "line": 215,
+  "kind": "num",
+  "desc": "3 -> 2",
+  "edits": {
+   "214": "    xstrrange    {strrange 2}"
+  }
+ },
+ {
+  "id": 276,
+  "line": 219,
+  "kind": "num",
+  "desc": "13 -> 14",
+  "edits": {
+   "218": "set preprec 14"
+  }
+ },
+ {
+  "id": 277,
+  "line": 219,
+  "kind": "num",
+  "desc": "13 -> 12",
+  "edits": {
+   "218": "set preprec 12"
+  }
+ },
+ {
+  "id": 278,
+  "line": 219,
+  "kind": "del",
+  "desc": "delete: set preprec 13",
+  "edits": {
+   "218": ";# MUTANT deleted"
+  }
+ },
+ {
+  "id": 279,
+  "line": 226,
+  "kind": "del",
+  "desc": "delete: variable depth",
+  "edits": {
+   "225": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 280,
+  "line": 227,
+  "kind": "del",
+  "desc": "delete: variable incode",
+  "edits": {
+   "226": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 281,
+  "line": 228,
+  "kind": "del",
+  "desc": "delete: variable inprec",
+  "edits": {
+   "227": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 282,
+  "line": 229,
+  "kind": "del",
+  "desc": "delete: variable tokens",
+  "edits": {
+   "228": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 283,
+  "line": 230,
+  "kind": "del",
+  "desc": "delete: variable tokpos",
+  "edits": {
+   "229": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 284,
+  "line": 231,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "230": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 285,
+  "line": 232,
+  "kind": "del",
+  "desc": "delete: set dep [incr depth]",
+  "edits": {
+   "231": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 286,
+  "line": 232,
+  "kind": "incr",
+  "desc": "incr depth -> incr depth -1",
+  "edits": {
+   "231": "    set dep [incr depth -1]"
+  }
+ },
+ {
+  "id": 287,
+  "line": 234,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "233": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 288,
+  "line": 234,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "233": "    incr tokpos -1"
+  }
+ },
+ {
+  "id": 289,
+  "line": 237,
+  "kind": "del",
+  "desc": "delete: set opcodes [parsePrefix $token]",
+  "edits": {
+   "236": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 290,
+  "line": 238,
+  "kind": "del",
+  "desc": "delete: set depth $dep",
+  "edits": {
+   "237": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 291,
+  "line": 239,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "238": "    while {$tokpos <= [llength $tokens]} {"
+  }
+ },
+ {
+  "id": 292,
+  "line": 239,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "238": "    while {!($tokpos < [llength $tokens])} {"
+  }
+ },
+ {
+  "id": 293,
+  "line": 241,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "240": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 294,
+  "line": 242,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "241": "        if {!([info exists inprec($token)])} {"
+  }
+ },
+ {
+  "id": 295,
+  "line": 243,
+  "kind": "del",
+  "desc": "delete: set tok_prec $inprec($token)",
+  "edits": {
+   "242": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 296,
+  "line": 245,
+  "kind": "del",
+  "desc": "delete: error \"Calc: expected operator but found '$token'\"",
+  "edits": {
+   "244": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 297,
+  "line": 248,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "247": "        if {$tok_prec <= $min_prec} {"
+  }
+ },
+ {
+  "id": 298,
+  "line": 248,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "247": "        if {!($tok_prec < $min_prec)} {"
+  }
+ },
+ {
+  "id": 299,
+  "line": 249,
+  "kind": "del",
+  "desc": "delete: break",
+  "edits": {
+   "248": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 300,
+  "line": 252,
+  "kind": "cmp",
+  "desc": "== -> !=",
+  "edits": {
+   "251": "        if {$tok_prec != $min_prec && $token ne \"**\"} {"
+  }
+ },
+ {
+  "id": 301,
+  "line": 252,
+  "kind": "cmp",
+  "desc": "&& -> ||",
+  "edits": {
+   "251": "        if {$tok_prec == $min_prec || $token ne \"**\"} {"
+  }
+ },
+ {
+  "id": 302,
+  "line": 252,
+  "kind": "cmp",
+  "desc": "ne -> eq",
+  "edits": {
+   "251": "        if {$tok_prec == $min_prec && $token eq \"**\"} {"
+  }
+ },
+ {
+  "id": 303,
+  "line": 252,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "251": "        if {!($tok_prec == $min_prec && $token ne \"**\")} {"
+  }
+ },
+ {
+  "id": 304,
+  "line": 253,
+  "kind": "del",
+  "desc": "delete: break",
+  "edits": {
+   "252": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 305,
+  "line": 256,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "255": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 306,
+  "line": 256,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "255": "        incr tokpos -1"
+  }
+ },
+ {
+  "id": 307,
+  "line": 257,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "256": "        if {$token neq \"?\"} {"
+  }
+ },
+ {
+  "id": 308,
+  "line": 257,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "256": "        if {$token ne \"?\"} {"
+  }
+ },
+ {
+  "id": 309,
+  "line": 257,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "256": "        if {!($token eq \"?\")} {"
+  }
+ },
+ {
+  "id": 310,
+  "line": 258,
+  "kind": "del",
+  "desc": "delete: append opcodes [parseTernary]",
+  "edits": {
+   "257": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 311,
+  "line": 259,
+  "kind": "del",
+  "desc": "delete: continue",
+  "edits": {
+   "258": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 312,
+  "line": 261,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "260": "        if {$token neq \"->\"} {"
+  }
+ },
+ {
+  "id": 313,
+  "line": 261,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "260": "        if {$token ne \"->\"} {"
+  }
+ },
+ {
+  "id": 314,
+  "line": 261,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "260": "        if {!($token eq \"->\")} {"
+  }
+ },
+ {
+  "id": 315,
+  "line": 263,
+  "kind": "del",
+  "desc": "delete: append opcodes [destructure [parsePattern]]",
+  "edits": {
+   "262": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 316,
+  "line": 264,
+  "kind": "del",
+  "desc": "delete: continue",
+  "edits": {
+   "263": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 317,
+  "line": 266,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "265": "        if {$token neq \"=>\"} {"
+  }
+ },
+ {
+  "id": 318,
+  "line": 266,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "265": "        if {$token ne \"=>\"} {"
+  }
+ },
+ {
+  "id": 319,
+  "line": 266,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "265": "        if {!($token eq \"=>\")} {"
+  }
+ },
+ {
+  "id": 320,
+  "line": 269,
+  "kind": "del",
+  "desc": "delete: variable strictFlag",
+  "edits": {
+   "268": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 321,
+  "line": 270,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "269": "            set strictFlag 2"
+  }
+ },
+ {
+  "id": 322,
+  "line": 270,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "269": "            set strictFlag 0"
+  }
+ },
+ {
+  "id": 323,
+  "line": 270,
+  "kind": "del",
+  "desc": "delete: set strictFlag 1",
+  "edits": {
+   "269": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 324,
+  "line": 271,
+  "kind": "del",
+  "desc": "delete: append opcodes [destructure [parsePattern]]",
+  "edits": {
+   "270": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 325,
+  "line": 272,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "271": "            set strictFlag 1"
+  }
+ },
+ {
+  "id": 326,
+  "line": 272,
+  "kind": "del",
+  "desc": "delete: set strictFlag 0",
+  "edits": {
+   "271": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 327,
+  "line": 273,
+  "kind": "del",
+  "desc": "delete: continue",
+  "edits": {
+   "272": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 328,
+  "line": 276,
+  "kind": "del",
+  "desc": "delete: set code $incode($token)",
+  "edits": {
+   "275": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 329,
+  "line": 277,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "276": "        if {$token neq \"||\" || $token eq \"&&\"} {"
+  }
+ },
+ {
+  "id": 330,
+  "line": 277,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "276": "        if {$token eq \"||\" || $token neq \"&&\"} {"
+  }
+ },
+ {
+  "id": 331,
+  "line": 277,
+  "kind": "cmp",
+  "desc": "|| -> &&",
+  "edits": {
+   "276": "        if {$token eq \"||\" && $token eq \"&&\"} {"
+  }
+ },
+ {
+  "id": 332,
+  "line": 277,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "276": "        if {$token ne \"||\" || $token eq \"&&\"} {"
+  }
+ },
+ {
+  "id": 333,
+  "line": 277,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "276": "        if {$token eq \"||\" || $token ne \"&&\"} {"
+  }
+ },
+ {
+  "id": 334,
+  "line": 277,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "276": "        if {!($token eq \"||\" || $token eq \"&&\")} {"
+  }
+ },
+ {
+  "id": 335,
+  "line": 280,
+  "kind": "del",
+  "desc": "delete: set n [incr ::labelcount]",
+  "edits": {
+   "279": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 336,
+  "line": 281,
+  "kind": "swap",
+  "desc": "true_res -> false_res",
+  "edits": {
+   "280": "            set code [string map [list pop_A pop_A$n false_res true_res$n \\"
+  }
+ },
+ {
+  "id": 337,
+  "line": 281,
+  "kind": "swap",
+  "desc": "true_res -> false_res",
+  "edits": {
+   "280": "            set code [string map [list pop_A pop_A$n true_res false_res$n \\"
+  }
+ },
+ {
+  "id": 338,
+  "line": 281,
+  "kind": "del",
+  "desc": "delete (multi-line): set code [string map [list pop_A pop_A$n true_res true_res$n",
+  "edits": {
+   "280": "            ;# MUTANT deleted",
+   "281": ""
+  }
+ },
+ {
+  "id": 339,
+  "line": 284,
+  "kind": "del",
+  "desc": "delete: append opcodes [parse $tok_prec] \"$code; \"",
+  "edits": {
+   "283": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 340,
+  "line": 287,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "286": "    set depth [expr {$dep - 2}]"
+  }
+ },
+ {
+  "id": 341,
+  "line": 287,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "286": "    set depth [expr {$dep - 0}]"
+  }
+ },
+ {
+  "id": 342,
+  "line": 287,
+  "kind": "del",
+  "desc": "delete: set depth [expr {$dep - 1}]",
+  "edits": {
+   "286": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 343,
+  "line": 288,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "287": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 344,
+  "line": 297,
+  "kind": "del",
+  "desc": "delete: variable inprocFlag",
+  "edits": {
+   "296": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 345,
+  "line": 298,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "297": "    if {!($inprocFlag)} { return \"incrImm $name $delta; \" }"
+  }
+ },
+ {
+  "id": 346,
+  "line": 299,
+  "kind": "swap",
+  "desc": "incrStkImm -> incrImm",
+  "edits": {
+   "298": "    return \"push $name; incrImm $delta; \""
+  }
+ },
+ {
+  "id": 347,
+  "line": 299,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "298": "    return \"pop $name; incrStkImm $delta; \""
+  }
+ },
+ {
+  "id": 348,
+  "line": 299,
+  "kind": "del",
+  "desc": "delete: return \"push $name; incrStkImm $delta; \"",
+  "edits": {
+   "298": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 349,
+  "line": 303,
+  "kind": "del",
+  "desc": "delete: variable depth",
+  "edits": {
+   "302": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 350,
+  "line": 304,
+  "kind": "del",
+  "desc": "delete: variable precode",
+  "edits": {
+   "303": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 351,
+  "line": 305,
+  "kind": "del",
+  "desc": "delete: variable preprec",
+  "edits": {
+   "304": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 352,
+  "line": 306,
+  "kind": "del",
+  "desc": "delete: variable tokens",
+  "edits": {
+   "305": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 353,
+  "line": 307,
+  "kind": "del",
+  "desc": "delete: variable tokpos",
+  "edits": {
+   "306": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 354,
+  "line": 308,
+  "kind": "del",
+  "desc": "delete: variable nativeFunc",
+  "edits": {
+   "307": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 355,
+  "line": 310,
+  "kind": "del",
+  "desc": "delete: set dep [incr depth]",
+  "edits": {
+   "309": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 356,
+  "line": 310,
+  "kind": "incr",
+  "desc": "incr depth -> incr depth -1",
+  "edits": {
+   "309": "    set dep [incr depth -1]"
+  }
+ },
+ {
+  "id": 357,
+  "line": 314,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "313": "    if {$token neq \"++\" || $token eq \"--\"} {"
+  }
+ },
+ {
+  "id": 358,
+  "line": 314,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "313": "    if {$token eq \"++\" || $token neq \"--\"} {"
+  }
+ },
+ {
+  "id": 359,
+  "line": 314,
+  "kind": "cmp",
+  "desc": "|| -> &&",
+  "edits": {
+   "313": "    if {$token eq \"++\" && $token eq \"--\"} {"
+  }
+ },
+ {
+  "id": 360,
+  "line": 314,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "313": "    if {$token ne \"++\" || $token eq \"--\"} {"
+  }
+ },
+ {
+  "id": 361,
+  "line": 314,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "313": "    if {$token eq \"++\" || $token ne \"--\"} {"
+  }
+ },
+ {
+  "id": 362,
+  "line": 314,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "313": "    if {!($token eq \"++\" || $token eq \"--\")} {"
+  }
+ },
+ {
+  "id": 363,
+  "line": 315,
+  "kind": "del",
+  "desc": "delete: set vname [lindex $tokens $tokpos]",
+  "edits": {
+   "314": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 364,
+  "line": 316,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "315": "        if {!(![regexp {^[[:alpha:]_][[:alnum:]_]*$} $vname])} {"
+  }
+ },
+ {
+  "id": 365,
+  "line": 317,
+  "kind": "del",
+  "desc": "delete: error \"Calc: expected a variable name after '$token' but fou",
+  "edits": {
+   "316": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 366,
+  "line": 319,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "318": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 367,
+  "line": 319,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "318": "        incr tokpos -1"
+  }
+ },
+ {
+  "id": 368,
+  "line": 320,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "319": "        return [incrCode $vname [expr {$token neq \"++\" ? 1 : -1}]]"
+  }
+ },
+ {
+  "id": 369,
+  "line": 320,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "319": "        return [incrCode $vname [expr {$token eq \"++\" ? 2 : -1}]]"
+  }
+ },
+ {
+  "id": 370,
+  "line": 320,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "319": "        return [incrCode $vname [expr {$token eq \"++\" ? 0 : -1}]]"
+  }
+ },
+ {
+  "id": 371,
+  "line": 320,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "319": "        return [incrCode $vname [expr {$token ne \"++\" ? 1 : -1}]]"
+  }
+ },
+ {
+  "id": 372,
+  "line": 320,
+  "kind": "del",
+  "desc": "delete: return [incrCode $vname [expr {$token eq \"++\" ? 1 : -1}]]",
+  "edits": {
+   "319": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 373,
+  "line": 325,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "324": "    if {[string is digit -strict [string index $token 1]]} {"
+  }
+ },
+ {
+  "id": 374,
+  "line": 325,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "324": "    if {!([string is digit -strict [string index $token 0]])} {"
+  }
+ },
+ {
+  "id": 375,
+  "line": 326,
+  "kind": "del",
+  "desc": "delete: regsub -all {_} $token {} token",
+  "edits": {
+   "325": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 376,
+  "line": 327,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "326": "        regsub {^1[dD]} $token {} token"
+  }
+ },
+ {
+  "id": 377,
+  "line": 327,
+  "kind": "del",
+  "desc": "delete: regsub {^0[dD]} $token {} token",
+  "edits": {
+   "326": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 378,
+  "line": 329,
+  "kind": "cmp",
+  "desc": "|| -> &&",
+  "edits": {
+   "328": "    if {[string is entier $token] && [string is double $token]} {"
+  }
+ },
+ {
+  "id": 379,
+  "line": 329,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "328": "    if {!([string is entier $token] || [string is double $token])} {"
+  }
+ },
+ {
+  "id": 380,
+  "line": 330,
+  "kind": "del",
+  "desc": "delete: set nexttok [lindex $tokens $tokpos]",
+  "edits": {
+   "329": "\t    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 381,
+  "line": 331,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "330": "\t    if {$nexttok neq \"=\"} {"
+  }
+ },
+ {
+  "id": 382,
+  "line": 331,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "330": "\t    if {$nexttok ne \"=\"} {"
+  }
+ },
+ {
+  "id": 383,
+  "line": 331,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "330": "\t    if {!($nexttok eq \"=\")} {"
+  }
+ },
+ {
+  "id": 384,
+  "line": 332,
+  "kind": "del",
+  "desc": "delete: error \"Calc: cannot assign to number literal '$token'\"",
+  "edits": {
+   "331": "\t        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 385,
+  "line": 334,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "333": "        return \"pop $token; \""
+  }
+ },
+ {
+  "id": 386,
+  "line": 334,
+  "kind": "del",
+  "desc": "delete: return \"push $token; \"",
+  "edits": {
+   "333": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 387,
+  "line": 338,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "337": "    if {$token neq \"false\" || $token eq \"true\"} {"
+  }
+ },
+ {
+  "id": 388,
+  "line": 338,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "337": "    if {$token eq \"false\" || $token neq \"true\"} {"
+  }
+ },
+ {
+  "id": 389,
+  "line": 338,
+  "kind": "cmp",
+  "desc": "|| -> &&",
+  "edits": {
+   "337": "    if {$token eq \"false\" && $token eq \"true\"} {"
+  }
+ },
+ {
+  "id": 390,
+  "line": 338,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "337": "    if {$token ne \"false\" || $token eq \"true\"} {"
+  }
+ },
+ {
+  "id": 391,
+  "line": 338,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "337": "    if {$token eq \"false\" || $token ne \"true\"} {"
+  }
+ },
+ {
+  "id": 392,
+  "line": 338,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "337": "    if {!($token eq \"false\" || $token eq \"true\")} {"
+  }
+ },
+ {
+  "id": 393,
+  "line": 339,
+  "kind": "del",
+  "desc": "delete: set nexttok [lindex $tokens $tokpos]",
+  "edits": {
+   "338": "\t    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 394,
+  "line": 340,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "339": "\t    if {$nexttok neq \"=\"} {"
+  }
+ },
+ {
+  "id": 395,
+  "line": 340,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "339": "\t    if {$nexttok ne \"=\"} {"
+  }
+ },
+ {
+  "id": 396,
+  "line": 340,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "339": "\t    if {!($nexttok eq \"=\")} {"
+  }
+ },
+ {
+  "id": 397,
+  "line": 341,
+  "kind": "del",
+  "desc": "delete: error \"Calc: cannot assign to boolean literal '$token'\"",
+  "edits": {
+   "340": "\t        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 398,
+  "line": 343,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "342": "        return \"pop $token; \""
+  }
+ },
+ {
+  "id": 399,
+  "line": 343,
+  "kind": "del",
+  "desc": "delete: return \"push $token; \"",
+  "edits": {
+   "342": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 400,
+  "line": 347,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "346": "    if {$token neq \"(\"} {"
+  }
+ },
+ {
+  "id": 401,
+  "line": 347,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "346": "    if {$token ne \"(\"} {"
+  }
+ },
+ {
+  "id": 402,
+  "line": 347,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "346": "    if {!($token eq \"(\")} {"
+  }
+ },
+ {
+  "id": 403,
+  "line": 349,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "348": "        set d 2"
+  }
+ },
+ {
+  "id": 404,
+  "line": 349,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "348": "        set d 0"
+  }
+ },
+ {
+  "id": 405,
+  "line": 349,
+  "kind": "del",
+  "desc": "delete: set d 1",
+  "edits": {
+   "348": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 406,
+  "line": 350,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "349": "        for {set j $tokpos} {$j <= [llength $tokens]} {incr j} {"
+  }
+ },
+ {
+  "id": 407,
+  "line": 350,
+  "kind": "incr",
+  "desc": "incr j -> incr j -1",
+  "edits": {
+   "349": "        for {set j $tokpos} {$j < [llength $tokens]} {incr j -1} {"
+  }
+ },
+ {
+  "id": 408,
+  "line": 351,
+  "kind": "del",
+  "desc": "delete: set tj [lindex $tokens $j]",
+  "edits": {
+   "350": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 409,
+  "line": 352,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "351": "            if {$tj neq \"(\"} { incr d } elseif {$tj eq \")\"} { if {[incr d -1] == 0} break }"
+  }
+ },
+ {
+  "id": 410,
+  "line": 352,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "351": "            if {$tj eq \"(\"} { incr d } elseif {$tj neq \")\"} { if {[incr d -1] == 0} break }"
+  }
+ },
+ {
+  "id": 411,
+  "line": 352,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "351": "            if {$tj eq \"(\"} { incr d } elseif {$tj eq \")\"} { if {[incr d -1] == 1} break }"
+  }
+ },
+ {
+  "id": 412,
+  "line": 352,
+  "kind": "cmp",
+  "desc": "== -> !=",
+  "edits": {
+   "351": "            if {$tj eq \"(\"} { incr d } elseif {$tj eq \")\"} { if {[incr d -1] != 0} break }"
+  }
+ },
+ {
+  "id": 413,
+  "line": 352,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "351": "            if {$tj ne \"(\"} { incr d } elseif {$tj eq \")\"} { if {[incr d -1] == 0} break }"
+  }
+ },
+ {
+  "id": 414,
+  "line": 352,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "351": "            if {$tj eq \"(\"} { incr d } elseif {$tj ne \")\"} { if {[incr d -1] == 0} break }"
+  }
+ },
+ {
+  "id": 415,
+  "line": 352,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "351": "            if {!($tj eq \"(\")} { incr d } elseif {$tj eq \")\"} { if {[incr d -1] == 0} break }"
+  }
+ },
+ {
+  "id": 416,
+  "line": 352,
+  "kind": "neg",
+  "desc": "negate elseif condition",
+  "edits": {
+   "351": "            if {$tj eq \"(\"} { incr d } elseif {!($tj eq \")\")} { if {[incr d -1] == 0} break }"
+  }
+ },
+ {
+  "id": 417,
+  "line": 352,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "351": "            if {$tj eq \"(\"} { incr d } elseif {$tj eq \")\"} { if {!([incr d -1] == 0)} break }"
+  }
+ },
+ {
+  "id": 418,
+  "line": 354,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "353": "        if {$j < [llength $tokens] && [lindex $tokens $j+1] neq \"=\"} {"
+  }
+ },
+ {
+  "id": 419,
+  "line": 354,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "353": "        if {$j < [llength $tokens] && [lindex $tokens $j+2] eq \"=\"} {"
+  }
+ },
+ {
+  "id": 420,
+  "line": 354,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "353": "        if {$j < [llength $tokens] && [lindex $tokens $j+0] eq \"=\"} {"
+  }
+ },
+ {
+  "id": 421,
+  "line": 354,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "353": "        if {$j <= [llength $tokens] && [lindex $tokens $j+1] eq \"=\"} {"
+  }
+ },
+ {
+  "id": 422,
+  "line": 354,
+  "kind": "cmp",
+  "desc": "&& -> ||",
+  "edits": {
+   "353": "        if {$j < [llength $tokens] || [lindex $tokens $j+1] eq \"=\"} {"
+  }
+ },
+ {
+  "id": 423,
+  "line": 354,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "353": "        if {$j < [llength $tokens] && [lindex $tokens $j+1] ne \"=\"} {"
+  }
+ },
+ {
+  "id": 424,
+  "line": 354,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "353": "        if {!($j < [llength $tokens] && [lindex $tokens $j+1] eq \"=\")} {"
+  }
+ },
+ {
+  "id": 425,
+  "line": 355,
+  "kind": "del",
+  "desc": "delete: incr tokpos -1",
+  "edits": {
+   "354": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 426,
+  "line": 356,
+  "kind": "del",
+  "desc": "delete: set pat [parsePattern]",
+  "edits": {
+   "355": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 427,
+  "line": 357,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "356": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 428,
+  "line": 358,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "357": "            return \"[parse 1][destructure $pat]\""
+  }
+ },
+ {
+  "id": 429,
+  "line": 358,
+  "kind": "del",
+  "desc": "delete: return \"[parse 0][destructure $pat]\"",
+  "edits": {
+   "357": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 430,
+  "line": 360,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "359": "        set opcodes [parse 1]"
+  }
+ },
+ {
+  "id": 431,
+  "line": 360,
+  "kind": "del",
+  "desc": "delete: set opcodes [parse 0]",
+  "edits": {
+   "359": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 432,
+  "line": 361,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "360": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 433,
+  "line": 362,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "361": "        set n 2"
+  }
+ },
+ {
+  "id": 434,
+  "line": 362,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "361": "        set n 0"
+  }
+ },
+ {
+  "id": 435,
+  "line": 362,
+  "kind": "del",
+  "desc": "delete: set n 1",
+  "edits": {
+   "361": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 436,
+  "line": 363,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "362": "        while {$token neq \",\"} {                 ;# (e1, e2, ...) is a list"
+  }
+ },
+ {
+  "id": 437,
+  "line": 363,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "362": "        while {$token ne \",\"} {                 ;# (e1, e2, ...) is a list"
+  }
+ },
+ {
+  "id": 438,
+  "line": 363,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "362": "        while {!($token eq \",\")} {                 ;# (e1, e2, ...) is a list"
+  }
+ },
+ {
+  "id": 439,
+  "line": 364,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "363": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 440,
+  "line": 364,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "363": "            incr tokpos -1"
+  }
+ },
+ {
+  "id": 441,
+  "line": 365,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "364": "            append opcodes [parse 1]"
+  }
+ },
+ {
+  "id": 442,
+  "line": 365,
+  "kind": "del",
+  "desc": "delete: append opcodes [parse 0]",
+  "edits": {
+   "364": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 443,
+  "line": 366,
+  "kind": "del",
+  "desc": "delete: incr n",
+  "edits": {
+   "365": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 444,
+  "line": 366,
+  "kind": "incr",
+  "desc": "incr n -> incr n -1",
+  "edits": {
+   "365": "            incr n -1"
+  }
+ },
+ {
+  "id": 445,
+  "line": 367,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "366": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 446,
+  "line": 369,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "368": "        if {$token neq \")\"} {"
+  }
+ },
+ {
+  "id": 447,
+  "line": 369,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "368": "        if {$token ne \")\"} {"
+  }
+ },
+ {
+  "id": 448,
+  "line": 369,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "368": "        if {!($token eq \")\")} {"
+  }
+ },
+ {
+  "id": 449,
+  "line": 370,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "369": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 450,
+  "line": 370,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "369": "            incr tokpos -1"
+  }
+ },
+ {
+  "id": 451,
+  "line": 371,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "370": "            if {$n > 2} { append opcodes \"list $n; \" }"
+  }
+ },
+ {
+  "id": 452,
+  "line": 371,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "370": "            if {$n > 0} { append opcodes \"list $n; \" }"
+  }
+ },
+ {
+  "id": 453,
+  "line": 371,
+  "kind": "cmp",
+  "desc": "> -> >=",
+  "edits": {
+   "370": "            if {$n >= 1} { append opcodes \"list $n; \" }"
+  }
+ },
+ {
+  "id": 454,
+  "line": 371,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "370": "            if {!($n > 1)} { append opcodes \"list $n; \" }"
+  }
+ },
+ {
+  "id": 455,
+  "line": 372,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "371": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 456,
+  "line": 374,
+  "kind": "del",
+  "desc": "delete: error \"Calc: expected ')' but found '$token'\"",
+  "edits": {
+   "373": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 457,
+  "line": 378,
+  "kind": "cmp",
+  "desc": "in -> ni",
+  "edits": {
+   "377": "    if {$token ni {+ - ! ~}} {"
+  }
+ },
+ {
+  "id": 458,
+  "line": 378,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "377": "    if {!($token in {+ - ! ~})} {"
+  }
+ },
+ {
+  "id": 459,
+  "line": 379,
+  "kind": "del",
+  "desc": "delete: return \"[parse $preprec]$precode($token); \"",
+  "edits": {
+   "378": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 460,
+  "line": 383,
+  "kind": "del",
+  "desc": "delete: set name \"\"",
+  "edits": {
+   "382": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 461,
+  "line": 384,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "383": "    while {$token neq {::} || [regexp {^[[:alpha:]_][[:alnum:]_]*$} $token]} {"
+  }
+ },
+ {
+  "id": 462,
+  "line": 384,
+  "kind": "cmp",
+  "desc": "|| -> &&",
+  "edits": {
+   "383": "    while {$token eq {::} && [regexp {^[[:alpha:]_][[:alnum:]_]*$} $token]} {"
+  }
+ },
+ {
+  "id": 463,
+  "line": 384,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "383": "    while {$token ne {::} || [regexp {^[[:alpha:]_][[:alnum:]_]*$} $token]} {"
+  }
+ },
+ {
+  "id": 464,
+  "line": 384,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "383": "    while {!($token eq {::} || [regexp {^[[:alpha:]_][[:alnum:]_]*$} $token])} {"
+  }
+ },
+ {
+  "id": 465,
+  "line": 385,
+  "kind": "del",
+  "desc": "delete: append name $token",
+  "edits": {
+   "384": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 466,
+  "line": 386,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "385": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 467,
+  "line": 387,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "386": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 468,
+  "line": 387,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "386": "        incr tokpos -1"
+  }
+ },
+ {
+  "id": 469,
+  "line": 390,
+  "kind": "cmp",
+  "desc": "ne -> eq",
+  "edits": {
+   "389": "    if {$name eq {}} {"
+  }
+ },
+ {
+  "id": 470,
+  "line": 390,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "389": "    if {!($name ne {})} {"
+  }
+ },
+ {
+  "id": 471,
+  "line": 392,
+  "kind": "del",
+  "desc": "delete: incr tokpos -1",
+  "edits": {
+   "391": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 472,
+  "line": 393,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "392": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 473,
+  "line": 396,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "395": "        if {$token neq \"(\"} {"
+  }
+ },
+ {
+  "id": 474,
+  "line": 396,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "395": "        if {$token ne \"(\"} {"
+  }
+ },
+ {
+  "id": 475,
+  "line": 396,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "395": "        if {!($token eq \"(\")} {"
+  }
+ },
+ {
+  "id": 476,
+  "line": 397,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "396": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 477,
+  "line": 400,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "399": "            if {!([info exists nativeFunc($name)])} {"
+  }
+ },
+ {
+  "id": 478,
+  "line": 401,
+  "kind": "del",
+  "desc": "delete: set opcodes [parseFuncArgs $name $nativeFunc($name)]",
+  "edits": {
+   "400": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 479,
+  "line": 402,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "401": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 480,
+  "line": 406,
+  "kind": "del",
+  "desc": "delete: set fun [namespace which tcl::mathfunc::$name]",
+  "edits": {
+   "405": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 481,
+  "line": 407,
+  "kind": "cmp",
+  "desc": "ne -> eq",
+  "edits": {
+   "406": "            if {$fun eq {}} {"
+  }
+ },
+ {
+  "id": 482,
+  "line": 407,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "406": "            if {!($fun ne {})} {"
+  }
+ },
+ {
+  "id": 483,
+  "line": 408,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "407": "                set opcodes \"pop $fun; \""
+  }
+ },
+ {
+  "id": 484,
+  "line": 408,
+  "kind": "del",
+  "desc": "delete: set opcodes \"push $fun; \"",
+  "edits": {
+   "407": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 485,
+  "line": 409,
+  "kind": "del",
+  "desc": "delete: append opcodes [parseFuncArgs $name \"\"]",
+  "edits": {
+   "408": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 486,
+  "line": 410,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "409": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 487,
+  "line": 414,
+  "kind": "del",
+  "desc": "delete: set fun [namespace which $name]",
+  "edits": {
+   "413": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 488,
+  "line": 415,
+  "kind": "cmp",
+  "desc": "ne -> eq",
+  "edits": {
+   "414": "            if {$fun eq {}} {"
+  }
+ },
+ {
+  "id": 489,
+  "line": 415,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "414": "            if {!($fun ne {})} {"
+  }
+ },
+ {
+  "id": 490,
+  "line": 416,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "415": "                set opcodes \"pop $fun; \""
+  }
+ },
+ {
+  "id": 491,
+  "line": 416,
+  "kind": "del",
+  "desc": "delete: set opcodes \"push $fun; \"",
+  "edits": {
+   "415": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 492,
+  "line": 417,
+  "kind": "del",
+  "desc": "delete: append opcodes [parseFuncArgs $name \"\"]",
+  "edits": {
+   "416": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 493,
+  "line": 418,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "417": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 494,
+  "line": 421,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "420": "            set opcodes \"pop $name; \""
+  }
+ },
+ {
+  "id": 495,
+  "line": 421,
+  "kind": "del",
+  "desc": "delete: set opcodes \"push $name; \"",
+  "edits": {
+   "420": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 496,
+  "line": 424,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "423": "            append opcodes [parse 1]"
+  }
+ },
+ {
+  "id": 497,
+  "line": 424,
+  "kind": "del",
+  "desc": "delete: append opcodes [parse 0]",
+  "edits": {
+   "423": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 498,
+  "line": 427,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "426": "            set indexCount 2"
+  }
+ },
+ {
+  "id": 499,
+  "line": 427,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "426": "            set indexCount 0"
+  }
+ },
+ {
+  "id": 500,
+  "line": 427,
+  "kind": "del",
+  "desc": "delete: set indexCount 1",
+  "edits": {
+   "426": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 501,
+  "line": 430,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "429": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 502,
+  "line": 431,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "430": "            while {$token neq \",\"} {"
+  }
+ },
+ {
+  "id": 503,
+  "line": 431,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "430": "            while {$token ne \",\"} {"
+  }
+ },
+ {
+  "id": 504,
+  "line": 431,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "430": "            while {!($token eq \",\")} {"
+  }
+ },
+ {
+  "id": 505,
+  "line": 432,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "431": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 506,
+  "line": 432,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "431": "                incr tokpos -1"
+  }
+ },
+ {
+  "id": 507,
+  "line": 433,
+  "kind": "del",
+  "desc": "delete: incr indexCount",
+  "edits": {
+   "432": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 508,
+  "line": 433,
+  "kind": "incr",
+  "desc": "incr indexCount -> incr indexCount -1",
+  "edits": {
+   "432": "                incr indexCount -1"
+  }
+ },
+ {
+  "id": 509,
+  "line": 434,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "433": "                append opcodes \"pop {,}; \""
+  }
+ },
+ {
+  "id": 510,
+  "line": 434,
+  "kind": "del",
+  "desc": "delete: append opcodes \"push {,}; \"",
+  "edits": {
+   "433": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 511,
+  "line": 435,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "434": "                append opcodes [parse 1]"
+  }
+ },
+ {
+  "id": 512,
+  "line": 435,
+  "kind": "del",
+  "desc": "delete: append opcodes [parse 0]",
+  "edits": {
+   "434": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 513,
+  "line": 436,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "435": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 514,
+  "line": 440,
+  "kind": "cmp",
+  "desc": "ne -> eq",
+  "edits": {
+   "439": "            if {$token eq \")\"} {"
+  }
+ },
+ {
+  "id": 515,
+  "line": 440,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "439": "            if {!($token ne \")\")} {"
+  }
+ },
+ {
+  "id": 516,
+  "line": 441,
+  "kind": "del",
+  "desc": "delete: error \"Calc: expected ')' but found '$token'\"",
+  "edits": {
+   "440": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 517,
+  "line": 443,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "442": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 518,
+  "line": 443,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "442": "            incr tokpos -1"
+  }
+ },
+ {
+  "id": 519,
+  "line": 446,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "445": "            if {$indexCount > 2} {"
+  }
+ },
+ {
+  "id": 520,
+  "line": 446,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "445": "            if {$indexCount > 0} {"
+  }
+ },
+ {
+  "id": 521,
+  "line": 446,
+  "kind": "cmp",
+  "desc": "> -> >=",
+  "edits": {
+   "445": "            if {$indexCount >= 1} {"
+  }
+ },
+ {
+  "id": 522,
+  "line": 446,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "445": "            if {!($indexCount > 1)} {"
+  }
+ },
+ {
+  "id": 523,
+  "line": 447,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "446": "                set strcatCount [expr {$indexCount * 3 - 1}]"
+  }
+ },
+ {
+  "id": 524,
+  "line": 447,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "446": "                set strcatCount [expr {$indexCount * 1 - 1}]"
+  }
+ },
+ {
+  "id": 525,
+  "line": 447,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "446": "                set strcatCount [expr {$indexCount * 2 - 2}]"
+  }
+ },
+ {
+  "id": 526,
+  "line": 447,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "446": "                set strcatCount [expr {$indexCount * 2 - 0}]"
+  }
+ },
+ {
+  "id": 527,
+  "line": 447,
+  "kind": "del",
+  "desc": "delete: set strcatCount [expr {$indexCount * 2 - 1}]",
+  "edits": {
+   "446": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 528,
+  "line": 448,
+  "kind": "del",
+  "desc": "delete: append opcodes \"strcat $strcatCount; \"",
+  "edits": {
+   "447": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 529,
+  "line": 451,
+  "kind": "del",
+  "desc": "delete: append opcodes \"loadArrayStk; \"",
+  "edits": {
+   "450": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 530,
+  "line": 452,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "451": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 531,
+  "line": 455,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "454": "\t\t    if {$token neq \"=\"} {"
+  }
+ },
+ {
+  "id": 532,
+  "line": 455,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "454": "\t\t    if {$token ne \"=\"} {"
+  }
+ },
+ {
+  "id": 533,
+  "line": 455,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "454": "\t\t    if {!($token eq \"=\")} {"
+  }
+ },
+ {
+  "id": 534,
+  "line": 456,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "455": "\t\t        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 535,
+  "line": 457,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "456": "\t\t        set opcodes \"pop $name; \""
+  }
+ },
+ {
+  "id": 536,
+  "line": 457,
+  "kind": "del",
+  "desc": "delete: set opcodes \"push $name; \"",
+  "edits": {
+   "456": "\t\t        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 537,
+  "line": 458,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "457": "\t\t        append opcodes [parse 1]"
+  }
+ },
+ {
+  "id": 538,
+  "line": 458,
+  "kind": "del",
+  "desc": "delete: append opcodes [parse 0]",
+  "edits": {
+   "457": "\t\t        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 539,
+  "line": 459,
+  "kind": "swap",
+  "desc": "storeStk -> loadStk",
+  "edits": {
+   "458": "\t\t        append opcodes \"loadStk; \""
+  }
+ },
+ {
+  "id": 540,
+  "line": 459,
+  "kind": "del",
+  "desc": "delete: append opcodes \"storeStk; \"",
+  "edits": {
+   "458": "\t\t        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 541,
+  "line": 460,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "459": "\t\t        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 542,
+  "line": 464,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "463": "            if {$token neq \"++\" || $token eq \"--\"} {"
+  }
+ },
+ {
+  "id": 543,
+  "line": 464,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "463": "            if {$token eq \"++\" || $token neq \"--\"} {"
+  }
+ },
+ {
+  "id": 544,
+  "line": 464,
+  "kind": "cmp",
+  "desc": "|| -> &&",
+  "edits": {
+   "463": "            if {$token eq \"++\" && $token eq \"--\"} {"
+  }
+ },
+ {
+  "id": 545,
+  "line": 464,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "463": "            if {$token ne \"++\" || $token eq \"--\"} {"
+  }
+ },
+ {
+  "id": 546,
+  "line": 464,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "463": "            if {$token eq \"++\" || $token ne \"--\"} {"
+  }
+ },
+ {
+  "id": 547,
+  "line": 464,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "463": "            if {!($token eq \"++\" || $token eq \"--\")} {"
+  }
+ },
+ {
+  "id": 548,
+  "line": 465,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "464": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 549,
+  "line": 465,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "464": "                incr tokpos -1"
+  }
+ },
+ {
+  "id": 550,
+  "line": 466,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "465": "                set delta [expr {$token neq \"++\" ? 1 : -1}]"
+  }
+ },
+ {
+  "id": 551,
+  "line": 466,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "465": "                set delta [expr {$token eq \"++\" ? 2 : -1}]"
+  }
+ },
+ {
+  "id": 552,
+  "line": 466,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "465": "                set delta [expr {$token eq \"++\" ? 0 : -1}]"
+  }
+ },
+ {
+  "id": 553,
+  "line": 466,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "465": "                set delta [expr {$token ne \"++\" ? 1 : -1}]"
+  }
+ },
+ {
+  "id": 554,
+  "line": 466,
+  "kind": "del",
+  "desc": "delete: set delta [expr {$token eq \"++\" ? 1 : -1}]",
+  "edits": {
+   "465": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 555,
+  "line": 467,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "466": "                return \"[incrCode $name $delta]pop $delta; sub; \""
+  }
+ },
+ {
+  "id": 556,
+  "line": 467,
+  "kind": "swap",
+  "desc": "sub -> add",
+  "edits": {
+   "466": "                return \"[incrCode $name $delta]push $delta; add; \""
+  }
+ },
+ {
+  "id": 557,
+  "line": 467,
+  "kind": "del",
+  "desc": "delete: return \"[incrCode $name $delta]push $delta; sub; \"",
+  "edits": {
+   "466": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 558,
+  "line": 470,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "469": "            set opcodes \"pop $name; \""
+  }
+ },
+ {
+  "id": 559,
+  "line": 470,
+  "kind": "del",
+  "desc": "delete: set opcodes \"push $name; \"",
+  "edits": {
+   "469": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 560,
+  "line": 471,
+  "kind": "swap",
+  "desc": "loadStk -> storeStk",
+  "edits": {
+   "470": "            append opcodes \"storeStk; \""
+  }
+ },
+ {
+  "id": 561,
+  "line": 471,
+  "kind": "del",
+  "desc": "delete: append opcodes \"loadStk; \"",
+  "edits": {
+   "470": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 562,
+  "line": 472,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "471": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 563,
+  "line": 476,
+  "kind": "del",
+  "desc": "delete: error \"Calc: expected start of expression but found '$token'",
+  "edits": {
+   "475": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 564,
+  "line": 490,
+  "kind": "del",
+  "desc": "delete: variable tokens",
+  "edits": {
+   "489": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 565,
+  "line": 491,
+  "kind": "del",
+  "desc": "delete: variable tokpos",
+  "edits": {
+   "490": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 566,
+  "line": 492,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "491": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 567,
+  "line": 493,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "492": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 568,
+  "line": 493,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "492": "    incr tokpos -1"
+  }
+ },
+ {
+  "id": 569,
+  "line": 494,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "493": "    if {$token neq \"(\"} {"
+  }
+ },
+ {
+  "id": 570,
+  "line": 494,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "493": "    if {$token ne \"(\"} {"
+  }
+ },
+ {
+  "id": 571,
+  "line": 494,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "493": "    if {!($token eq \"(\")} {"
+  }
+ },
+ {
+  "id": 572,
+  "line": 495,
+  "kind": "del",
+  "desc": "delete: set kids {}",
+  "edits": {
+   "494": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 573,
+  "line": 496,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "495": "        while 2 {"
+  }
+ },
+ {
+  "id": 574,
+  "line": 496,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "495": "        while 0 {"
+  }
+ },
+ {
+  "id": 575,
+  "line": 497,
+  "kind": "del",
+  "desc": "delete: lappend kids [parsePattern]",
+  "edits": {
+   "496": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 576,
+  "line": 498,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "497": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 577,
+  "line": 499,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "498": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 578,
+  "line": 499,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "498": "            incr tokpos -1"
+  }
+ },
+ {
+  "id": 579,
+  "line": 500,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "499": "            if {$token neq \")\"} break"
+  }
+ },
+ {
+  "id": 580,
+  "line": 500,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "499": "            if {$token ne \")\"} break"
+  }
+ },
+ {
+  "id": 581,
+  "line": 500,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "499": "            if {!($token eq \")\")} break"
+  }
+ },
+ {
+  "id": 582,
+  "line": 501,
+  "kind": "cmp",
+  "desc": "ne -> eq",
+  "edits": {
+   "500": "            if {$token eq \",\"} { error \"Calc: expected ',' or ')' in a pattern but found '$token'\" }"
+  }
+ },
+ {
+  "id": 583,
+  "line": 501,
+  "kind": "cmp",
+  "desc": "in -> ni",
+  "edits": {
+   "500": "            if {$token ne \",\"} { error \"Calc: expected ',' or ')' ni a pattern but found '$token'\" }"
+  }
+ },
+ {
+  "id": 584,
+  "line": 501,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "500": "            if {!($token ne \",\")} { error \"Calc: expected ',' or ')' in a pattern but found '$token'\" }"
+  }
+ },
+ {
+  "id": 585,
+  "line": 503,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "502": "        return [linsert $kids 1 t]"
+  }
+ },
+ {
+  "id": 586,
+  "line": 503,
+  "kind": "del",
+  "desc": "delete: return [linsert $kids 0 t]",
+  "edits": {
+   "502": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 587,
+  "line": 505,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "504": "    if {!(![regexp {^[[:alpha:]_][[:alnum:]_]*$} $token])} {"
+  }
+ },
+ {
+  "id": 588,
+  "line": 506,
+  "kind": "cmp",
+  "desc": "in -> ni",
+  "edits": {
+   "505": "        error \"Calc: expected a variable name ni a pattern but found '$token'\""
+  }
+ },
+ {
+  "id": 589,
+  "line": 506,
+  "kind": "del",
+  "desc": "delete: error \"Calc: expected a variable name in a pattern but found",
+  "edits": {
+   "505": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 590,
+  "line": 508,
+  "kind": "del",
+  "desc": "delete: return [list n $token]",
+  "edits": {
+   "507": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 591,
+  "line": 513,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "512": "    if {[lindex $pat 0] neq \"n\"} { return [lindex $pat 1] }"
+  }
+ },
+ {
+  "id": 592,
+  "line": 513,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "512": "    if {[lindex $pat 1] eq \"n\"} { return [lindex $pat 1] }"
+  }
+ },
+ {
+  "id": 593,
+  "line": 513,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "512": "    if {[lindex $pat 0] eq \"n\"} { return [lindex $pat 2] }"
+  }
+ },
+ {
+  "id": 594,
+  "line": 513,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "512": "    if {[lindex $pat 0] eq \"n\"} { return [lindex $pat 0] }"
+  }
+ },
+ {
+  "id": 595,
+  "line": 513,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "512": "    if {[lindex $pat 0] ne \"n\"} { return [lindex $pat 1] }"
+  }
+ },
+ {
+  "id": 596,
+  "line": 513,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "512": "    if {!([lindex $pat 0] eq \"n\")} { return [lindex $pat 1] }"
+  }
+ },
+ {
+  "id": 597,
+  "line": 514,
+  "kind": "del",
+  "desc": "delete: set parts {}",
+  "edits": {
+   "513": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 598,
+  "line": 515,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "514": "    foreach kid [lrange $pat 2 end] { lappend parts [patternText $kid] }"
+  }
+ },
+ {
+  "id": 599,
+  "line": 515,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "514": "    foreach kid [lrange $pat 0 end] { lappend parts [patternText $kid] }"
+  }
+ },
+ {
+  "id": 600,
+  "line": 516,
+  "kind": "del",
+  "desc": "delete: return \"([join $parts ,])\"",
+  "edits": {
+   "515": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 601,
+  "line": 521,
+  "kind": "del",
+  "desc": "delete: variable inprocFlag",
+  "edits": {
+   "520": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 602,
+  "line": 523,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "522": "    if {$kind neq \"n\"} {"
+  }
+ },
+ {
+  "id": 603,
+  "line": 523,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "522": "    if {$kind ne \"n\"} {"
+  }
+ },
+ {
+  "id": 604,
+  "line": 523,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "522": "    if {!($kind eq \"n\")} {"
+  }
+ },
+ {
+  "id": 605,
+  "line": 524,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "523": "        if {$first neq \"_\"} { return \"\" }"
+  }
+ },
+ {
+  "id": 606,
+  "line": 524,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "523": "        if {$first ne \"_\"} { return \"\" }"
+  }
+ },
+ {
+  "id": 607,
+  "line": 524,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "523": "        if {!($first eq \"_\")} { return \"\" }"
+  }
+ },
+ {
+  "id": 608,
+  "line": 525,
+  "kind": "swap",
+  "desc": "store -> load",
+  "edits": {
+   "524": "        if {$inprocFlag} { return \"load $first; \" }"
+  }
+ },
+ {
+  "id": 609,
+  "line": 525,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "524": "        if {!($inprocFlag)} { return \"store $first; \" }"
+  }
+ },
+ {
+  "id": 610,
+  "line": 526,
+  "kind": "swap",
+  "desc": "storeStk -> loadStk",
+  "edits": {
+   "525": "        return \"push $first; over 1; loadStk; pop; \""
+  }
+ },
+ {
+  "id": 611,
+  "line": 526,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "525": "        return \"pop $first; over 1; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 612,
+  "line": 526,
+  "kind": "swap",
+  "desc": "over -> dup",
+  "edits": {
+   "525": "        return \"push $first; dup 1; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 613,
+  "line": 526,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "525": "        return \"push $first; over 2; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 614,
+  "line": 526,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "525": "        return \"push $first; over 0; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 615,
+  "line": 526,
+  "kind": "del",
+  "desc": "delete: return \"push $first; over 1; storeStk; pop; \"",
+  "edits": {
+   "525": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 616,
+  "line": 528,
+  "kind": "del",
+  "desc": "delete: set opcodes \"\"",
+  "edits": {
+   "527": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 617,
+  "line": 529,
+  "kind": "del",
+  "desc": "delete: variable strictFlag",
+  "edits": {
+   "528": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 618,
+  "line": 530,
+  "kind": "cmp",
+  "desc": "&& -> ||",
+  "edits": {
+   "529": "    if {[info exists strictFlag] || $strictFlag} {"
+  }
+ },
+ {
+  "id": 619,
+  "line": 530,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "529": "    if {!([info exists strictFlag] && $strictFlag)} {"
+  }
+ },
+ {
+  "id": 620,
+  "line": 531,
+  "kind": "del",
+  "desc": "delete: set n [incr ::labelcount]",
+  "edits": {
+   "530": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 621,
+  "line": 532,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "531": "        set want [expr {[llength $pat] - 2}]"
+  }
+ },
+ {
+  "id": 622,
+  "line": 532,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "531": "        set want [expr {[llength $pat] - 0}]"
+  }
+ },
+ {
+  "id": 623,
+  "line": 532,
+  "kind": "del",
+  "desc": "delete: set want [expr {[llength $pat] - 1}]",
+  "edits": {
+   "531": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 624,
+  "line": 533,
+  "kind": "del",
+  "desc": "delete: set txt [patternText $pat]",
+  "edits": {
+   "532": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 625,
+  "line": 534,
+  "kind": "swap",
+  "desc": "dup -> pop",
+  "edits": {
+   "533": "        append opcodes \"pop; listLength; push $want; neq; jumpFalse tupok$n; \""
+  }
+ },
+ {
+  "id": 626,
+  "line": 534,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "533": "        append opcodes \"dup; listLength; pop $want; neq; jumpFalse tupok$n; \""
+  }
+ },
+ {
+  "id": 627,
+  "line": 534,
+  "kind": "del",
+  "desc": "delete: append opcodes \"dup; listLength; push $want; neq; jumpFalse ",
+  "edits": {
+   "533": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 628,
+  "line": 535,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "534": "        append opcodes \"pop error; push {Calc: tuple mismatch: pattern $txt expects $want, data has }; \""
+  }
+ },
+ {
+  "id": 629,
+  "line": 535,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "534": "        append opcodes \"push error; pop {Calc: tuple mismatch: pattern $txt expects $want, data has }; \""
+  }
+ },
+ {
+  "id": 630,
+  "line": 535,
+  "kind": "del",
+  "desc": "delete: append opcodes \"push error; push {Calc: tuple mismatch: patt",
+  "edits": {
+   "534": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 631,
+  "line": 536,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "535": "        append opcodes \"over 2; listLength; pop { (use -> to allow a mismatch)}; strcat 3; invokeStk 2; pop; label tupok$n; \""
+  }
+ },
+ {
+  "id": 632,
+  "line": 536,
+  "kind": "swap",
+  "desc": "over -> dup",
+  "edits": {
+   "535": "        append opcodes \"dup 2; listLength; push { (use -> to allow a mismatch)}; strcat 3; invokeStk 2; pop; label tupok$n; \""
+  }
+ },
+ {
+  "id": 633,
+  "line": 536,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "535": "        append opcodes \"over 3; listLength; push { (use -> to allow a mismatch)}; strcat 3; invokeStk 2; pop; label tupok$n; \""
+  }
+ },
+ {
+  "id": 634,
+  "line": 536,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "535": "        append opcodes \"over 1; listLength; push { (use -> to allow a mismatch)}; strcat 3; invokeStk 2; pop; label tupok$n; \""
+  }
+ },
+ {
+  "id": 635,
+  "line": 536,
+  "kind": "num",
+  "desc": "3 -> 4",
+  "edits": {
+   "535": "        append opcodes \"over 2; listLength; push { (use -> to allow a mismatch)}; strcat 4; invokeStk 2; pop; label tupok$n; \""
+  }
+ },
+ {
+  "id": 636,
+  "line": 536,
+  "kind": "num",
+  "desc": "3 -> 2",
+  "edits": {
+   "535": "        append opcodes \"over 2; listLength; push { (use -> to allow a mismatch)}; strcat 2; invokeStk 2; pop; label tupok$n; \""
+  }
+ },
+ {
+  "id": 637,
+  "line": 536,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "535": "        append opcodes \"over 2; listLength; push { (use -> to allow a mismatch)}; strcat 3; invokeStk 3; pop; label tupok$n; \""
+  }
+ },
+ {
+  "id": 638,
+  "line": 536,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "535": "        append opcodes \"over 2; listLength; push { (use -> to allow a mismatch)}; strcat 3; invokeStk 1; pop; label tupok$n; \""
+  }
+ },
+ {
+  "id": 639,
+  "line": 536,
+  "kind": "del",
+  "desc": "delete: append opcodes \"over 2; listLength; push { (use -> to allow ",
+  "edits": {
+   "535": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 640,
+  "line": 538,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "537": "    set i 1"
+  }
+ },
+ {
+  "id": 641,
+  "line": 538,
+  "kind": "del",
+  "desc": "delete: set i 0",
+  "edits": {
+   "537": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 642,
+  "line": 539,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "538": "    foreach kid [lrange $pat 2 end] {"
+  }
+ },
+ {
+  "id": 643,
+  "line": 539,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "538": "    foreach kid [lrange $pat 0 end] {"
+  }
+ },
+ {
+  "id": 644,
+  "line": 540,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "539": "        if {$kid neq {n _}} {"
+  }
+ },
+ {
+  "id": 645,
+  "line": 540,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "539": "        if {$kid ne {n _}} {"
+  }
+ },
+ {
+  "id": 646,
+  "line": 540,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "539": "        if {!($kid eq {n _})} {"
+  }
+ },
+ {
+  "id": 647,
+  "line": 542,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "541": "        } elseif {[lindex $kid 0] neq \"n\" && !$inprocFlag} {"
+  }
+ },
+ {
+  "id": 648,
+  "line": 542,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "541": "        } elseif {[lindex $kid 1] eq \"n\" && !$inprocFlag} {"
+  }
+ },
+ {
+  "id": 649,
+  "line": 542,
+  "kind": "cmp",
+  "desc": "&& -> ||",
+  "edits": {
+   "541": "        } elseif {[lindex $kid 0] eq \"n\" || !$inprocFlag} {"
+  }
+ },
+ {
+  "id": 650,
+  "line": 542,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "541": "        } elseif {[lindex $kid 0] ne \"n\" && !$inprocFlag} {"
+  }
+ },
+ {
+  "id": 651,
+  "line": 542,
+  "kind": "neg",
+  "desc": "negate elseif condition",
+  "edits": {
+   "541": "        } elseif {!([lindex $kid 0] eq \"n\" && !$inprocFlag)} {"
+  }
+ },
+ {
+  "id": 652,
+  "line": 544,
+  "kind": "swap",
+  "desc": "storeStk -> loadStk",
+  "edits": {
+   "543": "            append opcodes \"push [lindex $kid 1]; over 1; listIndexImm $i; loadStk; pop; \""
+  }
+ },
+ {
+  "id": 653,
+  "line": 544,
+  "kind": "swap",
+  "desc": "listIndexImm -> listLength",
+  "edits": {
+   "543": "            append opcodes \"push [lindex $kid 1]; over 1; listLength $i; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 654,
+  "line": 544,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "543": "            append opcodes \"pop [lindex $kid 1]; over 1; listIndexImm $i; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 655,
+  "line": 544,
+  "kind": "swap",
+  "desc": "over -> dup",
+  "edits": {
+   "543": "            append opcodes \"push [lindex $kid 1]; dup 1; listIndexImm $i; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 656,
+  "line": 544,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "543": "            append opcodes \"push [lindex $kid 2]; over 1; listIndexImm $i; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 657,
+  "line": 544,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "543": "            append opcodes \"push [lindex $kid 0]; over 1; listIndexImm $i; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 658,
+  "line": 544,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "543": "            append opcodes \"push [lindex $kid 1]; over 2; listIndexImm $i; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 659,
+  "line": 544,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "543": "            append opcodes \"push [lindex $kid 1]; over 0; listIndexImm $i; storeStk; pop; \""
+  }
+ },
+ {
+  "id": 660,
+  "line": 544,
+  "kind": "del",
+  "desc": "delete: append opcodes \"push [lindex $kid 1]; over 1; listIndexImm $",
+  "edits": {
+   "543": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 661,
+  "line": 545,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "544": "        } elseif {[lindex $kid 0] neq \"n\"} {"
+  }
+ },
+ {
+  "id": 662,
+  "line": 545,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "544": "        } elseif {[lindex $kid 1] eq \"n\"} {"
+  }
+ },
+ {
+  "id": 663,
+  "line": 545,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "544": "        } elseif {[lindex $kid 0] ne \"n\"} {"
+  }
+ },
+ {
+  "id": 664,
+  "line": 545,
+  "kind": "neg",
+  "desc": "negate elseif condition",
+  "edits": {
+   "544": "        } elseif {!([lindex $kid 0] eq \"n\")} {"
+  }
+ },
+ {
+  "id": 665,
+  "line": 546,
+  "kind": "swap",
+  "desc": "dup -> pop",
+  "edits": {
+   "545": "            append opcodes \"pop; listIndexImm $i; store [lindex $kid 1]; pop; \""
+  }
+ },
+ {
+  "id": 666,
+  "line": 546,
+  "kind": "swap",
+  "desc": "listIndexImm -> listLength",
+  "edits": {
+   "545": "            append opcodes \"dup; listLength $i; store [lindex $kid 1]; pop; \""
+  }
+ },
+ {
+  "id": 667,
+  "line": 546,
+  "kind": "swap",
+  "desc": "store -> load",
+  "edits": {
+   "545": "            append opcodes \"dup; listIndexImm $i; load [lindex $kid 1]; pop; \""
+  }
+ },
+ {
+  "id": 668,
+  "line": 546,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "545": "            append opcodes \"dup; listIndexImm $i; store [lindex $kid 2]; pop; \""
+  }
+ },
+ {
+  "id": 669,
+  "line": 546,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "545": "            append opcodes \"dup; listIndexImm $i; store [lindex $kid 0]; pop; \""
+  }
+ },
+ {
+  "id": 670,
+  "line": 546,
+  "kind": "del",
+  "desc": "delete: append opcodes \"dup; listIndexImm $i; store [lindex $kid 1];",
+  "edits": {
+   "545": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 671,
+  "line": 548,
+  "kind": "swap",
+  "desc": "dup -> pop",
+  "edits": {
+   "547": "            append opcodes \"pop; listIndexImm $i; [destructure $kid]pop; \""
+  }
+ },
+ {
+  "id": 672,
+  "line": 548,
+  "kind": "swap",
+  "desc": "listIndexImm -> listLength",
+  "edits": {
+   "547": "            append opcodes \"dup; listLength $i; [destructure $kid]pop; \""
+  }
+ },
+ {
+  "id": 673,
+  "line": 548,
+  "kind": "del",
+  "desc": "delete: append opcodes \"dup; listIndexImm $i; [destructure $kid]pop;",
+  "edits": {
+   "547": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 674,
+  "line": 550,
+  "kind": "del",
+  "desc": "delete: incr i",
+  "edits": {
+   "549": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 675,
+  "line": 550,
+  "kind": "incr",
+  "desc": "incr i -> incr i -1",
+  "edits": {
+   "549": "        incr i -1"
+  }
+ },
+ {
+  "id": 676,
+  "line": 552,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "551": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 677,
+  "line": 559,
+  "kind": "del",
+  "desc": "delete: variable depth",
+  "edits": {
+   "558": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 678,
+  "line": 560,
+  "kind": "del",
+  "desc": "delete: variable tokens",
+  "edits": {
+   "559": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 679,
+  "line": 561,
+  "kind": "del",
+  "desc": "delete: variable tokpos",
+  "edits": {
+   "560": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 680,
+  "line": 563,
+  "kind": "del",
+  "desc": "delete: set dep [incr depth]",
+  "edits": {
+   "562": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 681,
+  "line": 563,
+  "kind": "incr",
+  "desc": "incr depth -> incr depth -1",
+  "edits": {
+   "562": "    set dep [incr depth -1]"
+  }
+ },
+ {
+  "id": 682,
+  "line": 564,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "563": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 683,
+  "line": 565,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "564": "    set arg_num 2"
+  }
+ },
+ {
+  "id": 684,
+  "line": 565,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "564": "    set arg_num 0"
+  }
+ },
+ {
+  "id": 685,
+  "line": 565,
+  "kind": "del",
+  "desc": "delete: set arg_num 1",
+  "edits": {
+   "564": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 686,
+  "line": 567,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "566": "    while 2 {"
+  }
+ },
+ {
+  "id": 687,
+  "line": 567,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "566": "    while 0 {"
+  }
+ },
+ {
+  "id": 688,
+  "line": 568,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "567": "        if {$token neq \")\"} {"
+  }
+ },
+ {
+  "id": 689,
+  "line": 568,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "567": "        if {$token ne \")\"} {"
+  }
+ },
+ {
+  "id": 690,
+  "line": 568,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "567": "        if {!($token eq \")\")} {"
+  }
+ },
+ {
+  "id": 691,
+  "line": 569,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "568": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 692,
+  "line": 569,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "568": "            incr tokpos -1"
+  }
+ },
+ {
+  "id": 693,
+  "line": 572,
+  "kind": "cmp",
+  "desc": "ne -> eq",
+  "edits": {
+   "571": "            if {$nativeInfo eq \"\"} {"
+  }
+ },
+ {
+  "id": 694,
+  "line": 572,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "571": "            if {!($nativeInfo ne \"\")} {"
+  }
+ },
+ {
+  "id": 695,
+  "line": 575,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "574": "\t\t\t    set actualArgs [expr {$arg_num - 2}]"
+  }
+ },
+ {
+  "id": 696,
+  "line": 575,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "574": "\t\t\t    set actualArgs [expr {$arg_num - 0}]"
+  }
+ },
+ {
+  "id": 697,
+  "line": 575,
+  "kind": "del",
+  "desc": "delete: set actualArgs [expr {$arg_num - 1}]",
+  "edits": {
+   "574": "\t\t\t    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 698,
+  "line": 576,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "575": "\t\t\t    if {$expectedArgs > 1} {"
+  }
+ },
+ {
+  "id": 699,
+  "line": 576,
+  "kind": "cmp",
+  "desc": "> -> >=",
+  "edits": {
+   "575": "\t\t\t    if {$expectedArgs >= 0} {"
+  }
+ },
+ {
+  "id": 700,
+  "line": 576,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "575": "\t\t\t    if {!($expectedArgs > 0)} {"
+  }
+ },
+ {
+  "id": 701,
+  "line": 578,
+  "kind": "cmp",
+  "desc": "!= -> ==",
+  "edits": {
+   "577": "\t\t\t        if {$actualArgs == $expectedArgs} {"
+  }
+ },
+ {
+  "id": 702,
+  "line": 578,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "577": "\t\t\t        if {!($actualArgs != $expectedArgs)} {"
+  }
+ },
+ {
+  "id": 703,
+  "line": 579,
+  "kind": "del",
+  "desc": "delete: error \"Calc: $funcname expects exactly $expectedArgs args, g",
+  "edits": {
+   "578": "\t\t\t            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 704,
+  "line": 583,
+  "kind": "del",
+  "desc": "delete: set minArgs [expr {abs($expectedArgs)}]",
+  "edits": {
+   "582": "\t\t\t        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 705,
+  "line": 584,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "583": "\t\t\t        if {$actualArgs <= $minArgs} {"
+  }
+ },
+ {
+  "id": 706,
+  "line": 584,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "583": "\t\t\t        if {!($actualArgs < $minArgs)} {"
+  }
+ },
+ {
+  "id": 707,
+  "line": 585,
+  "kind": "del",
+  "desc": "delete: error \"Calc: $funcname expects at least $minArgs args, got $",
+  "edits": {
+   "584": "\t\t\t            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 708,
+  "line": 589,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "588": "\t\t\t    if {$expectedArgs < 1} {"
+  }
+ },
+ {
+  "id": 709,
+  "line": 589,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "588": "\t\t\t    if {$expectedArgs <= 0} {"
+  }
+ },
+ {
+  "id": 710,
+  "line": 589,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "588": "\t\t\t    if {!($expectedArgs < 0)} {"
+  }
+ },
+ {
+  "id": 711,
+  "line": 591,
+  "kind": "del",
+  "desc": "delete: append opcodes \"$instruction $actualArgs; \"",
+  "edits": {
+   "590": "\t\t\t        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 712,
+  "line": 594,
+  "kind": "del",
+  "desc": "delete: append opcodes \"$instruction; \"",
+  "edits": {
+   "593": "\t\t\t        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 713,
+  "line": 599,
+  "kind": "del",
+  "desc": "delete: append opcodes \"invokeStk $arg_num; \"",
+  "edits": {
+   "598": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 714,
+  "line": 601,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "600": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 715,
+  "line": 607,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "606": "        append opcodes [parse 1]"
+  }
+ },
+ {
+  "id": 716,
+  "line": 607,
+  "kind": "del",
+  "desc": "delete: append opcodes [parse 0]",
+  "edits": {
+   "606": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 717,
+  "line": 608,
+  "kind": "del",
+  "desc": "delete: incr arg_num",
+  "edits": {
+   "607": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 718,
+  "line": 608,
+  "kind": "incr",
+  "desc": "incr arg_num -> incr arg_num -1",
+  "edits": {
+   "607": "        incr arg_num -1"
+  }
+ },
+ {
+  "id": 719,
+  "line": 609,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "608": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 720,
+  "line": 614,
+  "kind": "del",
+  "desc": "delete: error \"Calc: expected ')' or ',' but found '$token'\"",
+  "edits": {
+   "613": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 721,
+  "line": 625,
+  "kind": "del",
+  "desc": "delete: variable depth",
+  "edits": {
+   "624": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 722,
+  "line": 626,
+  "kind": "del",
+  "desc": "delete: variable inprec",
+  "edits": {
+   "625": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 723,
+  "line": 627,
+  "kind": "del",
+  "desc": "delete: variable tokens",
+  "edits": {
+   "626": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 724,
+  "line": 628,
+  "kind": "del",
+  "desc": "delete: variable tokpos",
+  "edits": {
+   "627": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 725,
+  "line": 629,
+  "kind": "del",
+  "desc": "delete: set dep [incr depth]",
+  "edits": {
+   "628": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 726,
+  "line": 629,
+  "kind": "incr",
+  "desc": "incr depth -> incr depth -1",
+  "edits": {
+   "628": "    set dep [incr depth -1]"
+  }
+ },
+ {
+  "id": 727,
+  "line": 632,
+  "kind": "del",
+  "desc": "delete: set else else[incr ::labelcount]",
+  "edits": {
+   "631": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 728,
+  "line": 633,
+  "kind": "del",
+  "desc": "delete: set end end$::labelcount",
+  "edits": {
+   "632": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 729,
+  "line": 634,
+  "kind": "del",
+  "desc": "delete: append opcodes \"jumpFalse $else; [parse $inprec(:)]\"",
+  "edits": {
+   "633": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 730,
+  "line": 636,
+  "kind": "del",
+  "desc": "delete: set token [lindex $tokens $tokpos]",
+  "edits": {
+   "635": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 731,
+  "line": 637,
+  "kind": "cmp",
+  "desc": "ne -> eq",
+  "edits": {
+   "636": "    if {$token eq \":\"} {"
+  }
+ },
+ {
+  "id": 732,
+  "line": 637,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "636": "    if {!($token ne \":\")} {"
+  }
+ },
+ {
+  "id": 733,
+  "line": 638,
+  "kind": "del",
+  "desc": "delete: error \"Calc: expected ':' but found '$token'\"",
+  "edits": {
+   "637": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 734,
+  "line": 640,
+  "kind": "del",
+  "desc": "delete: incr tokpos",
+  "edits": {
+   "639": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 735,
+  "line": 640,
+  "kind": "incr",
+  "desc": "incr tokpos -> incr tokpos -1",
+  "edits": {
+   "639": "    incr tokpos -1"
+  }
+ },
+ {
+  "id": 736,
+  "line": 642,
+  "kind": "del",
+  "desc": "delete: append opcodes \"jump $end; label $else; [parse $inprec(:)]\"",
+  "edits": {
+   "641": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 737,
+  "line": 643,
+  "kind": "del",
+  "desc": "delete: append opcodes \"label $end; nop; \"",
+  "edits": {
+   "642": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 738,
+  "line": 644,
+  "kind": "del",
+  "desc": "delete: return $opcodes",
+  "edits": {
+   "643": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 739,
+  "line": 663,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "662": "proc transform= {arglist body {inproc 1} {preserve 1}} {"
+  }
+ },
+ {
+  "id": 740,
+  "line": 663,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "662": "proc transform= {arglist body {inproc 0} {preserve 2}} {"
+  }
+ },
+ {
+  "id": 741,
+  "line": 663,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "662": "proc transform= {arglist body {inproc 0} {preserve 0}} {"
+  }
+ },
+ {
+  "id": 742,
+  "line": 664,
+  "kind": "del",
+  "desc": "delete: set result {}",
+  "edits": {
+   "663": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 743,
+  "line": 665,
+  "kind": "del",
+  "desc": "delete: set lines [split $body \\n]",
+  "edits": {
+   "664": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 744,
+  "line": 666,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "665": "    set i 1"
+  }
+ },
+ {
+  "id": 745,
+  "line": 666,
+  "kind": "del",
+  "desc": "delete: set i 0",
+  "edits": {
+   "665": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 746,
+  "line": 667,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "666": "    while {$i <= [llength $lines]} {"
+  }
+ },
+ {
+  "id": 747,
+  "line": 667,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "666": "    while {!($i < [llength $lines])} {"
+  }
+ },
+ {
+  "id": 748,
+  "line": 668,
+  "kind": "del",
+  "desc": "delete: set line [lindex $lines $i]",
+  "edits": {
+   "667": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 749,
+  "line": 669,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "668": "        if {!([regexp {^(\\s*)[=:]\\s+\\{} $line -> indent])} {"
+  }
+ },
+ {
+  "id": 750,
+  "line": 670,
+  "kind": "del",
+  "desc": "delete: append result $indent",
+  "edits": {
+   "669": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 751,
+  "line": 672,
+  "kind": "del",
+  "desc": "delete: set accum $line",
+  "edits": {
+   "671": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 752,
+  "line": 673,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "672": "            while {!(![info complete $accum])} {"
+  }
+ },
+ {
+  "id": 753,
+  "line": 674,
+  "kind": "del",
+  "desc": "delete: incr i",
+  "edits": {
+   "673": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 754,
+  "line": 674,
+  "kind": "incr",
+  "desc": "incr i -> incr i -1",
+  "edits": {
+   "673": "                incr i -1"
+  }
+ },
+ {
+  "id": 755,
+  "line": 675,
+  "kind": "del",
+  "desc": "delete: append accum \\n [lindex $lines $i]",
+  "edits": {
+   "674": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 756,
+  "line": 679,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "678": "            set expr [string range $braced 2 end-1]"
+  }
+ },
+ {
+  "id": 757,
+  "line": 679,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "678": "            set expr [string range $braced 0 end-1]"
+  }
+ },
+ {
+  "id": 758,
+  "line": 679,
+  "kind": "del",
+  "desc": "delete: set expr [string range $braced 1 end-1]",
+  "edits": {
+   "678": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 759,
+  "line": 681,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "680": "            if {!([catch {set tal [::Calc::compile0 $expr $inproc]} err_code])} {"
+  }
+ },
+ {
+  "id": 760,
+  "line": 682,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "681": "                error \"line [expr {   $i +2  }]: $err_code\""
+  }
+ },
+ {
+  "id": 761,
+  "line": 682,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "681": "                error \"line [expr {   $i +0  }]: $err_code\""
+  }
+ },
+ {
+  "id": 762,
+  "line": 682,
+  "kind": "del",
+  "desc": "delete: error \"line [expr {   $i +1  }]: $err_code\"",
+  "edits": {
+   "681": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 763,
+  "line": 684,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "683": "            if {!($inproc)} {"
+  }
+ },
+ {
+  "id": 764,
+  "line": 685,
+  "kind": "swap",
+  "desc": "loadStk -> storeStk",
+  "edits": {
+   "684": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); storeStk} $tal {load \\1} tal"
+  }
+ },
+ {
+  "id": 765,
+  "line": 685,
+  "kind": "swap",
+  "desc": "load -> store",
+  "edits": {
+   "684": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {store \\1} tal"
+  }
+ },
+ {
+  "id": 766,
+  "line": 685,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "684": "                regsub -all {pop ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\1} tal"
+  }
+ },
+ {
+  "id": 767,
+  "line": 685,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "684": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\2} tal"
+  }
+ },
+ {
+  "id": 768,
+  "line": 685,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "684": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\0} tal"
+  }
+ },
+ {
+  "id": 769,
+  "line": 685,
+  "kind": "del",
+  "desc": "delete: regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {loa",
+  "edits": {
+   "684": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 770,
+  "line": 687,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "686": "            if {!($preserve)} {"
+  }
+ },
+ {
+  "id": 771,
+  "line": 688,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "687": "                append result \"if \\{1\\} \\{ $accum \\} \\{ tcl::unsupported::assemble \\{$tal\\} \\}\\n\""
+  }
+ },
+ {
+  "id": 772,
+  "line": 688,
+  "kind": "del",
+  "desc": "delete: append result \"if \\{0\\} \\{ $accum \\} \\{ tcl::unsupported::as",
+  "edits": {
+   "687": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 773,
+  "line": 690,
+  "kind": "del",
+  "desc": "delete: append result \"tcl::unsupported::assemble \\{$tal\\}\\n\"",
+  "edits": {
+   "689": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 774,
+  "line": 692,
+  "kind": "neg",
+  "desc": "negate elseif condition",
+  "edits": {
+   "691": "        } elseif {!( [regexp {^(\\s*)[=:]\\s+(\\S[^\\n]*)} $line -> indent expr])} {"
+  }
+ },
+ {
+  "id": 775,
+  "line": 693,
+  "kind": "del",
+  "desc": "delete: append result $indent",
+  "edits": {
+   "692": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 776,
+  "line": 696,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "695": "            if {!([catch {set tal [::Calc::compile0 $expr $inproc]} err_code])} {"
+  }
+ },
+ {
+  "id": 777,
+  "line": 697,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "696": "                error \"line [expr {   $i +2  }]: $err_code\""
+  }
+ },
+ {
+  "id": 778,
+  "line": 697,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "696": "                error \"line [expr {   $i +0  }]: $err_code\""
+  }
+ },
+ {
+  "id": 779,
+  "line": 697,
+  "kind": "del",
+  "desc": "delete: error \"line [expr {   $i +1  }]: $err_code\"",
+  "edits": {
+   "696": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 780,
+  "line": 699,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "698": "            if {!($inproc)} {"
+  }
+ },
+ {
+  "id": 781,
+  "line": 700,
+  "kind": "swap",
+  "desc": "loadStk -> storeStk",
+  "edits": {
+   "699": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); storeStk} $tal {load \\1} tal"
+  }
+ },
+ {
+  "id": 782,
+  "line": 700,
+  "kind": "swap",
+  "desc": "load -> store",
+  "edits": {
+   "699": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {store \\1} tal"
+  }
+ },
+ {
+  "id": 783,
+  "line": 700,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "699": "                regsub -all {pop ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\1} tal"
+  }
+ },
+ {
+  "id": 784,
+  "line": 700,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "699": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\2} tal"
+  }
+ },
+ {
+  "id": 785,
+  "line": 700,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "699": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\0} tal"
+  }
+ },
+ {
+  "id": 786,
+  "line": 700,
+  "kind": "del",
+  "desc": "delete: regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {loa",
+  "edits": {
+   "699": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 787,
+  "line": 702,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "701": "            if {!($preserve)} {"
+  }
+ },
+ {
+  "id": 788,
+  "line": 703,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "702": "                append result \"if \\{1\\} \\{ $line \\} \\{ tcl::unsupported::assemble \\{$tal\\} \\}\\n\""
+  }
+ },
+ {
+  "id": 789,
+  "line": 703,
+  "kind": "del",
+  "desc": "delete: append result \"if \\{0\\} \\{ $line \\} \\{ tcl::unsupported::ass",
+  "edits": {
+   "702": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 790,
+  "line": 705,
+  "kind": "del",
+  "desc": "delete: append result \"tcl::unsupported::assemble \\{$tal\\}\\n\"",
+  "edits": {
+   "704": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 791,
+  "line": 708,
+  "kind": "neg",
+  "desc": "negate elseif condition",
+  "edits": {
+   "707": "        } elseif {!([regexp -indices {\\[[=:]\\s+\\{} $line match])} {"
+  }
+ },
+ {
+  "id": 792,
+  "line": 711,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "710": "            set bracketStart [lindex $match 1]"
+  }
+ },
+ {
+  "id": 793,
+  "line": 711,
+  "kind": "del",
+  "desc": "delete: set bracketStart [lindex $match 0]",
+  "edits": {
+   "710": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 794,
+  "line": 712,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "711": "            set prefix [string range $line 1 [expr {$bracketStart - 1}]]"
+  }
+ },
+ {
+  "id": 795,
+  "line": 712,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "711": "            set prefix [string range $line 0 [expr {$bracketStart - 2}]]"
+  }
+ },
+ {
+  "id": 796,
+  "line": 712,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "711": "            set prefix [string range $line 0 [expr {$bracketStart - 0}]]"
+  }
+ },
+ {
+  "id": 797,
+  "line": 712,
+  "kind": "del",
+  "desc": "delete: set prefix [string range $line 0 [expr {$bracketStart - 1}]]",
+  "edits": {
+   "711": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 798,
+  "line": 715,
+  "kind": "del",
+  "desc": "delete: set accum [string range $line $bracketStart end]",
+  "edits": {
+   "714": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 799,
+  "line": 716,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "715": "            while {!(![info complete $accum])} {"
+  }
+ },
+ {
+  "id": 800,
+  "line": 717,
+  "kind": "del",
+  "desc": "delete: incr i",
+  "edits": {
+   "716": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 801,
+  "line": 717,
+  "kind": "incr",
+  "desc": "incr i -> incr i -1",
+  "edits": {
+   "716": "                incr i -1"
+  }
+ },
+ {
+  "id": 802,
+  "line": 718,
+  "kind": "del",
+  "desc": "delete: append accum \\n [lindex $lines $i]",
+  "edits": {
+   "717": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 803,
+  "line": 723,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "722": "            set expr [string range $braced 2 end-1]"
+  }
+ },
+ {
+  "id": 804,
+  "line": 723,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "722": "            set expr [string range $braced 0 end-1]"
+  }
+ },
+ {
+  "id": 805,
+  "line": 723,
+  "kind": "del",
+  "desc": "delete: set expr [string range $braced 1 end-1]",
+  "edits": {
+   "722": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 806,
+  "line": 725,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "724": "            if {!([catch {set tal [::Calc::compile0 $expr $inproc]} err_code])} {"
+  }
+ },
+ {
+  "id": 807,
+  "line": 726,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "725": "                error \"line [expr {$i+2}]: $err_code\""
+  }
+ },
+ {
+  "id": 808,
+  "line": 726,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "725": "                error \"line [expr {$i+0}]: $err_code\""
+  }
+ },
+ {
+  "id": 809,
+  "line": 726,
+  "kind": "del",
+  "desc": "delete: error \"line [expr {$i+1}]: $err_code\"",
+  "edits": {
+   "725": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 810,
+  "line": 728,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "727": "            if {!($inproc)} {"
+  }
+ },
+ {
+  "id": 811,
+  "line": 729,
+  "kind": "swap",
+  "desc": "loadStk -> storeStk",
+  "edits": {
+   "728": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); storeStk} $tal {load \\1} tal"
+  }
+ },
+ {
+  "id": 812,
+  "line": 729,
+  "kind": "swap",
+  "desc": "load -> store",
+  "edits": {
+   "728": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {store \\1} tal"
+  }
+ },
+ {
+  "id": 813,
+  "line": 729,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "728": "                regsub -all {pop ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\1} tal"
+  }
+ },
+ {
+  "id": 814,
+  "line": 729,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "728": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\2} tal"
+  }
+ },
+ {
+  "id": 815,
+  "line": 729,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "728": "                regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\0} tal"
+  }
+ },
+ {
+  "id": 816,
+  "line": 729,
+  "kind": "del",
+  "desc": "delete: regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {loa",
+  "edits": {
+   "728": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 817,
+  "line": 734,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "733": "            if {!([regexp {\\}\\s*(\\].*)} $accum -> suffix])} {"
+  }
+ },
+ {
+  "id": 818,
+  "line": 738,
+  "kind": "del",
+  "desc": "delete: set suffix \"\"",
+  "edits": {
+   "737": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 819,
+  "line": 739,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "738": "                while {$suffix neq \"\" && $i < [llength $lines]} {"
+  }
+ },
+ {
+  "id": 820,
+  "line": 739,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "738": "                while {$suffix eq \"\" && $i <= [llength $lines]} {"
+  }
+ },
+ {
+  "id": 821,
+  "line": 739,
+  "kind": "cmp",
+  "desc": "&& -> ||",
+  "edits": {
+   "738": "                while {$suffix eq \"\" || $i < [llength $lines]} {"
+  }
+ },
+ {
+  "id": 822,
+  "line": 739,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "738": "                while {$suffix ne \"\" && $i < [llength $lines]} {"
+  }
+ },
+ {
+  "id": 823,
+  "line": 739,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "738": "                while {!($suffix eq \"\" && $i < [llength $lines])} {"
+  }
+ },
+ {
+  "id": 824,
+  "line": 740,
+  "kind": "del",
+  "desc": "delete: incr i",
+  "edits": {
+   "739": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 825,
+  "line": 740,
+  "kind": "incr",
+  "desc": "incr i -> incr i -1",
+  "edits": {
+   "739": "                    incr i -1"
+  }
+ },
+ {
+  "id": 826,
+  "line": 741,
+  "kind": "del",
+  "desc": "delete: set suffix [string trimleft [lindex $lines $i]]",
+  "edits": {
+   "740": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 827,
+  "line": 745,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "744": "            set suffix [string range $suffix 2 end]"
+  }
+ },
+ {
+  "id": 828,
+  "line": 745,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "744": "            set suffix [string range $suffix 0 end]"
+  }
+ },
+ {
+  "id": 829,
+  "line": 745,
+  "kind": "del",
+  "desc": "delete: set suffix [string range $suffix 1 end]",
+  "edits": {
+   "744": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 830,
+  "line": 747,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "746": "            if {!($preserve)} {"
+  }
+ },
+ {
+  "id": 831,
+  "line": 748,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "747": "                append result \"$prefix\\[if \\{1\\} \\{$accum\\} \\{tcl::unsupported::assemble \\{$tal\\}\\}\\]$suffix\\n\""
+  }
+ },
+ {
+  "id": 832,
+  "line": 748,
+  "kind": "del",
+  "desc": "delete: append result \"$prefix\\[if \\{0\\} \\{$accum\\} \\{tcl::unsupport",
+  "edits": {
+   "747": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 833,
+  "line": 750,
+  "kind": "del",
+  "desc": "delete: append result \"$prefix\\[tcl::unsupported::assemble \\{$tal\\}\\",
+  "edits": {
+   "749": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 834,
+  "line": 753,
+  "kind": "neg",
+  "desc": "negate elseif condition",
+  "edits": {
+   "752": "        } elseif {!( [regexp {\\[\\s*[=:]\\s+[^\\]]+\\]} $line])} {"
+  }
+ },
+ {
+  "id": 835,
+  "line": 755,
+  "kind": "del",
+  "desc": "delete: set newline {}",
+  "edits": {
+   "754": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 836,
+  "line": 756,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "755": "            set pos 1"
+  }
+ },
+ {
+  "id": 837,
+  "line": 756,
+  "kind": "del",
+  "desc": "delete: set pos 0",
+  "edits": {
+   "755": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 838,
+  "line": 757,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "756": "            while {!([regexp -indices -start $pos {\\[\\s*[=:]\\s+([^\\]]+)\\]} $line match submatch])} {"
+  }
+ },
+ {
+  "id": 839,
+  "line": 759,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "758": "                append newline [string range $line $pos [expr {[lindex $match 1]-1}]]"
+  }
+ },
+ {
+  "id": 840,
+  "line": 759,
+  "kind": "del",
+  "desc": "delete: append newline [string range $line $pos [expr {[lindex $matc",
+  "edits": {
+   "758": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 841,
+  "line": 761,
+  "kind": "del",
+  "desc": "delete: set expr [string range $line {*}$submatch]",
+  "edits": {
+   "760": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 842,
+  "line": 762,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "761": "                if {!([catch {set tal [::Calc::compile0 $expr $inproc]} err_code])} {"
+  }
+ },
+ {
+  "id": 843,
+  "line": 763,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "762": "                    error \"line [expr {   $i +2  }]: $err_code\""
+  }
+ },
+ {
+  "id": 844,
+  "line": 763,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "762": "                    error \"line [expr {   $i +0  }]: $err_code\""
+  }
+ },
+ {
+  "id": 845,
+  "line": 763,
+  "kind": "del",
+  "desc": "delete: error \"line [expr {   $i +1  }]: $err_code\"",
+  "edits": {
+   "762": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 846,
+  "line": 765,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "764": "                if {!($inproc)} {"
+  }
+ },
+ {
+  "id": 847,
+  "line": 766,
+  "kind": "swap",
+  "desc": "loadStk -> storeStk",
+  "edits": {
+   "765": "                    regsub -all {push ([[:alpha:]_][^:;\\s]*); storeStk} $tal {load \\1} tal"
+  }
+ },
+ {
+  "id": 848,
+  "line": 766,
+  "kind": "swap",
+  "desc": "load -> store",
+  "edits": {
+   "765": "                    regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {store \\1} tal"
+  }
+ },
+ {
+  "id": 849,
+  "line": 766,
+  "kind": "swap",
+  "desc": "push -> pop",
+  "edits": {
+   "765": "                    regsub -all {pop ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\1} tal"
+  }
+ },
+ {
+  "id": 850,
+  "line": 766,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "765": "                    regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\2} tal"
+  }
+ },
+ {
+  "id": 851,
+  "line": 766,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "765": "                    regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {load \\0} tal"
+  }
+ },
+ {
+  "id": 852,
+  "line": 766,
+  "kind": "del",
+  "desc": "delete: regsub -all {push ([[:alpha:]_][^:;\\s]*); loadStk} $tal {loa",
+  "edits": {
+   "765": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 853,
+  "line": 768,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "767": "                if {!($preserve)} {"
+  }
+ },
+ {
+  "id": 854,
+  "line": 770,
+  "kind": "del",
+  "desc": "delete: set src [string range $line {*}$match]",
+  "edits": {
+   "769": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 855,
+  "line": 771,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "770": "                    set src [string range $src 2 end-1]  ;# strip the [ and ]"
+  }
+ },
+ {
+  "id": 856,
+  "line": 771,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "770": "                    set src [string range $src 0 end-1]  ;# strip the [ and ]"
+  }
+ },
+ {
+  "id": 857,
+  "line": 771,
+  "kind": "del",
+  "desc": "delete: set src [string range $src 1 end-1]",
+  "edits": {
+   "770": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 858,
+  "line": 772,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "771": "                    append newline \"\\[if \\{1\\} \\{$src\\} \\{tcl::unsupported::assemble \\{$tal\\}\\}\\]\""
+  }
+ },
+ {
+  "id": 859,
+  "line": 772,
+  "kind": "del",
+  "desc": "delete: append newline \"\\[if \\{0\\} \\{$src\\} \\{tcl::unsupported::asse",
+  "edits": {
+   "771": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 860,
+  "line": 774,
+  "kind": "del",
+  "desc": "delete: append newline \"\\[tcl::unsupported::assemble \\{$tal\\}\\]\"",
+  "edits": {
+   "773": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 861,
+  "line": 776,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "775": "                set pos [expr {[lindex $match 2]+1}]"
+  }
+ },
+ {
+  "id": 862,
+  "line": 776,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "775": "                set pos [expr {[lindex $match 0]+1}]"
+  }
+ },
+ {
+  "id": 863,
+  "line": 776,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "775": "                set pos [expr {[lindex $match 1]+2}]"
+  }
+ },
+ {
+  "id": 864,
+  "line": 776,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "775": "                set pos [expr {[lindex $match 1]+0}]"
+  }
+ },
+ {
+  "id": 865,
+  "line": 776,
+  "kind": "del",
+  "desc": "delete: set pos [expr {[lindex $match 1]+1}]",
+  "edits": {
+   "775": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 866,
+  "line": 779,
+  "kind": "del",
+  "desc": "delete: append newline [string range $line $pos end]",
+  "edits": {
+   "778": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 867,
+  "line": 780,
+  "kind": "del",
+  "desc": "delete: append result $newline \\n",
+  "edits": {
+   "779": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 868,
+  "line": 783,
+  "kind": "del",
+  "desc": "delete: append result $line \\n",
+  "edits": {
+   "782": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 869,
+  "line": 785,
+  "kind": "del",
+  "desc": "delete: incr i",
+  "edits": {
+   "784": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 870,
+  "line": 785,
+  "kind": "incr",
+  "desc": "incr i -> incr i -1",
+  "edits": {
+   "784": "        incr i -1"
+  }
+ },
+ {
+  "id": 871,
+  "line": 787,
+  "kind": "del",
+  "desc": "delete: return $result",
+  "edits": {
+   "786": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 872,
+  "line": 849,
+  "kind": "del",
+  "desc": "delete: set out {}",
+  "edits": {
+   "848": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 873,
+  "line": 850,
+  "kind": "del",
+  "desc": "delete: set pending [list ::]",
+  "edits": {
+   "849": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 874,
+  "line": 851,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "850": "    while {!([llength $pending])} {"
+  }
+ },
+ {
+  "id": 875,
+  "line": 852,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "851": "        set ns [lindex $pending 1]"
+  }
+ },
+ {
+  "id": 876,
+  "line": 852,
+  "kind": "del",
+  "desc": "delete: set ns [lindex $pending 0]",
+  "edits": {
+   "851": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 877,
+  "line": 853,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "852": "        set pending [lrange $pending 2 end]"
+  }
+ },
+ {
+  "id": 878,
+  "line": 853,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "852": "        set pending [lrange $pending 0 end]"
+  }
+ },
+ {
+  "id": 879,
+  "line": 853,
+  "kind": "del",
+  "desc": "delete: set pending [lrange $pending 1 end]",
+  "edits": {
+   "852": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 880,
+  "line": 854,
+  "kind": "del",
+  "desc": "delete: lappend out {*}[info procs ${ns}::*]",
+  "edits": {
+   "853": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 881,
+  "line": 856,
+  "kind": "swap",
+  "desc": "eq -> neq",
+  "edits": {
+   "855": "        if {$ns neq \"::\"} {"
+  }
+ },
+ {
+  "id": 882,
+  "line": 856,
+  "kind": "cmp",
+  "desc": "eq -> ne",
+  "edits": {
+   "855": "        if {$ns ne \"::\"} {"
+  }
+ },
+ {
+  "id": 883,
+  "line": 856,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "855": "        if {!($ns eq \"::\")} {"
+  }
+ },
+ {
+  "id": 884,
+  "line": 857,
+  "kind": "del",
+  "desc": "delete: lappend out {*}[info procs ::*]",
+  "edits": {
+   "856": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 885,
+  "line": 860,
+  "kind": "del",
+  "desc": "delete: lappend pending $child",
+  "edits": {
+   "859": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 886,
+  "line": 867,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "866": "    set debug 2"
+  }
+ },
+ {
+  "id": 887,
+  "line": 867,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "866": "    set debug 0"
+  }
+ },
+ {
+  "id": 888,
+  "line": 867,
+  "kind": "del",
+  "desc": "delete: set debug 1",
+  "edits": {
+   "866": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 889,
+  "line": 868,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "867": "    set useRegex 1"
+  }
+ },
+ {
+  "id": 890,
+  "line": 868,
+  "kind": "del",
+  "desc": "delete: set useRegex 0",
+  "edits": {
+   "867": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 891,
+  "line": 869,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "868": "    set listOnly 1"
+  }
+ },
+ {
+  "id": 892,
+  "line": 869,
+  "kind": "del",
+  "desc": "delete: set listOnly 0",
+  "edits": {
+   "868": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 893,
+  "line": 872,
+  "kind": "neg",
+  "desc": "negate while condition",
+  "edits": {
+   "871": "    while {!([llength $args])} {"
+  }
+ },
+ {
+  "id": 894,
+  "line": 873,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "872": "        set a [lindex $args 1]"
+  }
+ },
+ {
+  "id": 895,
+  "line": 873,
+  "kind": "del",
+  "desc": "delete: set a [lindex $args 0]",
+  "edits": {
+   "872": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 896,
+  "line": 876,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "875": "                if {[llength $args] < 3} {"
+  }
+ },
+ {
+  "id": 897,
+  "line": 876,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "875": "                if {[llength $args] < 1} {"
+  }
+ },
+ {
+  "id": 898,
+  "line": 876,
+  "kind": "cmp",
+  "desc": "< -> <=",
+  "edits": {
+   "875": "                if {[llength $args] <= 2} {"
+  }
+ },
+ {
+  "id": 899,
+  "line": 876,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "875": "                if {!([llength $args] < 2)} {"
+  }
+ },
+ {
+  "id": 900,
+  "line": 877,
+  "kind": "del",
+  "desc": "delete: error \"Calc::transformProcs: -preserve requires a value\"",
+  "edits": {
+   "876": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 901,
+  "line": 879,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "878": "                set debug [lindex $args 2]"
+  }
+ },
+ {
+  "id": 902,
+  "line": 879,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "878": "                set debug [lindex $args 0]"
+  }
+ },
+ {
+  "id": 903,
+  "line": 879,
+  "kind": "del",
+  "desc": "delete: set debug [lindex $args 1]",
+  "edits": {
+   "878": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 904,
+  "line": 880,
+  "kind": "num",
+  "desc": "2 -> 3",
+  "edits": {
+   "879": "                set args [lrange $args 3 end]"
+  }
+ },
+ {
+  "id": 905,
+  "line": 880,
+  "kind": "num",
+  "desc": "2 -> 1",
+  "edits": {
+   "879": "                set args [lrange $args 1 end]"
+  }
+ },
+ {
+  "id": 906,
+  "line": 880,
+  "kind": "del",
+  "desc": "delete: set args [lrange $args 2 end]",
+  "edits": {
+   "879": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 907,
+  "line": 883,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "882": "                set useRegex 2"
+  }
+ },
+ {
+  "id": 908,
+  "line": 883,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "882": "                set useRegex 0"
+  }
+ },
+ {
+  "id": 909,
+  "line": 883,
+  "kind": "del",
+  "desc": "delete: set useRegex 1",
+  "edits": {
+   "882": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 910,
+  "line": 884,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "883": "                set args [lrange $args 2 end]"
+  }
+ },
+ {
+  "id": 911,
+  "line": 884,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "883": "                set args [lrange $args 0 end]"
+  }
+ },
+ {
+  "id": 912,
+  "line": 884,
+  "kind": "del",
+  "desc": "delete: set args [lrange $args 1 end]",
+  "edits": {
+   "883": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 913,
+  "line": 887,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "886": "                set listOnly 2"
+  }
+ },
+ {
+  "id": 914,
+  "line": 887,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "886": "                set listOnly 0"
+  }
+ },
+ {
+  "id": 915,
+  "line": 887,
+  "kind": "del",
+  "desc": "delete: set listOnly 1",
+  "edits": {
+   "886": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 916,
+  "line": 888,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "887": "                set args [lrange $args 2 end]"
+  }
+ },
+ {
+  "id": 917,
+  "line": 888,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "887": "                set args [lrange $args 0 end]"
+  }
+ },
+ {
+  "id": 918,
+  "line": 888,
+  "kind": "del",
+  "desc": "delete: set args [lrange $args 1 end]",
+  "edits": {
+   "887": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 919,
+  "line": 891,
+  "kind": "del",
+  "desc": "delete: break",
+  "edits": {
+   "890": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 920,
+  "line": 895,
+  "kind": "del",
+  "desc": "delete: set patterns $args",
+  "edits": {
+   "894": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 921,
+  "line": 896,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "895": "    if {!(![llength $patterns])} {"
+  }
+ },
+ {
+  "id": 922,
+  "line": 897,
+  "kind": "del",
+  "desc": "delete: error \"Calc::transformProcs: no proc name pattern(s) given\"",
+  "edits": {
+   "896": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 923,
+  "line": 901,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "900": "    set preserve [expr {max($debug,1)}]"
+  }
+ },
+ {
+  "id": 924,
+  "line": 901,
+  "kind": "del",
+  "desc": "delete: set preserve [expr {max($debug,0)}]",
+  "edits": {
+   "900": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 925,
+  "line": 905,
+  "kind": "del",
+  "desc": "delete: set matched {}",
+  "edits": {
+   "904": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 926,
+  "line": 907,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "906": "    if {!(!$useRegex)} {"
+  }
+ },
+ {
+  "id": 927,
+  "line": 909,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "908": "            if {!(![string match \"::*\" $pat])} {"
+  }
+ },
+ {
+  "id": 928,
+  "line": 910,
+  "kind": "del",
+  "desc": "delete: set pat \"::$pat\"",
+  "edits": {
+   "909": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 929,
+  "line": 913,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "912": "                if {!(![string match \"::*\" $p])} {"
+  }
+ },
+ {
+  "id": 930,
+  "line": 914,
+  "kind": "del",
+  "desc": "delete: set p \"::$p\"",
+  "edits": {
+   "913": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 931,
+  "line": 916,
+  "kind": "del",
+  "desc": "delete: lappend matched $p",
+  "edits": {
+   "915": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 932,
+  "line": 920,
+  "kind": "del",
+  "desc": "delete: set candidates [::Calc::AllProcsRecursive]",
+  "edits": {
+   "919": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 933,
+  "line": 922,
+  "kind": "del",
+  "desc": "delete: set hasNs [string match \"*::*\" $pat]",
+  "edits": {
+   "921": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 934,
+  "line": 924,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "923": "                if {!($hasNs)} {"
+  }
+ },
+ {
+  "id": 935,
+  "line": 925,
+  "kind": "del",
+  "desc": "delete: set subject $p",
+  "edits": {
+   "924": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 936,
+  "line": 927,
+  "kind": "del",
+  "desc": "delete: set subject [namespace tail $p]",
+  "edits": {
+   "926": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 937,
+  "line": 929,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "928": "                if {!([regexp -- $pat $subject])} {"
+  }
+ },
+ {
+  "id": 938,
+  "line": 930,
+  "kind": "del",
+  "desc": "delete: lappend matched $p",
+  "edits": {
+   "929": "                    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 939,
+  "line": 935,
+  "kind": "del",
+  "desc": "delete: set matched [lsort -unique $matched]",
+  "edits": {
+   "934": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 940,
+  "line": 937,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "936": "    if {!($listOnly)} {"
+  }
+ },
+ {
+  "id": 941,
+  "line": 938,
+  "kind": "del",
+  "desc": "delete: return $matched",
+  "edits": {
+   "937": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 942,
+  "line": 942,
+  "kind": "del",
+  "desc": "delete: set touched {}",
+  "edits": {
+   "941": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 943,
+  "line": 944,
+  "kind": "del",
+  "desc": "delete: set arglist {}",
+  "edits": {
+   "943": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 944,
+  "line": 946,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "945": "            if {!([info default $procName $argName defaultVal])} {"
+  }
+ },
+ {
+  "id": 945,
+  "line": 947,
+  "kind": "del",
+  "desc": "delete: lappend arglist [list $argName $defaultVal]",
+  "edits": {
+   "946": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 946,
+  "line": 949,
+  "kind": "del",
+  "desc": "delete: lappend arglist $argName",
+  "edits": {
+   "948": "                ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 947,
+  "line": 952,
+  "kind": "del",
+  "desc": "delete: set body [info body $procName]",
+  "edits": {
+   "951": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 948,
+  "line": 955,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "954": "            set newbody [::Calc::transform= $arglist $body 2 $preserve]"
+  }
+ },
+ {
+  "id": 949,
+  "line": 955,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "954": "            set newbody [::Calc::transform= $arglist $body 0 $preserve]"
+  }
+ },
+ {
+  "id": 950,
+  "line": 955,
+  "kind": "del",
+  "desc": "delete: set newbody [::Calc::transform= $arglist $body 1 $preserve]",
+  "edits": {
+   "954": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 951,
+  "line": 957,
+  "kind": "del",
+  "desc": "delete: error \"Calc::transformProcs error compiling '$procName'  $er",
+  "edits": {
+   "956": "            ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 952,
+  "line": 960,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "959": "        if {abs($debug) > 2} {"
+  }
+ },
+ {
+  "id": 953,
+  "line": 960,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "959": "        if {abs($debug) > 0} {"
+  }
+ },
+ {
+  "id": 954,
+  "line": 960,
+  "kind": "cmp",
+  "desc": "> -> >=",
+  "edits": {
+   "959": "        if {abs($debug) >= 1} {"
+  }
+ },
+ {
+  "id": 955,
+  "line": 960,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "959": "        if {!(abs($debug) > 1)} {"
+  }
+ },
+ {
+  "id": 956,
+  "line": 965,
+  "kind": "del",
+  "desc": "delete: lappend touched $procName",
+  "edits": {
+   "964": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 957,
+  "line": 968,
+  "kind": "del",
+  "desc": "delete: return $touched",
+  "edits": {
+   "967": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 958,
+  "line": 973,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "972": "proc calc= {label body {debug 2}} {"
+  }
+ },
+ {
+  "id": 959,
+  "line": 973,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "972": "proc calc= {label body {debug 0}} {"
+  }
+ },
+ {
+  "id": 960,
+  "line": 974,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "973": "    set preserve [expr {   max($debug,1)   }]"
+  }
+ },
+ {
+  "id": 961,
+  "line": 974,
+  "kind": "del",
+  "desc": "delete: set preserve [expr {   max($debug,0)   }]",
+  "edits": {
+   "973": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 962,
+  "line": 977,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "976": "        set newbody [::Calc::transform= {} $body 1 $preserve]"
+  }
+ },
+ {
+  "id": 963,
+  "line": 977,
+  "kind": "del",
+  "desc": "delete: set newbody [::Calc::transform= {} $body 0 $preserve]",
+  "edits": {
+   "976": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 964,
+  "line": 979,
+  "kind": "cmp",
+  "desc": "in -> ni",
+  "edits": {
+   "978": "        error \"Calc= error ni section '$label' $err_code\""
+  }
+ },
+ {
+  "id": 965,
+  "line": 979,
+  "kind": "del",
+  "desc": "delete: error \"Calc= error in section '$label' $err_code\"",
+  "edits": {
+   "978": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 966,
+  "line": 981,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "980": "    if { $preserve != 1} {"
+  }
+ },
+ {
+  "id": 967,
+  "line": 981,
+  "kind": "cmp",
+  "desc": "!= -> ==",
+  "edits": {
+   "980": "    if { $preserve == 0} {"
+  }
+ },
+ {
+  "id": 968,
+  "line": 981,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "980": "    if {!( $preserve != 0)} {"
+  }
+ },
+ {
+  "id": 969,
+  "line": 982,
+  "kind": "del",
+  "desc": "delete: set Calc::calc(\"calc=$label\") $newbody",
+  "edits": {
+   "981": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 970,
+  "line": 985,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "984": "    if { abs($debug) > 2} {"
+  }
+ },
+ {
+  "id": 971,
+  "line": 985,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "984": "    if { abs($debug) > 0} {"
+  }
+ },
+ {
+  "id": 972,
+  "line": 985,
+  "kind": "cmp",
+  "desc": "> -> >=",
+  "edits": {
+   "984": "    if { abs($debug) >= 1} {"
+  }
+ },
+ {
+  "id": 973,
+  "line": 985,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "984": "    if {!( abs($debug) > 1)} {"
+  }
+ },
+ {
+  "id": 974,
+  "line": 989,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "988": "    uplevel 2 $newbody"
+  }
+ },
+ {
+  "id": 975,
+  "line": 989,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "988": "    uplevel 0 $newbody"
+  }
+ },
+ {
+  "id": 976,
+  "line": 991,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "990": "proc proc= {name arglist body {debug 2}} {"
+  }
+ },
+ {
+  "id": 977,
+  "line": 991,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "990": "proc proc= {name arglist body {debug 0}} {"
+  }
+ },
+ {
+  "id": 978,
+  "line": 992,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "991": "    set preserve [expr {   max($debug,1)   }]"
+  }
+ },
+ {
+  "id": 979,
+  "line": 992,
+  "kind": "del",
+  "desc": "delete: set preserve [expr {   max($debug,0)   }]",
+  "edits": {
+   "991": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 980,
+  "line": 995,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "994": "        set newbody [::Calc::transform= $arglist $body 2 $preserve]"
+  }
+ },
+ {
+  "id": 981,
+  "line": 995,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "994": "        set newbody [::Calc::transform= $arglist $body 0 $preserve]"
+  }
+ },
+ {
+  "id": 982,
+  "line": 995,
+  "kind": "del",
+  "desc": "delete: set newbody [::Calc::transform= $arglist $body 1 $preserve]",
+  "edits": {
+   "994": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 983,
+  "line": 997,
+  "kind": "del",
+  "desc": "delete: error \"Proc= error compiling '$name'  $err_code\"",
+  "edits": {
+   "996": "    \t;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 984,
+  "line": 1000,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "999": "    if { abs($debug) > 2} {"
+  }
+ },
+ {
+  "id": 985,
+  "line": 1000,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "999": "    if { abs($debug) > 0} {"
+  }
+ },
+ {
+  "id": 986,
+  "line": 1000,
+  "kind": "cmp",
+  "desc": "> -> >=",
+  "edits": {
+   "999": "    if { abs($debug) >= 1} {"
+  }
+ },
+ {
+  "id": 987,
+  "line": 1000,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "999": "    if {!( abs($debug) > 1)} {"
+  }
+ },
+ {
+  "id": 988,
+  "line": 1004,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "1003": "    uplevel 2 [list proc $name $arglist $newbody]"
+  }
+ },
+ {
+  "id": 989,
+  "line": 1004,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "1003": "    uplevel 0 [list proc $name $arglist $newbody]"
+  }
+ },
+ {
+  "id": 990,
+  "line": 1006,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "1005": "proc oo::define::method= {name arglist body {debug 2}} {"
+  }
+ },
+ {
+  "id": 991,
+  "line": 1006,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "1005": "proc oo::define::method= {name arglist body {debug 0}} {"
+  }
+ },
+ {
+  "id": 992,
+  "line": 1007,
+  "kind": "num",
+  "desc": "0 -> 1",
+  "edits": {
+   "1006": "    set preserve [expr {   max($debug,1)   }]"
+  }
+ },
+ {
+  "id": 993,
+  "line": 1007,
+  "kind": "del",
+  "desc": "delete: set preserve [expr {   max($debug,0)   }]",
+  "edits": {
+   "1006": "    ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 994,
+  "line": 1010,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "1009": "        set newbody [::Calc::transform= $arglist $body 2 $preserve]"
+  }
+ },
+ {
+  "id": 995,
+  "line": 1010,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "1009": "        set newbody [::Calc::transform= $arglist $body 0 $preserve]"
+  }
+ },
+ {
+  "id": 996,
+  "line": 1010,
+  "kind": "del",
+  "desc": "delete: set newbody [::Calc::transform= $arglist $body 1 $preserve]",
+  "edits": {
+   "1009": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 997,
+  "line": 1012,
+  "kind": "del",
+  "desc": "delete: error \"Method= error compiling '$name'  $err_code\"",
+  "edits": {
+   "1011": "        ;# MUTANT deleted"
+  }
+ },
+ {
+  "id": 998,
+  "line": 1015,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "1014": "    if { abs($debug) > 2} {"
+  }
+ },
+ {
+  "id": 999,
+  "line": 1015,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "1014": "    if { abs($debug) > 0} {"
+  }
+ },
+ {
+  "id": 1000,
+  "line": 1015,
+  "kind": "cmp",
+  "desc": "> -> >=",
+  "edits": {
+   "1014": "    if { abs($debug) >= 1} {"
+  }
+ },
+ {
+  "id": 1001,
+  "line": 1015,
+  "kind": "neg",
+  "desc": "negate if condition",
+  "edits": {
+   "1014": "    if {!( abs($debug) > 1)} {"
+  }
+ },
+ {
+  "id": 1002,
+  "line": 1019,
+  "kind": "num",
+  "desc": "1 -> 2",
+  "edits": {
+   "1018": "    uplevel 2 [list method $name $arglist $newbody]"
+  }
+ },
+ {
+  "id": 1003,
+  "line": 1019,
+  "kind": "num",
+  "desc": "1 -> 0",
+  "edits": {
+   "1018": "    uplevel 0 [list method $name $arglist $newbody]"
+  }
+ }
+]

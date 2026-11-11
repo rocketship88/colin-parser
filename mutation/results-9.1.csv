@@ -1,0 +1,1004 @@
+id,line,kind,mutation,status,killed_by
+1,8,num,0 -> 1,KILLED,"colon_test.tcl Calc: expected ')' or ',' but found ''"
+2,8,cmp,!= -> ==,KILLED,"colon_test.tcl Calc: expected ')' or ',' but found ''"
+3,8,neg,negate if condition,KILLED,"colon_test.tcl Calc: expected ')' or ',' but found ''"
+4,9,del,"delete: set arg [join ""$arg $args""]",KILLED,"colon_test.tcl Calc: expected ')' or ',' but found ''"
+5,11,neg,negate if condition,KILLED,"colon_test.tcl can't read ""::Calc::cache(x = 10)"": no such element in array"
+6,18,num,0 -> 1,KILLED,"calc.test ==== calc-27.1 min(5, 10) FAILED"
+7,18,cmp,!= -> ==,KILLED,calc.test ==== calc-1.1 addition: 1 + 2 FAILED
+8,18,neg,negate if condition,KILLED,calc.test ==== calc-1.1 addition: 1 + 2 FAILED
+9,19,del,"delete: set arg [join ""$arg $args""]",KILLED,calc.test ==== calc-1.1 addition: 1 + 2 FAILED
+10,21,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+11,30,num,0 -> 1,KILLED,calc.test ==== calc-42.5 tuple: extra elements are ignored FAILED
+12,30,del,delete: variable strictFlag 0,SURVIVED,
+13,38,num,0 -> 1,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+14,39,del,delete: variable tokens,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+15,40,del,delete: variable tokpos,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+16,41,del,delete: variable inprocFlag,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+17,42,del,delete: set inprocFlag $inproc,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+18,43,num,1000 -> 1001,KILLED,calc.test ==== calc-47.2 the compile cache holds at most 1000 expressions FAILED
+19,43,num,1000 -> 999,KILLED,calc.test ==== calc-47.2 the compile cache holds at most 1000 expressions FAILED
+20,43,cmp,> -> >=,KILLED,calc.test ==== calc-47.2 the compile cache holds at most 1000 expressions FAILED
+21,43,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+22,44,del,"delete: error ""Calc: Cache exhausted with expression: $exp""",KILLED,calc.test ==== calc-47.2 the compile cache holds at most 1000 expressions FAILED
+23,48,del,delete: regsub -all  {#[^\n]*}  $exp {} exp,KILLED,calc.test ==== calc-47.5 single line unbraced multi statement with a trailing comment FAILED
+24,50,del,"delete: set exp [string map {""'"" "";"" ""\n"" "" "" ""\$"" """"} $exp]",KILLED,colon_test.tcl Proc= error compiling 'test2'  line 3: Calc: expected start of expression but found '10 ' a3'
+25,54,cmp,== -> !=,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+26,54,neg,negate if condition,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+27,55,del,delete: set stmtcode [compile [tokenise $exp]],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+28,56,cmp,< -> <=,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+29,56,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+30,57,cmp,in -> ni,KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+31,57,del,"delete: error ""Calc: unexpected token '[lindex $tokens $tokpos]' in ",KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+32,59,neg,negate if condition,KILLED,calc.test ==== calc-44.12 postfix in an assignment FAILED
+33,60,swap,storeStk -> loadStk,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+34,60,swap,push -> pop,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+35,60,neg,negate if condition,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+36,61,swap,store -> load,KILLED,calc.test ==== calc-44.28 ++ and -- in proc= use incrImm FAILED
+37,61,del,"delete: set stmtcode ""$expr; store $name; """,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+38,64,del,delete: return $stmtcode,SURVIVED,
+39,68,del,"delete: set statements [split $exp "";""]",KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+40,69,del,"delete: set bytecode """"",SURVIVED,
+41,70,num,0 -> 1,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+42,70,del,delete: set count 0,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+43,72,del,delete: set stmt [string trim $stmt],KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+44,73,swap,eq -> neq,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+45,73,cmp,eq -> ne,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+46,73,neg,negate if condition,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+47,75,num,0 -> 1,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+48,75,cmp,> -> >=,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+49,75,neg,negate if condition,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+50,76,del,"delete: append bytecode ""pop; """,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+51,78,neg,negate if condition,KILLED,calc.test ==== calc-44.13 a+++b reads as a++ + b FAILED
+52,79,del,delete: set stmtcode [compile [tokenise $stmt]],KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+53,80,cmp,< -> <=,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+54,80,neg,negate if condition,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+55,81,cmp,in -> ni,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+56,81,del,"delete: error ""Calc: unexpected token '[lindex $tokens $tokpos]' in ",KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+57,84,swap,storeStk -> loadStk,KILLED,calc.test ==== calc-51.1 multi statement braces in proc= use locals FAILED
+58,84,swap,push -> pop,KILLED,calc.test ==== calc-51.1 multi statement braces in proc= use locals FAILED
+59,84,neg,negate if condition,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+60,85,swap,store -> load,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+61,85,del,"delete: set stmtcode ""$expr; store $name; """,KILLED,calc.test ==== calc-51.1 multi statement braces in proc= use locals FAILED
+62,87,del,delete: append bytecode $stmtcode,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+63,89,del,delete: append bytecode [compile [tokenise $stmt]],KILLED,calc.test ==== calc-44.13 a+++b reads as a++ + b FAILED
+64,90,cmp,< -> <=,KILLED,calc.test ==== calc-44.13 a+++b reads as a++ + b FAILED
+65,90,neg,negate if condition,KILLED,calc.test ==== calc-44.13 a+++b reads as a++ + b FAILED
+66,91,cmp,in -> ni,KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+67,91,del,"delete: error ""Calc: unexpected token '[lindex $tokens $tokpos]' in ",KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+68,95,del,delete: incr count,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+69,95,incr,incr count -> incr count -1,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+70,98,del,delete: return $bytecode,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+71,102,del,delete: set op_re  {\+\+|--|\*\*|%|/|\*|->|-|\+|>>|<<|>=|<=|>|<|!=|=,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+72,102,opre,tokenizer: drop alternative \+\+,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+73,102,opre,tokenizer: drop alternative --,KILLED,calc.test ==== calc-44.3 --i returns the new value and decrements FAILED
+74,102,opre,tokenizer: drop alternative \*\*,KILLED,calc.test ==== calc-1.6 exponentiation: 2 ** 10 FAILED
+75,102,opre,tokenizer: drop alternative %,KILLED,calc.test ==== calc-1.5 modulo: 17 % 5 FAILED
+76,102,opre,tokenizer: drop alternative /,KILLED,calc.test ==== calc-1.4 division: 20 / 4 FAILED
+77,102,opre,tokenizer: drop alternative \*,KILLED,calc.test ==== calc-1.3 multiplication: 5 * 6 FAILED
+78,102,opre,tokenizer: drop alternative ->,KILLED,calc.test ==== calc-42.3 tuple with ->: value -> (pattern) FAILED
+79,102,opre,tokenizer: drop alternative -,KILLED,calc.test ==== calc-1.2 subtraction: 10 - 3 FAILED
+80,102,opre,tokenizer: drop alternative \+,KILLED,calc.test ==== calc-1.1 addition: 1 + 2 FAILED
+81,102,opre,tokenizer: drop alternative >>,KILLED,calc.test ==== calc-4.5 right shift: 256 >> 4 FAILED
+82,102,opre,tokenizer: drop alternative <<,KILLED,calc.test ==== calc-4.4 left shift: 1 << 8 FAILED
+83,102,opre,tokenizer: drop alternative >=,KILLED,calc.test ==== calc-43.13 >= and == are unaffected by the => token FAILED
+84,102,opre,tokenizer: drop alternative <=,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+85,102,opre,tokenizer: drop alternative >,KILLED,calc.test ==== calc-6.2 greater than: a > b FAILED
+86,102,opre,tokenizer: drop alternative <,KILLED,calc.test ==== calc-6.1 less than: a < b FAILED
+87,102,opre,tokenizer: drop alternative !=,KILLED,calc.test ==== calc-6.4 inequality: a != b FAILED
+88,102,opre,tokenizer: drop alternative ==,KILLED,calc.test ==== calc-6.3 equality: a == 10 FAILED
+89,102,opre,tokenizer: drop alternative =>,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+90,102,opre,tokenizer: drop alternative =,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+91,102,opre,tokenizer: drop alternative &&,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+92,102,opre,tokenizer: drop alternative &,KILLED,calc.test ==== calc-4.1 bitwise AND: 15 & 7 FAILED
+93,102,opre,tokenizer: drop alternative \|\|,KILLED,calc.test ==== calc-5.3 logical OR: 0 || 1 FAILED
+94,102,opre,tokenizer: drop alternative \|,KILLED,calc.test ==== calc-4.2 bitwise OR: 8 | 4 FAILED
+95,102,opre,tokenizer: drop alternative \^,KILLED,calc.test ==== calc-4.3 bitwise XOR: 12 ^ 5 FAILED
+96,102,opre,tokenizer: drop alternative ::,KILLED,calc.test ==== calc-37.2 global with :: prefix FAILED
+97,102,opre,tokenizer: drop alternative :,KILLED,calc.test Ternary operator (? :):        0
+98,102,opre,tokenizer: drop alternative \?,KILLED,calc.test Ternary operator (? :):        0
+99,102,opre,"tokenizer: drop alternative ,",KILLED,"calc.test ==== calc-27.1 min(5, 10) FAILED"
+100,102,opre,tokenizer: drop alternative !,KILLED,calc.test ==== calc-5.4 logical NOT: !1 FAILED
+101,102,opre,tokenizer: drop alternative ~,KILLED,calc.test ==== calc-12.3 bitwise NOT FAILED
+102,102,opre,tokenizer: drop alternative \(,KILLED,calc.test Array access:                  0
+103,102,opre,tokenizer: drop alternative \),KILLED,calc.test Array access:                  0
+104,106,num,0 -> 1,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+105,106,del,delete: set pos 0,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+106,107,del,delete: set output {},SURVIVED,
+107,108,num,0 -> 1,SURVIVED,
+108,108,del,delete: set needsMerge 0,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+109,111,del,delete: set prev [string trim [string range $input $pos $start-1]],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+110,112,cmp,ne -> eq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+111,112,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+112,113,del,delete: lappend output $prev,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+113,114,del,delete: set last [string index $prev end],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+114,115,swap,eq -> neq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+115,115,swap,eq -> neq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+116,115,num,0 -> 1,SURVIVED,
+117,115,cmp,&& -> ||,SURVIVED,
+118,115,cmp,|| -> &&,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+119,115,cmp,eq -> ne,KILLED,colon_test.tcl Calc: expected start of expression but found '3.0e'
+120,115,cmp,eq -> ne,KILLED,colon_test.tcl Calc: expected start of expression but found '2.0E'
+121,115,neg,negate if condition,KILLED,colon_test.tcl Calc: expected start of expression but found '3.0e'
+122,116,num,1 -> 2,SURVIVED,
+123,116,num,1 -> 0,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+124,116,del,delete: set needsMerge 1,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+125,119,del,delete: lappend output [string range $input $start $end],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+126,120,num,1 -> 2,KILLED,calc.test Array access:                  0
+127,120,num,1 -> 0,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+128,120,del,delete: set pos [expr {$end + 1}],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+129,122,del,delete: set rest [string trim [string range $input $pos end]],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+130,123,cmp,ne -> eq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+131,123,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+132,125,neg,negate if condition,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+133,128,del,delete: set merged {},SURVIVED,
+134,129,num,0 -> 1,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+135,129,del,delete: set j 0,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+136,130,cmp,< -> <=,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+137,130,neg,negate while condition,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+138,131,del,delete: set tok [lindex $output $j],KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+139,132,num,0 -> 1,SURVIVED,
+140,132,num,0 -> 1,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+141,132,cmp,&& -> ||,KILLED,calc.test ==== calc-51.4 an exponent sign with no digits is not a number FAILED
+142,133,num,2 -> 3,KILLED,colon_test.tcl Calc: expected start of expression but found '3.0e'
+143,133,num,2 -> 1,KILLED,calc.test ==== calc-51.4 an exponent sign with no digits is not a number FAILED
+144,133,cmp,< -> <=,KILLED,calc.test ==== calc-51.4 an exponent sign with no digits is not a number FAILED
+145,134,num,1 -> 2,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+146,134,num,1 -> 0,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+147,134,cmp,in -> ni,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+148,135,num,2 -> 3,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+149,135,num,2 -> 1,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+150,136,num,1 -> 2,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+151,136,num,1 -> 0,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+152,136,num,2 -> 3,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+153,136,num,2 -> 1,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+154,136,del,"delete: lappend merged ""$tok[lindex $output [expr {$j+1}]][lindex $o",KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+155,137,num,3 -> 4,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+156,137,num,3 -> 2,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+157,137,del,delete: incr j 3,KILLED,calc.test 
+158,139,del,delete: lappend merged $tok,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+159,140,del,delete: incr j,KILLED,timeout
+160,140,incr,incr j -> incr j -1,KILLED,timeout
+161,143,del,delete: return $merged,KILLED,calc.test ==== calc-44.26 scientific notation is not affected FAILED
+162,148,del,delete: variable depth,SURVIVED,
+163,149,del,delete: variable tokens,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+164,150,del,delete: variable tokpos,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+165,152,num,0 -> 1,KILLED,calc.test ==== calc-44.27 -> still works next to the new tokens FAILED
+166,152,cmp,== -> !=,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+167,152,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+168,153,del,delete: set tokens $toks,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+169,154,num,0 -> 1,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+170,154,del,delete: set tokpos 0,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+171,155,num,0 -> 1,SURVIVED,
+172,155,del,delete: set depth 0,SURVIVED,
+173,156,num,0 -> 1,KILLED,calc.test Ternary operator (? :):        0
+174,156,del,delete: return [parse 0],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+175,164,num,0 -> 1,KILLED,calc.test Array access:                  0
+176,165,num,0 -> 1,KILLED,"calc.test ==== calc-27.1 min(5, 10) FAILED"
+177,166,num,0 -> 1,SURVIVED,
+178,169,num,1 -> 2,SURVIVED,
+179,169,num,1 -> 0,KILLED,calc.test Ternary operator (? :):        0
+180,170,num,1 -> 2,KILLED,calc.test ==== calc-45.5 ternary operator mixed with other operators agrees with expr FAILED
+181,170,num,1 -> 0,SURVIVED,
+182,171,swap,jumpTrue -> jumpFalse,KILLED,calc.test ==== calc-5.3 logical OR: 0 || 1 FAILED
+183,171,swap,push -> pop,KILLED,calc.test ==== calc-5.3 logical OR: 0 || 1 FAILED
+184,171,swap,push -> pop,KILLED,calc.test ==== calc-5.3 logical OR: 0 || 1 FAILED
+185,171,swap,push -> pop,KILLED,calc.test ==== calc-5.3 logical OR: 0 || 1 FAILED
+186,171,swap,true_res -> false_res,KILLED,calc.test ==== calc-5.3 logical OR: 0 || 1 FAILED
+187,171,swap,true_res -> false_res,KILLED,calc.test ==== calc-5.3 logical OR: 0 || 1 FAILED
+188,171,num,2 -> 3,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+189,171,num,2 -> 1,KILLED,calc.test ==== calc-45.5 ternary operator mixed with other operators agrees with expr FAILED
+190,171,num,1 -> 2,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+191,171,num,1 -> 0,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+192,171,num,0 -> 1,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+193,171,num,1 -> 2,KILLED,calc.test ==== calc-5.3 logical OR: 0 || 1 FAILED
+194,171,num,1 -> 0,KILLED,calc.test ==== calc-5.3 logical OR: 0 || 1 FAILED
+195,171,cmp,|| -> &&,KILLED,calc.test ==== calc-5.3 logical OR: 0 || 1 FAILED
+196,172,swap,push -> pop,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+197,172,swap,push -> pop,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+198,172,num,3 -> 4,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+199,172,num,3 -> 2,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+200,172,num,1 -> 2,KILLED,calc.test ==== calc-5.1 logical AND: 1 && 1 FAILED
+201,172,num,1 -> 0,KILLED,calc.test ==== calc-5.1 logical AND: 1 && 1 FAILED
+202,172,num,0 -> 1,KILLED,calc.test ==== calc-5.2 logical AND: 1 && 0 FAILED
+203,172,cmp,&& -> ||,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+204,173,num,4 -> 5,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+205,173,num,4 -> 3,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+206,174,swap,bitxor -> bitor,KILLED,calc.test ==== calc-4.3 bitwise XOR: 12 ^ 5 FAILED
+207,174,num,5 -> 6,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+208,174,num,5 -> 4,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+209,175,swap,bitand -> bitor,KILLED,calc.test ==== calc-4.1 bitwise AND: 15 & 7 FAILED
+210,175,num,6 -> 7,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+211,175,num,6 -> 5,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+212,176,swap,eq -> neq,KILLED,calc.test ==== calc-6.3 equality: a == 10 FAILED
+213,176,num,7 -> 8,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+214,176,num,7 -> 6,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+215,176,cmp,== -> !=,KILLED,calc.test ==== calc-6.3 equality: a == 10 FAILED
+216,177,num,7 -> 8,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+217,177,num,7 -> 6,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+218,177,cmp,!= -> ==,KILLED,calc.test ==== calc-6.3 equality: a == 10 FAILED
+219,178,swap,lt -> gt,KILLED,calc.test ==== calc-6.1 less than: a < b FAILED
+220,178,swap,lt -> le,KILLED,"calc.test ==== calc-41.3 || mixed with &&, matches expr FAILED"
+221,178,num,8 -> 9,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+222,178,num,8 -> 7,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+223,178,cmp,< -> <=,KILLED,calc.test ==== calc-6.1 less than: a < b FAILED
+224,179,swap,gt -> ge,KILLED,"calc.test ==== calc-41.3 || mixed with &&, matches expr FAILED"
+225,179,num,8 -> 9,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+226,179,num,8 -> 7,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+227,179,cmp,> -> >=,KILLED,calc.test ==== calc-6.2 greater than: a > b FAILED
+228,180,swap,le -> ge,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+229,180,num,8 -> 9,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+230,180,num,8 -> 7,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+231,180,cmp,<= -> <,KILLED,"calc.test ==== calc-41.3 || mixed with &&, matches expr FAILED"
+232,181,num,8 -> 9,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+233,181,num,8 -> 7,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+234,181,cmp,>= -> >,KILLED,"calc.test ==== calc-41.3 || mixed with &&, matches expr FAILED"
+235,182,swap,lshift -> rshift,KILLED,calc.test ==== calc-4.4 left shift: 1 << 8 FAILED
+236,182,num,9 -> 10,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+237,182,num,9 -> 8,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+238,183,num,9 -> 10,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+239,183,num,9 -> 8,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+240,184,swap,add -> sub,KILLED,calc.test ==== calc-1.1 addition: 1 + 2 FAILED
+241,184,num,10 -> 11,KILLED,calc.test ==== calc-2.1 precedence: 2 + 3 * 4 FAILED
+242,184,num,10 -> 9,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+243,185,swap,sub -> add,KILLED,calc.test ==== calc-1.2 subtraction: 10 - 3 FAILED
+244,185,num,10 -> 11,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+245,185,num,10 -> 9,KILLED,calc.test ==== calc-18.2 bignum cancellation FAILED
+246,186,swap,mult -> div,KILLED,calc.test ==== calc-1.3 multiplication: 5 * 6 FAILED
+247,186,num,11 -> 12,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+248,186,num,11 -> 10,KILLED,calc.test ==== calc-2.1 precedence: 2 + 3 * 4 FAILED
+249,187,num,11 -> 12,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+250,187,num,11 -> 10,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+251,188,swap,mod -> div,KILLED,calc.test ==== calc-1.5 modulo: 17 % 5 FAILED
+252,188,num,11 -> 12,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+253,188,num,11 -> 10,KILLED,calc.test ==== calc-45.1 every pair of binary operators agrees with expr (precedence and associativity) FAILED
+254,189,swap,expon -> mult,KILLED,calc.test ==== calc-1.6 exponentiation: 2 ** 10 FAILED
+255,189,num,12 -> 13,KILLED,calc.test ==== calc-45.2 unary operators bind tighter than every binary operator FAILED
+256,189,num,12 -> 11,SURVIVED,
+257,191,del,delete: set inprec($op) $prec,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+258,192,del,delete: set incode($op) $code,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+259,198,swap,uminus -> uplus,KILLED,calc.test ==== calc-12.2 unary minus FAILED
+260,199,swap,not -> bitnot,KILLED,calc.test ==== calc-5.4 logical NOT: !1 FAILED
+261,202,del,delete: set precode($op) $code,KILLED,calc.test ==== calc-5.4 logical NOT: !1 FAILED
+262,207,num,1 -> 2,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+263,207,num,1 -> 0,KILLED,calc.test ==== calc-46.3 native functions with the wrong number of arguments FAILED
+264,208,num,1 -> 2,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+265,208,num,1 -> 0,KILLED,calc.test ==== calc-46.3 native functions with the wrong number of arguments FAILED
+266,211,num,2 -> 3,SURVIVED,
+267,211,num,2 -> 1,SURVIVED,
+268,212,num,1 -> 2,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+269,212,num,1 -> 0,KILLED,calc.test ==== calc-46.3 native functions with the wrong number of arguments FAILED
+270,213,num,1 -> 2,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+271,213,num,1 -> 0,KILLED,calc.test ==== calc-46.3 native functions with the wrong number of arguments FAILED
+272,214,num,2 -> 3,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+273,214,num,2 -> 1,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+274,215,num,3 -> 4,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+275,215,num,3 -> 2,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+276,219,num,13 -> 14,SURVIVED,
+277,219,num,13 -> 12,KILLED,calc.test ==== calc-45.2 unary operators bind tighter than every binary operator FAILED
+278,219,del,delete: set preprec 13,KILLED,calc.test ==== calc-5.4 logical NOT: !1 FAILED
+279,226,del,delete: variable depth,SURVIVED,
+280,227,del,delete: variable incode,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+281,228,del,delete: variable inprec,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+282,229,del,delete: variable tokens,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+283,230,del,delete: variable tokpos,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+284,231,del,delete: set token [lindex $tokens $tokpos],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+285,232,del,delete: set dep [incr depth],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+286,232,incr,incr depth -> incr depth -1,SURVIVED,
+287,234,del,delete: incr tokpos,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+288,234,incr,incr tokpos -> incr tokpos -1,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+289,237,del,delete: set opcodes [parsePrefix $token],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+290,238,del,delete: set depth $dep,SURVIVED,
+291,239,cmp,< -> <=,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+292,239,neg,negate while condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+293,241,del,delete: set token [lindex $tokens $tokpos],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+294,242,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+295,243,del,delete: set tok_prec $inprec($token),KILLED,"calc.test Logical operators (&&, ||, !): 0"
+296,245,del,"delete: error ""Calc: expected operator but found '$token'""",KILLED,calc.test ==== calc-44.24 5--3 is not 5 - -3 FAILED
+297,248,cmp,< -> <=,KILLED,calc.test ==== calc-2.3 right associativity: 2 ** 3 ** 2 FAILED
+298,248,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+299,249,del,delete: break,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+300,252,cmp,== -> !=,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+301,252,cmp,&& -> ||,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+302,252,cmp,ne -> eq,KILLED,calc.test Ternary operator (? :):        0
+303,252,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+304,253,del,delete: break,KILLED,calc.test Ternary operator (? :):        0
+305,256,del,delete: incr tokpos,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+306,256,incr,incr tokpos -> incr tokpos -1,KILLED,timeout
+307,257,swap,eq -> neq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+308,257,cmp,eq -> ne,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+309,257,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+310,258,del,delete: append opcodes [parseTernary],KILLED,calc.test Ternary operator (? :):        0
+311,259,del,delete: continue,KILLED,calc.test Ternary operator (? :):        0
+312,261,swap,eq -> neq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+313,261,cmp,eq -> ne,KILLED,timeout
+314,261,neg,negate if condition,KILLED,timeout
+315,263,del,delete: append opcodes [destructure [parsePattern]],KILLED,calc.test ==== calc-42.3 tuple with ->: value -> (pattern) FAILED
+316,264,del,delete: continue,KILLED,calc.test ==== calc-42.3 tuple with ->: value -> (pattern) FAILED
+317,266,swap,eq -> neq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+318,266,cmp,eq -> ne,KILLED,timeout
+319,266,neg,negate if condition,KILLED,timeout
+320,269,del,delete: variable strictFlag,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+321,270,num,1 -> 2,SURVIVED,
+322,270,num,1 -> 0,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+323,270,del,delete: set strictFlag 1,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+324,271,del,delete: append opcodes [destructure [parsePattern]],KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+325,272,num,0 -> 1,KILLED,calc.test ==== calc-43.10 -> stays lenient next to => FAILED
+326,272,del,delete: set strictFlag 0,KILLED,calc.test ==== calc-43.10 -> stays lenient next to => FAILED
+327,273,del,delete: continue,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+328,276,del,delete: set code $incode($token),KILLED,"calc.test Logical operators (&&, ||, !): 0"
+329,277,swap,eq -> neq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+330,277,swap,eq -> neq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+331,277,cmp,|| -> &&,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+332,277,cmp,eq -> ne,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+333,277,cmp,eq -> ne,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+334,277,neg,negate if condition,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+335,280,del,delete: set n [incr ::labelcount],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+336,281,swap,true_res -> false_res,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+337,281,swap,true_res -> false_res,SURVIVED,
+338,281,del,delete (multi-line): set code [string map [list pop_A pop_A$n true_res true_res$n,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+339,284,del,"delete: append opcodes [parse $tok_prec] ""$code; """,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+340,287,num,1 -> 2,SURVIVED,
+341,287,num,1 -> 0,SURVIVED,
+342,287,del,delete: set depth [expr {$dep - 1}],SURVIVED,
+343,288,del,delete: return $opcodes,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+344,297,del,delete: variable inprocFlag,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+345,298,neg,negate if condition,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+346,299,swap,incrStkImm -> incrImm,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+347,299,swap,push -> pop,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+348,299,del,"delete: return ""push $name; incrStkImm $delta; """,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+349,303,del,delete: variable depth,SURVIVED,
+350,304,del,delete: variable precode,KILLED,calc.test ==== calc-5.4 logical NOT: !1 FAILED
+351,305,del,delete: variable preprec,KILLED,calc.test ==== calc-5.4 logical NOT: !1 FAILED
+352,306,del,delete: variable tokens,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+353,307,del,delete: variable tokpos,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+354,308,del,delete: variable nativeFunc,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+355,310,del,delete: set dep [incr depth],SURVIVED,
+356,310,incr,incr depth -> incr depth -1,SURVIVED,
+357,314,swap,eq -> neq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+358,314,swap,eq -> neq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+359,314,cmp,|| -> &&,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+360,314,cmp,eq -> ne,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+361,314,cmp,eq -> ne,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+362,314,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+363,315,del,delete: set vname [lindex $tokens $tokpos],KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+364,316,neg,negate if condition,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+365,317,del,"delete: error ""Calc: expected a variable name after '$token' but fou",KILLED,calc.test ==== calc-44.19 ++ needs a variable name after it FAILED
+366,319,del,delete: incr tokpos,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+367,319,incr,incr tokpos -> incr tokpos -1,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+368,320,swap,eq -> neq,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+369,320,num,1 -> 2,KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+370,320,num,1 -> 0,KILLED,timeout
+371,320,cmp,eq -> ne,KILLED,timeout
+372,320,del,"delete: return [incrCode $vname [expr {$token eq ""++"" ? 1 : -1}]]",KILLED,calc.test ==== calc-44.1 ++i returns the new value and increments FAILED
+373,325,num,0 -> 1,KILLED,"calc.test ==== calc-47.3 numbers: underscores, 0d prefix, exponents FAILED"
+374,325,neg,negate if condition,KILLED,calc.test Array access:                  0
+375,326,del,delete: regsub -all {_} $token {} token,SURVIVED,
+376,327,num,0 -> 1,KILLED,"calc.test ==== calc-47.3 numbers: underscores, 0d prefix, exponents FAILED"
+377,327,del,delete: regsub {^0[dD]} $token {} token,KILLED,"calc.test ==== calc-47.3 numbers: underscores, 0d prefix, exponents FAILED"
+378,329,cmp,|| -> &&,KILLED,calc.test ==== calc-24.3 floor(3.7) FAILED
+379,329,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+380,330,del,delete: set nexttok [lindex $tokens $tokpos],KILLED,"calc.test Logical operators (&&, ||, !): 0"
+381,331,swap,eq -> neq,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+382,331,cmp,eq -> ne,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+383,331,neg,negate if condition,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+384,332,del,"delete: error ""Calc: cannot assign to number literal '$token'""",KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+385,334,swap,push -> pop,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+386,334,del,"delete: return ""push $token; """,KILLED,"calc.test Logical operators (&&, ||, !): 0"
+387,338,swap,eq -> neq,KILLED,calc.test Array access:                  0
+388,338,swap,eq -> neq,KILLED,calc.test Array access:                  0
+389,338,cmp,|| -> &&,KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+390,338,cmp,eq -> ne,KILLED,calc.test Array access:                  0
+391,338,cmp,eq -> ne,KILLED,calc.test Array access:                  0
+392,338,neg,negate if condition,KILLED,calc.test Array access:                  0
+393,339,del,delete: set nexttok [lindex $tokens $tokpos],KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+394,340,swap,eq -> neq,KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+395,340,cmp,eq -> ne,KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+396,340,neg,negate if condition,KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+397,341,del,"delete: error ""Calc: cannot assign to boolean literal '$token'""",KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+398,343,swap,push -> pop,KILLED,"colon_test.tcl wrong # args: should be ""pop """
+399,343,del,"delete: return ""push $token; """,KILLED,"colon_test.tcl can't read ""true"": no such variable"
+400,347,swap,eq -> neq,KILLED,calc.test Array access:                  0
+401,347,cmp,eq -> ne,KILLED,calc.test Array access:                  0
+402,347,neg,negate if condition,KILLED,calc.test Array access:                  0
+403,349,num,1 -> 2,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+404,349,num,1 -> 0,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+405,349,del,delete: set d 1,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+406,350,cmp,< -> <=,SURVIVED,
+407,350,incr,incr j -> incr j -1,KILLED,timeout
+408,351,del,delete: set tj [lindex $tokens $j],KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+409,352,swap,eq -> neq,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+410,352,swap,eq -> neq,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+411,352,num,0 -> 1,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+412,352,cmp,== -> !=,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+413,352,cmp,eq -> ne,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+414,352,cmp,eq -> ne,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+415,352,neg,negate if condition,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+416,352,neg,negate elseif condition,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+417,352,neg,negate if condition,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+418,354,swap,eq -> neq,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+419,354,num,1 -> 2,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+420,354,num,1 -> 0,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+421,354,cmp,< -> <=,SURVIVED,
+422,354,cmp,&& -> ||,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+423,354,cmp,eq -> ne,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+424,354,neg,negate if condition,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+425,355,del,delete: incr tokpos -1,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+426,356,del,delete: set pat [parsePattern],KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+427,357,del,delete: incr tokpos,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+428,358,num,0 -> 1,SURVIVED,
+429,358,del,"delete: return ""[parse 0][destructure $pat]""",KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+430,360,num,0 -> 1,KILLED,calc.test ==== calc-41.4 && and || in ternary branches FAILED
+431,360,del,delete: set opcodes [parse 0],KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+432,361,del,delete: set token [lindex $tokens $tokpos],KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+433,362,num,1 -> 2,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+434,362,num,1 -> 0,KILLED,"calc.test ==== calc-42.10 tuple: swap, the right side is built before storing FAILED"
+435,362,del,delete: set n 1,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+436,363,swap,eq -> neq,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+437,363,cmp,eq -> ne,KILLED,timeout
+438,363,neg,negate while condition,KILLED,timeout
+439,364,del,delete: incr tokpos,KILLED,"calc.test ==== calc-42.10 tuple: swap, the right side is built before storing FAILED"
+440,364,incr,incr tokpos -> incr tokpos -1,KILLED,timeout
+441,365,num,0 -> 1,SURVIVED,
+442,365,del,delete: append opcodes [parse 0],KILLED,"calc.test ==== calc-42.10 tuple: swap, the right side is built before storing FAILED"
+443,366,del,delete: incr n,KILLED,"calc.test ==== calc-42.10 tuple: swap, the right side is built before storing FAILED"
+444,366,incr,incr n -> incr n -1,KILLED,"calc.test ==== calc-42.10 tuple: swap, the right side is built before storing FAILED"
+445,367,del,delete: set token [lindex $tokens $tokpos],KILLED,timeout
+446,369,swap,eq -> neq,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+447,369,cmp,eq -> ne,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+448,369,neg,negate if condition,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+449,370,del,delete: incr tokpos,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+450,370,incr,incr tokpos -> incr tokpos -1,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+451,371,num,1 -> 2,KILLED,"calc.test ==== calc-42.10 tuple: swap, the right side is built before storing FAILED"
+452,371,num,1 -> 0,KILLED,"calc.test ==== calc-46.1 parentheses with one element only group, they do not make a list FAILED"
+453,371,cmp,> -> >=,KILLED,"calc.test ==== calc-46.1 parentheses with one element only group, they do not make a list FAILED"
+454,371,neg,negate if condition,KILLED,"calc.test ==== calc-42.10 tuple: swap, the right side is built before storing FAILED"
+455,372,del,delete: return $opcodes,KILLED,calc.test ==== calc-2.2 precedence with parens: (2 + 3) * 4 FAILED
+456,374,del,"delete: error ""Calc: expected ')' but found '$token'""",KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+457,378,cmp,in -> ni,KILLED,calc.test Array access:                  0
+458,378,neg,negate if condition,KILLED,calc.test Array access:                  0
+459,379,del,"delete: return ""[parse $preprec]$precode($token); """,KILLED,calc.test ==== calc-5.4 logical NOT: !1 FAILED
+460,383,del,"delete: set name """"",KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+461,384,swap,eq -> neq,KILLED,calc.test Array access:                  0
+462,384,cmp,|| -> &&,KILLED,calc.test Array access:                  0
+463,384,cmp,eq -> ne,KILLED,timeout
+464,384,neg,negate while condition,KILLED,timeout
+465,385,del,delete: append name $token,KILLED,calc.test Array access:                  0
+466,386,del,delete: set token [lindex $tokens $tokpos],KILLED,timeout
+467,387,del,delete: incr tokpos,KILLED,timeout
+468,387,incr,incr tokpos -> incr tokpos -1,KILLED,timeout
+469,390,cmp,ne -> eq,KILLED,calc.test Array access:                  0
+470,390,neg,negate if condition,KILLED,calc.test Array access:                  0
+471,392,del,delete: incr tokpos -1,KILLED,calc.test Array access:                  0
+472,393,del,delete: set token [lindex $tokens $tokpos],SURVIVED,
+473,396,swap,eq -> neq,KILLED,calc.test Array access:                  0
+474,396,cmp,eq -> ne,KILLED,calc.test Array access:                  0
+475,396,neg,negate if condition,KILLED,calc.test Array access:                  0
+476,397,del,delete: incr tokpos,KILLED,calc.test Array access:                  0
+477,400,neg,negate if condition,KILLED,calc.test Array access:                  0
+478,401,del,delete: set opcodes [parseFuncArgs $name $nativeFunc($name)],KILLED,calc.test ==== calc-42.12 list builder: same as list() FAILED
+479,402,del,delete: return $opcodes,KILLED,calc.test ==== calc-42.12 list builder: same as list() FAILED
+480,406,del,delete: set fun [namespace which tcl::mathfunc::$name],KILLED,calc.test Array access:                  0
+481,407,cmp,ne -> eq,KILLED,calc.test Array access:                  0
+482,407,neg,negate if condition,KILLED,calc.test Array access:                  0
+483,408,swap,push -> pop,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+484,408,del,"delete: set opcodes ""push $fun; """,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+485,409,del,"delete: append opcodes [parseFuncArgs $name """"]",KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+486,410,del,delete: return $opcodes,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+487,414,del,delete: set fun [namespace which $name],KILLED,calc.test ==== calc-46.5 mathfunc and general commands are called with invokeStk FAILED
+488,415,cmp,ne -> eq,KILLED,calc.test Array access:                  0
+489,415,neg,negate if condition,KILLED,calc.test Array access:                  0
+490,416,swap,push -> pop,KILLED,calc.test ==== calc-46.5 mathfunc and general commands are called with invokeStk FAILED
+491,416,del,"delete: set opcodes ""push $fun; """,KILLED,calc.test ==== calc-46.5 mathfunc and general commands are called with invokeStk FAILED
+492,417,del,"delete: append opcodes [parseFuncArgs $name """"]",KILLED,calc.test ==== calc-46.5 mathfunc and general commands are called with invokeStk FAILED
+493,418,del,delete: return $opcodes,KILLED,calc.test ==== calc-46.5 mathfunc and general commands are called with invokeStk FAILED
+494,421,swap,push -> pop,KILLED,calc.test Array access:                  0
+495,421,del,"delete: set opcodes ""push $name; """,KILLED,calc.test Array access:                  0
+496,424,num,0 -> 1,SURVIVED,
+497,424,del,delete: append opcodes [parse 0],KILLED,calc.test Array access:                  0
+498,427,num,1 -> 2,KILLED,calc.test Array access:                  0
+499,427,num,1 -> 0,KILLED,colon_test.tcl stack is unbalanced on exit from the code (depth=3)
+500,427,del,delete: set indexCount 1,KILLED,calc.test Array access:                  0
+501,430,del,delete: set token [lindex $tokens $tokpos],KILLED,calc.test Array access:                  0
+502,431,swap,eq -> neq,KILLED,calc.test Array access:                  0
+503,431,cmp,eq -> ne,KILLED,timeout
+504,431,neg,negate while condition,KILLED,timeout
+505,432,del,delete: incr tokpos,KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+506,432,incr,incr tokpos -> incr tokpos -1,KILLED,timeout
+507,433,del,delete: incr indexCount,KILLED,colon_test.tcl stack is unbalanced on exit from the code (depth=3)
+508,433,incr,incr indexCount -> incr indexCount -1,KILLED,colon_test.tcl stack is unbalanced on exit from the code (depth=3)
+509,434,swap,push -> pop,KILLED,"colon_test.tcl wrong # args: should be ""pop """
+510,434,del,"delete: append opcodes ""push {,}; """,KILLED,colon_test.tcl stack underflow
+511,435,num,0 -> 1,SURVIVED,
+512,435,del,delete: append opcodes [parse 0],KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+513,436,del,delete: set token [lindex $tokens $tokpos],KILLED,timeout
+514,440,cmp,ne -> eq,KILLED,calc.test Array access:                  0
+515,440,neg,negate if condition,KILLED,calc.test Array access:                  0
+516,441,del,"delete: error ""Calc: expected ')' but found '$token'""",KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+517,443,del,delete: incr tokpos,KILLED,calc.test Array access:                  0
+518,443,incr,incr tokpos -> incr tokpos -1,KILLED,calc.test Array access:                  0
+519,446,num,1 -> 2,KILLED,colon_test.tcl stack is unbalanced on exit from the code (depth=3)
+520,446,num,1 -> 0,SURVIVED,
+521,446,cmp,> -> >=,SURVIVED,
+522,446,neg,negate if condition,KILLED,colon_test.tcl stack is unbalanced on exit from the code (depth=3)
+523,447,num,2 -> 3,KILLED,colon_test.tcl stack underflow
+524,447,num,2 -> 1,KILLED,colon_test.tcl stack is unbalanced on exit from the code (depth=3)
+525,447,num,1 -> 2,KILLED,colon_test.tcl stack is unbalanced on exit from the code (depth=2)
+526,447,num,1 -> 0,KILLED,colon_test.tcl stack underflow
+527,447,del,delete: set strcatCount [expr {$indexCount * 2 - 1}],KILLED,"colon_test.tcl can't read ""strcatCount"": no such variable"
+528,448,del,"delete: append opcodes ""strcat $strcatCount; """,KILLED,colon_test.tcl stack is unbalanced on exit from the code (depth=3)
+529,451,del,"delete: append opcodes ""loadArrayStk; """,KILLED,calc.test Array access:                  0
+530,452,del,delete: return $opcodes,KILLED,calc.test Array access:                  0
+531,455,swap,eq -> neq,KILLED,calc.test Array access:                  0
+532,455,cmp,eq -> ne,KILLED,calc.test Array access:                  0
+533,455,neg,negate if condition,KILLED,calc.test Array access:                  0
+534,456,del,delete: incr tokpos,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+535,457,swap,push -> pop,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+536,457,del,"delete: set opcodes ""push $name; """,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+537,458,num,0 -> 1,KILLED,calc.test ==== calc-45.6 assignment has lower precedence than the ternary and all binary operators FAILED
+538,458,del,delete: append opcodes [parse 0],KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+539,459,swap,storeStk -> loadStk,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+540,459,del,"delete: append opcodes ""storeStk; """,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+541,460,del,delete: return $opcodes,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+542,464,swap,eq -> neq,KILLED,calc.test Array access:                  0
+543,464,swap,eq -> neq,KILLED,calc.test Array access:                  0
+544,464,cmp,|| -> &&,KILLED,calc.test ==== calc-44.2 i++ returns the old value and increments FAILED
+545,464,cmp,eq -> ne,KILLED,calc.test Array access:                  0
+546,464,cmp,eq -> ne,KILLED,calc.test Array access:                  0
+547,464,neg,negate if condition,KILLED,calc.test Array access:                  0
+548,465,del,delete: incr tokpos,KILLED,calc.test ==== calc-44.2 i++ returns the old value and increments FAILED
+549,465,incr,incr tokpos -> incr tokpos -1,KILLED,calc.test ==== calc-44.2 i++ returns the old value and increments FAILED
+550,466,swap,eq -> neq,KILLED,calc.test ==== calc-44.2 i++ returns the old value and increments FAILED
+551,466,num,1 -> 2,KILLED,calc.test ==== calc-44.2 i++ returns the old value and increments FAILED
+552,466,num,1 -> 0,KILLED,timeout
+553,466,cmp,eq -> ne,KILLED,timeout
+554,466,del,"delete: set delta [expr {$token eq ""++"" ? 1 : -1}]",KILLED,calc.test ==== calc-44.2 i++ returns the old value and increments FAILED
+555,467,swap,push -> pop,KILLED,calc.test ==== calc-44.2 i++ returns the old value and increments FAILED
+556,467,swap,sub -> add,KILLED,calc.test ==== calc-44.2 i++ returns the old value and increments FAILED
+557,467,del,"delete: return ""[incrCode $name $delta]push $delta; sub; """,KILLED,timeout
+558,470,swap,push -> pop,KILLED,calc.test Array access:                  0
+559,470,del,"delete: set opcodes ""push $name; """,KILLED,calc.test Array access:                  0
+560,471,swap,loadStk -> storeStk,KILLED,calc.test Array access:                  0
+561,471,del,"delete: append opcodes ""loadStk; """,KILLED,timeout
+562,472,del,delete: return $opcodes,KILLED,calc.test Array access:                  0
+563,476,del,"delete: error ""Calc: expected start of expression but found '$token'",KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+564,490,del,delete: variable tokens,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+565,491,del,delete: variable tokpos,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+566,492,del,delete: set token [lindex $tokens $tokpos],KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+567,493,del,delete: incr tokpos,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+568,493,incr,incr tokpos -> incr tokpos -1,KILLED,timeout
+569,494,swap,eq -> neq,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+570,494,cmp,eq -> ne,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+571,494,neg,negate if condition,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+572,495,del,delete: set kids {},SURVIVED,
+573,496,num,1 -> 2,SURVIVED,
+574,496,num,1 -> 0,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+575,497,del,delete: lappend kids [parsePattern],KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+576,498,del,delete: set token [lindex $tokens $tokpos],KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+577,499,del,delete: incr tokpos,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+578,499,incr,incr tokpos -> incr tokpos -1,KILLED,timeout
+579,500,swap,eq -> neq,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+580,500,cmp,eq -> ne,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+581,500,neg,negate if condition,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+582,501,cmp,ne -> eq,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+583,501,cmp,in -> ni,KILLED,calc.test ==== calc-42.18 tuple pattern: an expression is an error FAILED
+584,501,neg,negate if condition,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+585,503,num,0 -> 1,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+586,503,del,delete: return [linsert $kids 0 t],KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+587,505,neg,negate if condition,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+588,506,cmp,in -> ni,KILLED,calc.test ==== calc-42.17 tuple pattern: a number is an error FAILED
+589,506,del,"delete: error ""Calc: expected a variable name in a pattern but found",KILLED,calc.test ==== calc-42.17 tuple pattern: a number is an error FAILED
+590,508,del,delete: return [list n $token],KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+591,513,swap,eq -> neq,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+592,513,num,0 -> 1,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+593,513,num,1 -> 2,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+594,513,num,1 -> 0,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+595,513,cmp,eq -> ne,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+596,513,neg,negate if condition,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+597,514,del,delete: set parts {},SURVIVED,
+598,515,num,1 -> 2,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+599,515,num,1 -> 0,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+600,516,del,"delete: return ""([join $parts ,])""",KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+601,521,del,delete: variable inprocFlag,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+602,523,swap,eq -> neq,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+603,523,cmp,eq -> ne,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+604,523,neg,negate if condition,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+605,524,swap,eq -> neq,KILLED,calc.test ==== calc-43.9 => a single name takes the whole value FAILED
+606,524,cmp,eq -> ne,KILLED,calc.test ==== calc-43.9 => a single name takes the whole value FAILED
+607,524,neg,negate if condition,KILLED,calc.test ==== calc-43.9 => a single name takes the whole value FAILED
+608,525,swap,store -> load,KILLED,"calc.test ==== calc-51.2 a single name target takes the whole value, top level and in proc= FAILED"
+609,525,neg,negate if condition,KILLED,calc.test ==== calc-43.9 => a single name takes the whole value FAILED
+610,526,swap,storeStk -> loadStk,KILLED,calc.test ==== calc-43.9 => a single name takes the whole value FAILED
+611,526,swap,push -> pop,KILLED,calc.test ==== calc-43.9 => a single name takes the whole value FAILED
+612,526,swap,over -> dup,KILLED,calc.test ==== calc-43.9 => a single name takes the whole value FAILED
+613,526,num,1 -> 2,KILLED,calc.test ==== calc-43.9 => a single name takes the whole value FAILED
+614,526,num,1 -> 0,KILLED,calc.test ==== calc-43.9 => a single name takes the whole value FAILED
+615,526,del,"delete: return ""push $first; over 1; storeStk; pop; """,KILLED,calc.test ==== calc-43.9 => a single name takes the whole value FAILED
+616,528,del,"delete: set opcodes """"",SURVIVED,
+617,529,del,delete: variable strictFlag,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+618,530,cmp,&& -> ||,KILLED,calc.test ==== calc-42.5 tuple: extra elements are ignored FAILED
+619,530,neg,negate if condition,KILLED,calc.test ==== calc-42.5 tuple: extra elements are ignored FAILED
+620,531,del,delete: set n [incr ::labelcount],KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+621,532,num,1 -> 2,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+622,532,num,1 -> 0,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+623,532,del,delete: set want [expr {[llength $pat] - 1}],KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+624,533,del,delete: set txt [patternText $pat],KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+625,534,swap,dup -> pop,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+626,534,swap,push -> pop,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+627,534,del,"delete: append opcodes ""dup; listLength; push $want; neq; jumpFalse ",KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+628,535,swap,push -> pop,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+629,535,swap,push -> pop,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+630,535,del,"delete: append opcodes ""push error; push {Calc: tuple mismatch: patt",KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+631,536,swap,push -> pop,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+632,536,swap,over -> dup,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+633,536,num,2 -> 3,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+634,536,num,2 -> 1,KILLED,calc.test ==== calc-43.3 => pattern longer than data is an error FAILED
+635,536,num,3 -> 4,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+636,536,num,3 -> 2,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+637,536,num,2 -> 3,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+638,536,num,2 -> 1,KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+639,536,del,"delete: append opcodes ""over 2; listLength; push { (use -> to allow ",KILLED,"calc.test ==== calc-43.1 => flat pattern, sizes match FAILED"
+640,538,num,0 -> 1,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+641,538,del,delete: set i 0,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+642,539,num,1 -> 2,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+643,539,num,1 -> 0,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+644,540,swap,eq -> neq,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+645,540,cmp,eq -> ne,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+646,540,neg,negate if condition,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+647,542,swap,eq -> neq,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+648,542,num,0 -> 1,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+649,542,cmp,&& -> ||,KILLED,calc.test ==== calc-42.8 tuple: nested pattern FAILED
+650,542,cmp,eq -> ne,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+651,542,neg,negate elseif condition,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+652,544,swap,storeStk -> loadStk,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+653,544,swap,listIndexImm -> listLength,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+654,544,swap,push -> pop,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+655,544,swap,over -> dup,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+656,544,num,1 -> 2,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+657,544,num,1 -> 0,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+658,544,num,1 -> 2,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+659,544,num,1 -> 0,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+660,544,del,"delete: append opcodes ""push [lindex $kid 1]; over 1; listIndexImm $",KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+661,545,swap,eq -> neq,KILLED,calc.test ==== calc-42.8 tuple: nested pattern FAILED
+662,545,num,0 -> 1,SURVIVED,
+663,545,cmp,eq -> ne,KILLED,calc.test ==== calc-42.8 tuple: nested pattern FAILED
+664,545,neg,negate elseif condition,KILLED,calc.test ==== calc-42.8 tuple: nested pattern FAILED
+665,546,swap,dup -> pop,KILLED,calc.test ==== calc-42.19 tuple in proc= FAILED
+666,546,swap,listIndexImm -> listLength,KILLED,calc.test ==== calc-42.19 tuple in proc= FAILED
+667,546,swap,store -> load,KILLED,calc.test ==== calc-42.19 tuple in proc= FAILED
+668,546,num,1 -> 2,KILLED,calc.test ==== calc-42.19 tuple in proc= FAILED
+669,546,num,1 -> 0,KILLED,calc.test ==== calc-42.19 tuple in proc= FAILED
+670,546,del,"delete: append opcodes ""dup; listIndexImm $i; store [lindex $kid 1];",KILLED,calc.test ==== calc-42.19 tuple in proc= FAILED
+671,548,swap,dup -> pop,KILLED,calc.test ==== calc-42.8 tuple: nested pattern FAILED
+672,548,swap,listIndexImm -> listLength,KILLED,calc.test ==== calc-42.8 tuple: nested pattern FAILED
+673,548,del,"delete: append opcodes ""dup; listIndexImm $i; [destructure $kid]pop;",KILLED,calc.test ==== calc-42.8 tuple: nested pattern FAILED
+674,550,del,delete: incr i,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+675,550,incr,incr i -> incr i -1,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+676,552,del,delete: return $opcodes,KILLED,"calc.test ==== calc-42.1 tuple assignment: (x,y,z) = list FAILED"
+677,559,del,delete: variable depth,SURVIVED,
+678,560,del,delete: variable tokens,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+679,561,del,delete: variable tokpos,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+680,563,del,delete: set dep [incr depth],SURVIVED,
+681,563,incr,incr depth -> incr depth -1,SURVIVED,
+682,564,del,delete: set token [lindex $tokens $tokpos],KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+683,565,num,1 -> 2,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+684,565,num,1 -> 0,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+685,565,del,delete: set arg_num 1,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+686,567,num,1 -> 2,SURVIVED,
+687,567,num,1 -> 0,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+688,568,swap,eq -> neq,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+689,568,cmp,eq -> ne,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+690,568,neg,negate if condition,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+691,569,del,delete: incr tokpos,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+692,569,incr,incr tokpos -> incr tokpos -1,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+693,572,cmp,ne -> eq,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+694,572,neg,negate if condition,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+695,575,num,1 -> 2,KILLED,calc.test ==== calc-42.12 list builder: same as list() FAILED
+696,575,num,1 -> 0,KILLED,calc.test ==== calc-42.12 list builder: same as list() FAILED
+697,575,del,delete: set actualArgs [expr {$arg_num - 1}],KILLED,calc.test ==== calc-42.12 list builder: same as list() FAILED
+698,576,num,0 -> 1,KILLED,calc.test ==== calc-46.3 native functions with the wrong number of arguments FAILED
+699,576,cmp,> -> >=,SURVIVED,
+700,576,neg,negate if condition,KILLED,calc.test ==== calc-42.12 list builder: same as list() FAILED
+701,578,cmp,!= -> ==,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+702,578,neg,negate if condition,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+703,579,del,"delete: error ""Calc: $funcname expects exactly $expectedArgs args, g",KILLED,calc.test ==== calc-46.3 native functions with the wrong number of arguments FAILED
+704,583,del,delete: set minArgs [expr {abs($expectedArgs)}],KILLED,calc.test ==== calc-42.12 list builder: same as list() FAILED
+705,584,cmp,< -> <=,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+706,584,neg,negate if condition,KILLED,calc.test ==== calc-42.12 list builder: same as list() FAILED
+707,585,del,"delete: error ""Calc: $funcname expects at least $minArgs args, got $",KILLED,calc.test ==== calc-46.3 native functions with the wrong number of arguments FAILED
+708,589,num,0 -> 1,SURVIVED,
+709,589,cmp,< -> <=,SURVIVED,
+710,589,neg,negate if condition,KILLED,calc.test ==== calc-42.12 list builder: same as list() FAILED
+711,591,del,"delete: append opcodes ""$instruction $actualArgs; """,KILLED,calc.test ==== calc-42.12 list builder: same as list() FAILED
+712,594,del,"delete: append opcodes ""$instruction; """,KILLED,calc.test ==== calc-46.2 native functions give the right answers FAILED
+713,599,del,"delete: append opcodes ""invokeStk $arg_num; """,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+714,601,del,delete: return $opcodes,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+715,607,num,0 -> 1,SURVIVED,
+716,607,del,delete: append opcodes [parse 0],KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+717,608,del,delete: incr arg_num,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+718,608,incr,incr arg_num -> incr arg_num -1,KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+719,609,del,delete: set token [lindex $tokens $tokpos],KILLED,calc.test ==== calc-7.1 sqrt of literal FAILED
+720,614,del,"delete: error ""Calc: expected ')' or ',' but found '$token'""",KILLED,timeout
+721,625,del,delete: variable depth,SURVIVED,
+722,626,del,delete: variable inprec,KILLED,calc.test Ternary operator (? :):        0
+723,627,del,delete: variable tokens,KILLED,calc.test Ternary operator (? :):        0
+724,628,del,delete: variable tokpos,KILLED,calc.test Ternary operator (? :):        0
+725,629,del,delete: set dep [incr depth],SURVIVED,
+726,629,incr,incr depth -> incr depth -1,SURVIVED,
+727,632,del,delete: set else else[incr ::labelcount],KILLED,calc.test Ternary operator (? :):        0
+728,633,del,delete: set end end$::labelcount,KILLED,calc.test Ternary operator (? :):        0
+729,634,del,"delete: append opcodes ""jumpFalse $else; [parse $inprec(:)]""",KILLED,calc.test Ternary operator (? :):        0
+730,636,del,delete: set token [lindex $tokens $tokpos],KILLED,calc.test Ternary operator (? :):        0
+731,637,cmp,ne -> eq,KILLED,calc.test Ternary operator (? :):        0
+732,637,neg,negate if condition,KILLED,calc.test Ternary operator (? :):        0
+733,638,del,"delete: error ""Calc: expected ':' but found '$token'""",KILLED,calc.test ==== calc-47.1 malformed expressions give clear errors FAILED
+734,640,del,delete: incr tokpos,KILLED,calc.test Ternary operator (? :):        0
+735,640,incr,incr tokpos -> incr tokpos -1,KILLED,calc.test Ternary operator (? :):        0
+736,642,del,"delete: append opcodes ""jump $end; label $else; [parse $inprec(:)]""",KILLED,calc.test Ternary operator (? :):        0
+737,643,del,"delete: append opcodes ""label $end; nop; """,KILLED,calc.test Ternary operator (? :):        0
+738,644,del,delete: return $opcodes,SURVIVED,
+739,663,num,0 -> 1,KILLED,calc.test ==== calc-52.1 transform= defaults to a top level body with the source kept FAILED
+740,663,num,1 -> 2,SURVIVED,
+741,663,num,1 -> 0,KILLED,calc.test ==== calc-52.1 transform= defaults to a top level body with the source kept FAILED
+742,664,del,delete: set result {},SURVIVED,
+743,665,del,delete: set lines [split $body \n],KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+744,666,num,0 -> 1,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+745,666,del,delete: set i 0,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+746,667,cmp,< -> <=,KILLED,calc.test ==== calc-52.1 transform= defaults to a top level body with the source kept FAILED
+747,667,neg,negate while condition,KILLED,timeout
+748,668,del,delete: set line [lindex $lines $i],KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+749,669,neg,negate if condition,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+750,670,del,delete: append result $indent,KILLED,calc.test ==== calc-52.3 transform= braced block over several lines FAILED
+751,672,del,delete: set accum $line,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+752,673,neg,negate while condition,KILLED,timeout
+753,674,del,delete: incr i,KILLED,timeout
+754,674,incr,incr i -> incr i -1,KILLED,timeout
+755,675,del,delete: append accum \n [lindex $lines $i],KILLED,timeout
+756,679,num,1 -> 2,KILLED,calc.test ==== calc-42.19 tuple in proc= FAILED
+757,679,num,1 -> 0,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+758,679,del,delete: set expr [string range $braced 1 end-1],KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+759,681,neg,negate if condition,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+760,682,num,1 -> 2,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+761,682,num,1 -> 0,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+762,682,del,"delete: error ""line [expr {   $i +1  }]: $err_code""",KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+763,684,neg,negate if condition,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+764,685,swap,loadStk -> storeStk,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+765,685,swap,load -> store,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+766,685,swap,push -> pop,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+767,685,num,1 -> 2,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+768,685,num,1 -> 0,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+769,685,del,delete: regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {loa,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+770,687,neg,negate if condition,KILLED,"calc.test ==== calc-49.4 -preserve 0 drops the original source, the default keeps it FAILED"
+771,688,num,0 -> 1,KILLED,calc.test ==== calc-52.3 transform= braced block over several lines FAILED
+772,688,del,"delete: append result ""if \{0\} \{ $accum \} \{ tcl::unsupported::as",KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+773,690,del,"delete: append result ""tcl::unsupported::assemble \{$tal\}\n""",KILLED,"calc.test ==== calc-49.4 -preserve 0 drops the original source, the default keeps it FAILED"
+774,692,neg,negate elseif condition,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+775,693,del,delete: append result $indent,KILLED,calc.test ==== calc-52.1 transform= defaults to a top level body with the source kept FAILED
+776,696,neg,negate if condition,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+777,697,num,1 -> 2,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+778,697,num,1 -> 0,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+779,697,del,"delete: error ""line [expr {   $i +1  }]: $err_code""",KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+780,699,neg,negate if condition,KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+781,700,swap,loadStk -> storeStk,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+782,700,swap,load -> store,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+783,700,swap,push -> pop,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+784,700,num,1 -> 2,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+785,700,num,1 -> 0,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+786,700,del,delete: regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {loa,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+787,702,neg,negate if condition,KILLED,calc.test ==== calc-48.2 proc= keeps the original source in an if {0} unless debug is 0 FAILED
+788,703,num,0 -> 1,KILLED,calc.test ==== calc-48.2 proc= keeps the original source in an if {0} unless debug is 0 FAILED
+789,703,del,"delete: append result ""if \{0\} \{ $line \} \{ tcl::unsupported::ass",KILLED,timeout
+790,705,del,"delete: append result ""tcl::unsupported::assemble \{$tal\}\n""",KILLED,calc.test ==== calc-48.2 proc= keeps the original source in an if {0} unless debug is 0 FAILED
+791,708,neg,negate elseif condition,KILLED,calc.test ==== calc-41.2 || in two statements of one body FAILED
+792,711,num,0 -> 1,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+793,711,del,delete: set bracketStart [lindex $match 0],KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+794,712,num,0 -> 1,KILLED,calc.test ==== calc-52.4 transform= inline [: {...}] with text before and after FAILED
+795,712,num,1 -> 2,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+796,712,num,1 -> 0,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+797,712,del,delete: set prefix [string range $line 0 [expr {$bracketStart - 1}]],KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+798,715,del,delete: set accum [string range $line $bracketStart end],KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+799,716,neg,negate while condition,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+800,717,del,delete: incr i,KILLED,timeout
+801,717,incr,incr i -> incr i -1,KILLED,timeout
+802,718,del,delete: append accum \n [lindex $lines $i],KILLED,timeout
+803,723,num,1 -> 2,KILLED,"calc.test ==== calc-48.3 inline [= ...] and braced forms, with text around them on the same line FAILED"
+804,723,num,1 -> 0,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+805,723,del,delete: set expr [string range $braced 1 end-1],KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+806,725,neg,negate if condition,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+807,726,num,1 -> 2,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+808,726,num,1 -> 0,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+809,726,del,"delete: error ""line [expr {$i+1}]: $err_code""",KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+810,728,neg,negate if condition,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+811,729,swap,loadStk -> storeStk,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+812,729,swap,load -> store,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+813,729,swap,push -> pop,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+814,729,num,1 -> 2,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+815,729,num,1 -> 0,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+816,729,del,delete: regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {loa,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+817,734,neg,negate if condition,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+818,738,del,"delete: set suffix """"",SURVIVED,
+819,739,swap,eq -> neq,SURVIVED,
+820,739,cmp,< -> <=,SURVIVED,
+821,739,cmp,&& -> ||,SURVIVED,
+822,739,cmp,eq -> ne,SURVIVED,
+823,739,neg,negate while condition,SURVIVED,
+824,740,del,delete: incr i,SURVIVED,
+825,740,incr,incr i -> incr i -1,SURVIVED,
+826,741,del,delete: set suffix [string trimleft [lindex $lines $i]],SURVIVED,
+827,745,num,1 -> 2,KILLED,"calc.test ==== calc-48.3 inline [= ...] and braced forms, with text around them on the same line FAILED"
+828,745,num,1 -> 0,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+829,745,del,delete: set suffix [string range $suffix 1 end],KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+830,747,neg,negate if condition,KILLED,calc.test ==== calc-52.4 transform= inline [: {...}] with text before and after FAILED
+831,748,num,0 -> 1,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+832,748,del,"delete: append result ""$prefix\[if \{0\} \{$accum\} \{tcl::unsupport",KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+833,750,del,"delete: append result ""$prefix\[tcl::unsupported::assemble \{$tal\}\",KILLED,calc.test ==== calc-52.4 transform= inline [: {...}] with text before and after FAILED
+834,753,neg,negate elseif condition,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+835,755,del,delete: set newline {},SURVIVED,
+836,756,num,0 -> 1,KILLED,"calc.test ==== calc-52.5 transform= inline [= expr], several per line, one at column 0 FAILED"
+837,756,del,delete: set pos 0,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+838,757,neg,negate while condition,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+839,759,num,0 -> 1,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+840,759,del,delete: append newline [string range $line $pos [expr {[lindex $matc,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+841,761,del,delete: set expr [string range $line {*}$submatch],KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+842,762,neg,negate if condition,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+843,763,num,1 -> 2,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+844,763,num,1 -> 0,KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+845,763,del,"delete: error ""line [expr {   $i +1  }]: $err_code""",KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+846,765,neg,negate if condition,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+847,766,swap,loadStk -> storeStk,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+848,766,swap,load -> store,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+849,766,swap,push -> pop,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+850,766,num,1 -> 2,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+851,766,num,1 -> 0,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+852,766,del,delete: regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {loa,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+853,768,neg,negate if condition,KILLED,"calc.test ==== calc-52.5 transform= inline [= expr], several per line, one at column 0 FAILED"
+854,770,del,delete: set src [string range $line {*}$match],KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+855,771,num,1 -> 2,KILLED,"calc.test ==== calc-52.5 transform= inline [= expr], several per line, one at column 0 FAILED"
+856,771,num,1 -> 0,KILLED,"calc.test ==== calc-52.5 transform= inline [= expr], several per line, one at column 0 FAILED"
+857,771,del,delete: set src [string range $src 1 end-1],KILLED,"calc.test ==== calc-52.5 transform= inline [= expr], several per line, one at column 0 FAILED"
+858,772,num,0 -> 1,KILLED,"calc.test ==== calc-52.5 transform= inline [= expr], several per line, one at column 0 FAILED"
+859,772,del,"delete: append newline ""\[if \{0\} \{$src\} \{tcl::unsupported::asse",KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+860,774,del,"delete: append newline ""\[tcl::unsupported::assemble \{$tal\}\]""",KILLED,"calc.test ==== calc-52.5 transform= inline [= expr], several per line, one at column 0 FAILED"
+861,776,num,1 -> 2,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+862,776,num,1 -> 0,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+863,776,num,1 -> 2,KILLED,"calc.test ==== calc-52.5 transform= inline [= expr], several per line, one at column 0 FAILED"
+864,776,num,1 -> 0,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+865,776,del,delete: set pos [expr {[lindex $match 1]+1}],KILLED,timeout
+866,779,del,delete: append newline [string range $line $pos end],KILLED,"calc.test ==== calc-52.5 transform= inline [= expr], several per line, one at column 0 FAILED"
+867,780,del,delete: append result $newline \n,KILLED,"calc.test ==== calc-48.1 proc= output: variables are locals (load/store), not names on the stack FAILED"
+868,783,del,delete: append result $line \n,KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+869,785,del,delete: incr i,KILLED,timeout
+870,785,incr,incr i -> incr i -1,KILLED,timeout
+871,787,del,delete: return $result,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+872,849,del,delete: set out {},SURVIVED,
+873,850,del,delete: set pending [list ::],KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+874,851,neg,negate while condition,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+875,852,num,0 -> 1,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+876,852,del,delete: set ns [lindex $pending 0],KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+877,853,num,1 -> 2,KILLED,calc.test ==== calc-49.6 Calc::AllProcsRecursive finds procs in every namespace FAILED
+878,853,num,1 -> 0,KILLED,calc.test 
+879,853,del,delete: set pending [lrange $pending 1 end],KILLED,calc.test 
+880,854,del,delete: lappend out {*}[info procs ${ns}::*],KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+881,856,swap,eq -> neq,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+882,856,cmp,eq -> ne,SURVIVED,
+883,856,neg,negate if condition,SURVIVED,
+884,857,del,delete: lappend out {*}[info procs ::*],SURVIVED,
+885,860,del,delete: lappend pending $child,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+886,867,num,1 -> 2,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+887,867,num,1 -> 0,KILLED,"calc.test ==== calc-53.3 transformProcs: each match once, sorted, default keeps the source FAILED"
+888,867,del,delete: set debug 1,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+889,868,num,0 -> 1,KILLED,calc.test ==== calc-49.1 -listonly lists the matching procs and changes nothing FAILED
+890,868,del,delete: set useRegex 0,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+891,869,num,0 -> 1,KILLED,calc.test ==== calc-44.35 Calc::transformProcs handles ++ FAILED
+892,869,del,delete: set listOnly 0,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+893,872,neg,negate while condition,KILLED,calc.test ==== calc-49.1 -listonly lists the matching procs and changes nothing FAILED
+894,873,num,0 -> 1,KILLED,calc.test ==== calc-49.1 -listonly lists the matching procs and changes nothing FAILED
+895,873,del,delete: set a [lindex $args 0],KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+896,876,num,2 -> 3,KILLED,calc.test ==== calc-53.4 transformProcs: -preserve with a value but no pattern FAILED
+897,876,num,2 -> 1,KILLED,calc.test ==== calc-49.7 transformProcs argument errors FAILED
+898,876,cmp,< -> <=,KILLED,calc.test ==== calc-53.4 transformProcs: -preserve with a value but no pattern FAILED
+899,876,neg,negate if condition,KILLED,"calc.test ==== calc-49.4 -preserve 0 drops the original source, the default keeps it FAILED"
+900,877,del,"delete: error ""Calc::transformProcs: -preserve requires a value""",KILLED,calc.test ==== calc-49.7 transformProcs argument errors FAILED
+901,879,num,1 -> 2,KILLED,"calc.test ==== calc-49.4 -preserve 0 drops the original source, the default keeps it FAILED"
+902,879,num,1 -> 0,KILLED,"calc.test ==== calc-49.4 -preserve 0 drops the original source, the default keeps it FAILED"
+903,879,del,delete: set debug [lindex $args 1],KILLED,"calc.test ==== calc-49.4 -preserve 0 drops the original source, the default keeps it FAILED"
+904,880,num,2 -> 3,KILLED,"calc.test ==== calc-49.4 -preserve 0 drops the original source, the default keeps it FAILED"
+905,880,num,2 -> 1,KILLED,calc.test ==== calc-53.4 transformProcs: -preserve with a value but no pattern FAILED
+906,880,del,delete: set args [lrange $args 2 end],KILLED,timeout
+907,883,num,1 -> 2,SURVIVED,
+908,883,num,1 -> 0,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+909,883,del,delete: set useRegex 1,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+910,884,num,1 -> 2,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+911,884,num,1 -> 0,KILLED,timeout
+912,884,del,delete: set args [lrange $args 1 end],KILLED,timeout
+913,887,num,1 -> 2,SURVIVED,
+914,887,num,1 -> 0,KILLED,calc.test ==== calc-49.1 -listonly lists the matching procs and changes nothing FAILED
+915,887,del,delete: set listOnly 1,KILLED,calc.test ==== calc-49.1 -listonly lists the matching procs and changes nothing FAILED
+916,888,num,1 -> 2,KILLED,calc.test ==== calc-49.1 -listonly lists the matching procs and changes nothing FAILED
+917,888,num,1 -> 0,KILLED,timeout
+918,888,del,delete: set args [lrange $args 1 end],KILLED,timeout
+919,891,del,delete: break,KILLED,timeout
+920,895,del,delete: set patterns $args,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+921,896,neg,negate if condition,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+922,897,del,"delete: error ""Calc::transformProcs: no proc name pattern(s) given""",KILLED,calc.test ==== calc-49.7 transformProcs argument errors FAILED
+923,901,num,0 -> 1,KILLED,"calc.test ==== calc-49.4 -preserve 0 drops the original source, the default keeps it FAILED"
+924,901,del,"delete: set preserve [expr {max($debug,0)}]",KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+925,905,del,delete: set matched {},KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+926,907,neg,negate if condition,KILLED,calc.test ==== calc-49.1 -listonly lists the matching procs and changes nothing FAILED
+927,909,neg,negate if condition,KILLED,calc.test ==== calc-44.35 Calc::transformProcs handles ++ FAILED
+928,910,del,"delete: set pat ""::$pat""",KILLED,calc.test ==== calc-44.35 Calc::transformProcs handles ++ FAILED
+929,913,neg,negate if condition,KILLED,calc.test ==== calc-49.1 -listonly lists the matching procs and changes nothing FAILED
+930,914,del,"delete: set p ""::$p""",SURVIVED,
+931,916,del,delete: lappend matched $p,KILLED,calc.test ==== calc-44.35 Calc::transformProcs handles ++ FAILED
+932,920,del,delete: set candidates [::Calc::AllProcsRecursive],KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+933,922,del,"delete: set hasNs [string match ""*::*"" $pat]",KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+934,924,neg,negate if condition,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+935,925,del,delete: set subject $p,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+936,927,del,delete: set subject [namespace tail $p],KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+937,929,neg,negate if condition,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+938,930,del,delete: lappend matched $p,KILLED,"calc.test ==== calc-49.2 -regex matches a regular expression, plain patterns are globs FAILED"
+939,935,del,delete: set matched [lsort -unique $matched],KILLED,"calc.test ==== calc-53.3 transformProcs: each match once, sorted, default keeps the source FAILED"
+940,937,neg,negate if condition,KILLED,calc.test ==== calc-44.35 Calc::transformProcs handles ++ FAILED
+941,938,del,delete: return $matched,KILLED,calc.test ==== calc-49.1 -listonly lists the matching procs and changes nothing FAILED
+942,942,del,delete: set touched {},SURVIVED,
+943,944,del,delete: set arglist {},KILLED,calc.test ==== calc-49.8 transformProcs reports the proc that fails to compile FAILED
+944,946,neg,negate if condition,KILLED,"calc.test ==== calc-49.3 transformProcs returns what it changed, keeps arguments and defaults FAILED"
+945,947,del,delete: lappend arglist [list $argName $defaultVal],KILLED,"calc.test ==== calc-49.3 transformProcs returns what it changed, keeps arguments and defaults FAILED"
+946,949,del,delete: lappend arglist $argName,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+947,952,del,delete: set body [info body $procName],KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+948,955,num,1 -> 2,SURVIVED,
+949,955,num,1 -> 0,KILLED,calc.test ==== calc-44.35 Calc::transformProcs handles ++ FAILED
+950,955,del,delete: set newbody [::Calc::transform= $arglist $body 1 $preserve],KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+951,957,del,"delete: error ""Calc::transformProcs error compiling '$procName'  $er",KILLED,calc.test ==== calc-49.8 transformProcs reports the proc that fails to compile FAILED
+952,960,num,1 -> 2,KILLED,"calc.test ==== calc-53.1 a debug value above 1 calls Calc::debug (proc=, calc=, method=, transformProcs) FAILE"
+953,960,num,1 -> 0,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+954,960,cmp,> -> >=,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+955,960,neg,negate if condition,KILLED,"calc.test ==== calc-41.5 two && operators, Calc::transformProcs FAILED"
+956,965,del,delete: lappend touched $procName,KILLED,"calc.test ==== calc-49.3 transformProcs returns what it changed, keeps arguments and defaults FAILED"
+957,968,del,delete: return $touched,KILLED,"calc.test ==== calc-49.3 transformProcs returns what it changed, keeps arguments and defaults FAILED"
+958,973,num,1 -> 2,KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+959,973,num,1 -> 0,KILLED,calc.test ==== calc-48.7 calc= runs in the caller and records its result unless debug is 0 FAILED
+960,974,num,0 -> 1,KILLED,calc.test ==== calc-48.7 calc= runs in the caller and records its result unless debug is 0 FAILED
+961,974,del,"delete: set preserve [expr {   max($debug,0)   }]",KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+962,977,num,0 -> 1,KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+963,977,del,delete: set newbody [::Calc::transform= {} $body 0 $preserve],KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+964,979,cmp,in -> ni,KILLED,calc.test ==== calc-48.6 errors in calc= and method= name the section and the line FAILED
+965,979,del,"delete: error ""Calc= error in section '$label' $err_code""",KILLED,calc.test ==== calc-48.6 errors in calc= and method= name the section and the line FAILED
+966,981,num,0 -> 1,KILLED,calc.test ==== calc-48.7 calc= runs in the caller and records its result unless debug is 0 FAILED
+967,981,cmp,!= -> ==,KILLED,calc.test ==== calc-48.7 calc= runs in the caller and records its result unless debug is 0 FAILED
+968,981,neg,negate if condition,KILLED,calc.test ==== calc-48.7 calc= runs in the caller and records its result unless debug is 0 FAILED
+969,982,del,"delete: set Calc::calc(""calc=$label"") $newbody",KILLED,calc.test ==== calc-48.7 calc= runs in the caller and records its result unless debug is 0 FAILED
+970,985,num,1 -> 2,KILLED,"calc.test ==== calc-53.1 a debug value above 1 calls Calc::debug (proc=, calc=, method=, transformProcs) FAILE"
+971,985,num,1 -> 0,KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+972,985,cmp,> -> >=,KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+973,985,neg,negate if condition,KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+974,989,num,1 -> 2,KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+975,989,num,1 -> 0,KILLED,calc.test ==== calc-42.25 tuple in calc= FAILED
+976,991,num,1 -> 2,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+977,991,num,1 -> 0,KILLED,calc.test ==== calc-48.2 proc= keeps the original source in an if {0} unless debug is 0 FAILED
+978,992,num,0 -> 1,KILLED,calc.test ==== calc-48.2 proc= keeps the original source in an if {0} unless debug is 0 FAILED
+979,992,del,"delete: set preserve [expr {   max($debug,0)   }]",KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+980,995,num,1 -> 2,SURVIVED,
+981,995,num,1 -> 0,KILLED,calc.test ==== calc-44.28 ++ and -- in proc= use incrImm FAILED
+982,995,del,delete: set newbody [::Calc::transform= $arglist $body 1 $preserve],KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+983,997,del,"delete: error ""Proc= error compiling '$name'  $err_code""",KILLED,calc.test ==== calc-48.5 errors in proc= name the proc and the line FAILED
+984,1000,num,1 -> 2,KILLED,"calc.test ==== calc-53.1 a debug value above 1 calls Calc::debug (proc=, calc=, method=, transformProcs) FAILE"
+985,1000,num,1 -> 0,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+986,1000,cmp,> -> >=,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+987,1000,neg,negate if condition,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+988,1004,num,1 -> 2,KILLED,"calc.test ==== calc-41.1 three || in one expression, proc= FAILED"
+989,1004,num,1 -> 0,KILLED,calc.test ==== calc-48.8 proc= and method= define in the caller's namespace FAILED
+990,1006,num,1 -> 2,KILLED,calc.test ==== calc-42.24 tuple in method= FAILED
+991,1006,num,1 -> 0,KILLED,"calc.test ==== calc-53.2 method= output: locals, source kept unless debug is 0 FAILED"
+992,1007,num,0 -> 1,KILLED,"calc.test ==== calc-53.2 method= output: locals, source kept unless debug is 0 FAILED"
+993,1007,del,"delete: set preserve [expr {   max($debug,0)   }]",KILLED,calc.test ==== calc-42.24 tuple in method= FAILED
+994,1010,num,1 -> 2,SURVIVED,
+995,1010,num,1 -> 0,KILLED,"calc.test ==== calc-53.2 method= output: locals, source kept unless debug is 0 FAILED"
+996,1010,del,delete: set newbody [::Calc::transform= $arglist $body 1 $preserve],KILLED,calc.test ==== calc-42.24 tuple in method= FAILED
+997,1012,del,"delete: error ""Method= error compiling '$name'  $err_code""",KILLED,calc.test ==== calc-48.6 errors in calc= and method= name the section and the line FAILED
+998,1015,num,1 -> 2,KILLED,"calc.test ==== calc-53.1 a debug value above 1 calls Calc::debug (proc=, calc=, method=, transformProcs) FAILE"
+999,1015,num,1 -> 0,KILLED,calc.test ==== calc-42.24 tuple in method= FAILED
+1000,1015,cmp,> -> >=,KILLED,calc.test ==== calc-42.24 tuple in method= FAILED
+1001,1015,neg,negate if condition,KILLED,calc.test ==== calc-42.24 tuple in method= FAILED
+1002,1019,num,1 -> 2,KILLED,calc.test ==== calc-42.24 tuple in method= FAILED
+1003,1019,num,1 -> 0,KILLED,calc.test ==== calc-42.24 tuple in method= FAILED

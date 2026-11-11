@@ -2201,6 +2201,646 @@ test calc-44.35 {Calc::transformProcs handles ++} -constraints hasCalcCmd -body 
 }
 
 # ============================================================================
+# FOUND BY MUTATION TESTING (see the mutation folder)
+# Precedence, comparison operators, native functions, error messages,
+# the proc= / calc= / method= preprocessor, Calc::transformProcs options,
+# and the fixed limit of the compile cache.
+# ============================================================================
+
+set ::mutOps {|| && | ^ & == != < > <= >= << >> + - * / % **}
+
+test calc-45.1 {every pair of binary operators agrees with expr (precedence and associativity)} -constraints hasCalcCmd -body {
+    array unset ::Calc::cache
+    set bad {}
+    foreach a $::mutOps { foreach b $::mutOps {
+        set text "x $a y $b z"
+        set vals [expr {$a in {/ %} || $b in {/ %} ? {1 2 3} : {0 1 2 3}}]
+        foreach x $vals { foreach y $vals { foreach z $vals {
+            set want [expr {[catch {expr "$x $a $y $b $z"} w] ? "ERR" : $w}]
+            set got  [expr {[catch {= $text} g] ? "ERR" : $g}]
+            if {$want ne $got} {lappend bad "$text with $x $y $z: got $got want $want"}
+        }}}
+    }}
+    array unset ::Calc::cache
+    lrange $bad 0 4
+} -result {} -cleanup {
+    unset -nocomplain x y z a b text want got w g bad
+}
+
+test calc-45.2 {unary operators bind tighter than every binary operator} -constraints hasCalcCmd -body {
+    array unset ::Calc::cache
+    set bad {}
+    foreach u {- + ! ~} { foreach op $::mutOps {
+        foreach {ctext etext} [list "$u x $op y" "\$u \$x $op \$y" "x $op $u y" "\$x $op \$u \$y"] {
+            set vals [expr {$op in {/ %} ? {1 2 3} : {0 1 2 3}}]
+            foreach x $vals { foreach y $vals {
+                set want [expr {[catch {expr [subst -nocommands $etext]} w] ? "ERR" : $w}]
+                set got  [expr {[catch {= $ctext} g] ? "ERR" : $g}]
+                if {$want ne $got} {lappend bad "$ctext with $x $y: got $got want $want"}
+            }}
+        }
+    }}
+    array unset ::Calc::cache
+    lrange $bad 0 4
+} -result {} -cleanup {
+    unset -nocomplain x y u op ctext etext want got w g bad
+}
+
+test calc-45.3 {each binary operator agrees with expr, including <= and >=} -constraints hasCalcCmd -body {
+    set bad {}
+    foreach op $::mutOps {
+        set vals [expr {$op in {/ %} ? {1 2 3 4} : {0 1 2 3 4}}]
+        foreach x $vals { foreach y $vals {
+            set want [expr {[catch {expr "$x $op $y"} w] ? "ERR" : $w}]
+            set got  [expr {[catch {= x $op y} g] ? "ERR" : $g}]
+            if {$want ne $got} {lappend bad "x $op y with $x $y: got $got want $want"}
+        }}
+    }
+    lrange $bad 0 4
+} -result {} -cleanup {
+    unset -nocomplain x y op want got w g bad
+}
+
+test calc-45.4 {<= and >= at, below and above equality} -constraints hasCalcCmd -body {
+    set out {}
+    foreach {x y} {1 2 2 2 3 2} { lappend out [= x <= y] [= x >= y] [= x < y] [= x > y] }
+    set out
+} -result {1 0 1 0 1 1 0 0 0 1 0 1} -cleanup {
+    unset -nocomplain x y out
+}
+
+test calc-45.5 {ternary operator mixed with other operators agrees with expr} -constraints {hasCalcCmd hasTernary} -body {
+    set bad {}
+    foreach text {
+        {a ? b : c} {a ? b + 1 : c + 2} {a || b ? c : d} {a ? b : c || d} {a ? b : (c ? d : e)}
+        {a ? (b ? c : d) : e} {(a ? b : c) ? d : e} {a == b ? c : d} {a + b ? c : d} {a ? b : c + d * e} {a && b ? c : d}
+        {a < b ? c : d} {a ? b : c == d} {a ? b : c << d} {a | b ? c : d}
+    } {
+        set etext [regsub -all {\m([a-e])\M} $text {$\1}]
+        foreach a {0 1 2} { foreach b {0 1 2} { foreach c {0 1 2} { foreach d {0 1 2} { foreach e {0 1 2} {
+            set want [expr $etext]
+            set got  [= $text]
+            if {$want ne $got} {lappend bad "$text with $a $b $c $d $e: got $got want $want"}
+        }}}}}
+    }
+    lrange $bad 0 4
+} -result {} -cleanup {
+    unset -nocomplain a b c d e text etext want got bad
+}
+
+test calc-45.6 {assignment has lower precedence than the ternary and all binary operators} -constraints {hasCalcCmd hasTernary} -body {
+    set a 1; set b 2
+    list [= r = a + b * 2] [= s = a < b ? 10 : 20] [= t = u = a || 0] $r $s $t $u
+} -result {5 10 1 5 10 1 1} -cleanup {
+    unset -nocomplain a b r s t u
+}
+
+testConstraint knownBug 0   ;# set to 1 to see the two conformance gaps below
+
+test calc-45.7 {nested ternary without parentheses matches expr (known gap)} -constraints {hasCalcCmd hasTernary knownBug} -body {
+    set a 1; set b 2; set c 3; set d 4; set e 5
+    list [= a ? b : c ? d : e] [= a ? b ? c : d : e]
+} -result {2 3} -cleanup {
+    unset -nocomplain a b c d e
+}
+
+test calc-45.8 {|| and && do not evaluate the right side when the left decides (known gap)} -constraints {hasCalcCmd hasLogicalOps knownBug} -body {
+    list [= 1 || 1/0] [= 0 && 1/0]
+} -result {1 0}
+
+test calc-46.1 {parentheses with one element only group, they do not make a list} -constraints hasCalcCmd -body {
+    set x {a b}
+    list [= (x)] [= ((x))] [= (x, 1)]
+} -result {{a b} {a b} {{a b} 1}} -cleanup {
+    unset -nocomplain x
+}
+
+test calc-46.2 {native functions give the right answers} -constraints hasCalcCmd -body {
+    set s abc; set l {x y z}
+    list [= strlen(s)] [= llength(l)] [= lindex(l, 1)] [= list(1, 2, 3)] [= xtoupper(s)] [= xtolower(xtoupper(s))] [= xstrindex(s, 1)] [= xstrrange(s, 0, 1)]
+} -result {3 3 y {1 2 3} ABC abc b ab} -cleanup {
+    unset -nocomplain s l
+}
+
+test calc-46.3 {native functions with the wrong number of arguments} -constraints hasCalcCmd -body {
+    set s abc; set l {x y z}
+    set out {}
+    foreach e {
+        {strlen(s, s)} {strlen()} {llength()} {llength(l, l)} {lindex(l)} {list()}
+        {xtoupper(s, s)} {xtolower()} {xstrindex(s)} {xstrindex(s, 1, 2)} {xstrrange(s, 0)} {xstrrange(s, 0, 1, 2)}
+    } {
+        catch {= $e} msg
+        lappend out $msg
+    }
+    join $out \n
+} -result {Calc: strlen expects exactly 1 args, got 2
+Calc: strlen expects exactly 1 args, got 0
+Calc: llength expects exactly 1 args, got 0
+Calc: llength expects exactly 1 args, got 2
+Calc: lindex expects at least 2 args, got 1
+Calc: list expects at least 1 args, got 0
+Calc: xtoupper expects exactly 1 args, got 2
+Calc: xtolower expects exactly 1 args, got 0
+Calc: xstrindex expects exactly 2 args, got 1
+Calc: xstrindex expects exactly 2 args, got 3
+Calc: xstrrange expects exactly 3 args, got 2
+Calc: xstrrange expects exactly 3 args, got 4} -cleanup {
+    unset -nocomplain s l out e msg
+}
+
+test calc-46.4 {native functions compile to their own instructions in proc=} -constraints hasCalcCmd -body {
+    proc= t46 {l s} {
+        = {a = llength(l); b = strlen(s); c = lindex(l, 1); d = list(a, b)}
+    }
+    set body [info body t46]
+    list [t46 {p q r} hello] [string match *listLength* $body] [string match *strlen* $body] \
+         [string match *lindexMulti* $body] [string match {*list 2*} $body]
+} -result {{3 5} 1 1 1 1} -cleanup {
+    rename t46 {}
+    unset -nocomplain body
+}
+
+test calc-46.5 {mathfunc and general commands are called with invokeStk} -constraints hasCalcCmd -body {
+    proc t46add {a b} {expr {$a + $b}}
+    proc= t46 {x} { = {r = t46add(x, 10); s = max(r, 3); sqrt(s)} }
+    list [t46 6] [string match *invokeStk* [info body t46]]
+} -result {4.0 1} -cleanup {
+    rename t46 {}
+    rename t46add {}
+}
+
+test calc-47.1 {malformed expressions give clear errors} -constraints hasCalcCmd -body {
+    set x {a b}
+    set out {}
+    foreach e {
+        {1 )} {(1, 2} {(1} {max(1, 2} {nosuch(1, 2} {x ? 1} {5 = 3} {true = 1} {false = 1}
+        {a = 1 ) ; 3} {a = 1; 2 3}
+    } {
+        catch {= $e} msg
+        lappend out $msg
+    }
+    join $out \n
+} -result {Calc: unexpected token ')' in expression '1 )'
+Calc: expected ')' but found ''
+Calc: expected ')' but found ''
+Calc: expected ')' or ',' but found ''
+Calc: expected ')' but found ''
+Calc: expected ':' but found ''
+Calc: cannot assign to number literal '5'
+Calc: cannot assign to boolean literal 'true'
+Calc: cannot assign to boolean literal 'false'
+Calc: unexpected token ')' in statement 'a = 1 )'
+Calc: expected start of expression but found '2 3'} -cleanup {
+    unset -nocomplain x out e msg
+}
+
+test calc-47.2 {the compile cache holds at most 1000 expressions} -constraints hasCalcCmd -body {
+    array unset ::Calc::cache
+    for {set i 0} {$i < 1000} {incr i} {set ::Calc::cache(fake$i) {}}
+    set r1 [catch {= 7 + 1} m1]
+    set r2 [catch {= 8 + 1} m2]
+    array unset ::Calc::cache
+    list $r1 $m1 $r2 $m2
+} -result {0 8 1 {Calc: Cache exhausted with expression: 8 + 1}} -cleanup {
+    array unset ::Calc::cache
+    unset -nocomplain i r1 r2 m1 m2
+}
+
+test calc-47.3 {numbers: underscores, 0d prefix, exponents} -constraints hasCalcCmd -body {
+    set e 5
+    list [= 1_000 + 1] [= 0d12] [= 0D5 + 1] [= 1e-2 * 100] [= 5e-1 * 2] [= 1E-1 * 10] [= 2e+1 * 1] [= 2E+1 * 1] [= e-3] [= e - 3]
+} -result {1001 12 6 1.0 1.0 1.0 20.0 20.0 2 2} -cleanup {
+    unset -nocomplain e
+}
+
+test calc-47.4 {names containing underscores or starting with digits-like text are not mangled} -constraints hasCalcCmd -body {
+    set a_b 4; set _c 5; set d0 6
+    list [= a_b + 1] [= _c + 1] [= d0 + 1]
+} -result {5 6 7} -cleanup {
+    unset -nocomplain a_b _c d0
+}
+
+test calc-47.5 {single line unbraced multi statement with a trailing comment} -constraints hasCalcCmd -body {
+    list [= {p = 3 ;# set p
+             p * 2 # double it
+            }]
+} -result 6 -cleanup {
+    unset -nocomplain p
+}
+
+# ---- proc= / calc= / method= preprocessor ----------------------------------
+
+test calc-48.1 {proc= output: variables are locals (load/store), not names on the stack} -constraints hasCalcCmd -body {
+    proc= t48 {x} {
+        = y = x + 1
+        = {z = y * 2}
+        set r [= z + 1]
+        set s [: {
+            w = z + 2
+        }]
+        return [list $r $s]
+    }
+    set b [info body t48]
+    list [t48 4] [string match *loadStk* $b] [string match *storeStk* $b] [string match {*store y*} $b] \
+         [string match {*store z*} $b] [string match {*store w*} $b] [string match {*load x*} $b]
+} -result {{11 12} 0 0 1 1 1 1} -cleanup {
+    rename t48 {}
+    unset -nocomplain b
+}
+
+test calc-48.2 {proc= keeps the original source in an if {0} unless debug is 0} -constraints hasCalcCmd -body {
+    proc= t48 {x} {
+        = y = x + 1
+        return $y
+    }
+    proc= t48b {x} {
+        = y = x + 1
+        return $y
+    } 0
+    set b1 [info body t48]
+    set b2 [info body t48b]
+    list [t48 1] [t48b 1] [string match {*if {0}*= y = x + 1*} $b1] [string match *if* $b2] [string match *assemble* $b2]
+} -result {2 2 1 0 1} -cleanup {
+    rename t48 {}
+    rename t48b {}
+    unset -nocomplain b1 b2
+}
+
+test calc-48.3 {inline [= ...] and braced forms, with text around them on the same line} -constraints hasCalcCmd -body {
+    proc= t48 {x} {
+        set v [: {
+            t = x +
+                10;
+            t * 2
+        }] ; set w 5
+        set u [: x + 1 ]
+        set k "<[= {x * 3}]>"
+        set m [list [= x + 2] [: {x + 3}]]
+        return [list $v $w $u $k $m]
+    }
+    t48 1
+} -result {22 5 2 <3> {3 4}} -cleanup {
+    rename t48 {}
+}
+
+test calc-48.4 {inline braced form with the closing bracket on a later line} -constraints hasCalcCmd -body {
+    proc= t48 {x} {
+        set v [: {
+            x + 1
+        }
+        ]
+        return $v
+    }
+    list [t48 1] [string match *assemble* [info body t48]]
+} -result {2 1} -cleanup {
+    rename t48 {}
+}
+
+test calc-48.5 {errors in proc= name the proc and the line} -constraints hasCalcCmd -body {
+    set out {}
+    foreach body {
+        {
+    set q 1
+    = 1 + )
+}
+        {
+    set q 1
+    set z [= 1 + )]
+}
+        {
+    set q 1
+    = {
+        a = 1;
+        b = 2 )
+    }
+}
+        {
+    set q 1
+    set z [= {
+       1 + )
+    }]
+}
+    } {
+        catch {proc= bad {} $body} msg
+        lappend out $msg
+    }
+    join $out \n
+} -result {Proc= error compiling 'bad'  line 3: Calc: expected start of expression but found ')'
+Proc= error compiling 'bad'  line 3: Calc: expected start of expression but found ')'
+Proc= error compiling 'bad'  line 6: Calc: unexpected token ')' in statement 'b = 2 )'
+Proc= error compiling 'bad'  line 5: Calc: expected start of expression but found ')'} -cleanup {
+    catch {rename bad {}}
+    unset -nocomplain out body msg
+}
+
+test calc-48.6 {errors in calc= and method= name the section and the line} -constraints hasCalcCmd -body {
+    catch {calc= sect {
+    set q 1
+    = 1 + )
+}} m1
+    oo::class create T48
+    catch {oo::define T48 {method= m {} {
+    = 1 + )
+}}} m2
+    list $m1 $m2
+} -result {{Calc= error in section 'sect' line 3: Calc: expected start of expression but found ')'} {Method= error compiling 'm'  line 2: Calc: expected start of expression but found ')'}} -cleanup {
+    catch {T48 destroy}
+    unset -nocomplain m1 m2
+}
+
+test calc-48.7 {calc= runs in the caller and records its result unless debug is 0} -constraints hasCalcCmd -body {
+    array unset ::Calc::calc
+    set q 3
+    calc= first {
+        = q2 = q * 2
+    }
+    calc= second {
+        = q3 = q * 3
+    } 0
+    list $q2 $q3 [lsort [array names ::Calc::calc]]
+} -result {6 9 {{"calc=first"}}} -cleanup {
+    array unset ::Calc::calc
+    unset -nocomplain q q2 q3
+}
+
+test calc-48.8 {proc= and method= define in the caller's namespace} -constraints hasCalcCmd -body {
+    namespace eval ns48 {
+        proc= f {x} { = x + 1 }
+    }
+    oo::class create T48 { method= m {x} { = x * 2 } }
+    list [ns48::f 1] [info procs ::f] [[T48 new] m 4]
+} -result {2 {} 8} -cleanup {
+    namespace delete ns48
+    catch {T48 destroy}
+}
+
+# ---- Calc::transformProcs ---------------------------------------------------
+
+namespace eval ::tp49 {
+    proc a {x {y 5}} {
+        = x + y
+    }
+    proc b {x} {
+        = {x * 2}
+    }
+    namespace eval inner {
+        proc c {x} {
+            = x - 1
+        }
+    }
+}
+proc tp49top {x} {
+    = x + 100
+}
+
+test calc-49.1 {-listonly lists the matching procs and changes nothing} -constraints hasCalcCmd -body {
+    list [Calc::transformProcs -listonly ::tp49::*] [Calc::transformProcs -listonly ::tp49::inner::*] \
+         [Calc::transformProcs -listonly ::tp49::a ::tp49::b] [Calc::transformProcs -listonly tp49top] \
+         [string match *assemble* [info body ::tp49::a]] [string match *assemble* [info body tp49top]]
+} -result {{::tp49::a ::tp49::b} ::tp49::inner::c {::tp49::a ::tp49::b} ::tp49top 0 0}
+
+test calc-49.2 {-regex matches a regular expression, plain patterns are globs} -constraints hasCalcCmd -body {
+    list [Calc::transformProcs -listonly -regex {^::tp49::[ab]$}] [Calc::transformProcs -listonly -regex {^tp49t}] \
+         [Calc::transformProcs -listonly {tp49t?p}] [Calc::transformProcs -listonly {tp49t?}] [Calc::transformProcs -listonly nosuchproc]
+} -result {{::tp49::a ::tp49::b} ::tp49top ::tp49top {} {}}
+
+test calc-49.3 {transformProcs returns what it changed, keeps arguments and defaults} -constraints hasCalcCmd -body {
+    set done [Calc::transformProcs ::tp49::a]
+    info default ::tp49::a y d
+    list $done [info args ::tp49::a] $d [::tp49::a 1] [::tp49::a 1 10] [string match *assemble* [info body ::tp49::a]]
+} -result {::tp49::a {x y} 5 6 11 1} -cleanup {
+    unset -nocomplain done d
+}
+
+test calc-49.4 {-preserve 0 drops the original source, the default keeps it} -constraints hasCalcCmd -body {
+    Calc::transformProcs -preserve 0 ::tp49::b
+    set b1 [info body ::tp49::b]
+    Calc::transformProcs -preserve 1 tp49top
+    set b2 [info body tp49top]
+    list [string match *if* $b1] [string match {*if {0}*} $b2] [::tp49::b 4] [tp49top 1]
+} -result {0 1 8 101} -cleanup {
+    unset -nocomplain b1 b2
+}
+
+test calc-49.5 {a namespace pattern reaches the nested namespace only when named} -constraints hasCalcCmd -body {
+    set before [string match *assemble* [info body ::tp49::inner::c]]
+    Calc::transformProcs ::tp49::*
+    set mid [string match *assemble* [info body ::tp49::inner::c]]
+    Calc::transformProcs ::tp49::inner::*
+    list $before $mid [string match *assemble* [info body ::tp49::inner::c]] [::tp49::inner::c 4]
+} -result {0 0 1 3} -cleanup {
+    unset -nocomplain before mid
+}
+
+test calc-49.6 {Calc::AllProcsRecursive finds procs in every namespace} -constraints hasCalcCmd -body {
+    set all [Calc::AllProcsRecursive]
+    list [expr {[lsearch -exact $all ::tp49top] >= 0}] [expr {[lsearch -exact $all ::tp49::a] >= 0}] \
+         [expr {[lsearch -exact $all ::tp49::inner::c] >= 0}] [expr {[lsearch -exact $all ::tp49::nosuch] >= 0}]
+} -result {1 1 1 0} -cleanup {
+    unset -nocomplain all
+}
+
+test calc-49.7 {transformProcs argument errors} -constraints hasCalcCmd -body {
+    set out {}
+    foreach args {{} {-preserve} {-listonly} {-regex}} {
+        catch {Calc::transformProcs {*}$args} msg
+        lappend out $msg
+    }
+    join $out \n
+} -result {Calc::transformProcs: no proc name pattern(s) given
+Calc::transformProcs: -preserve requires a value
+Calc::transformProcs: no proc name pattern(s) given
+Calc::transformProcs: no proc name pattern(s) given} -cleanup {
+    unset -nocomplain out args msg
+}
+
+test calc-49.8 {transformProcs reports the proc that fails to compile} -constraints hasCalcCmd -body {
+    proc tp49bad {} {
+        = 1 + )
+    }
+    catch {Calc::transformProcs tp49bad} msg
+    set msg
+} -match glob -result {Calc::transformProcs error compiling '::tp49bad'*expected start of expression but found ')'} -cleanup {
+    rename tp49bad {}
+    unset -nocomplain msg
+}
+
+test calc-49.9 {transformProcs on a proc with no Calc code leaves it working} -constraints hasCalcCmd -body {
+    proc tp49plain {a {b 2}} {expr {$a * $b}}
+    Calc::transformProcs tp49plain
+    list [tp49plain 3] [tp49plain 3 4]
+} -result {6 12} -cleanup {
+    rename tp49plain {}
+}
+
+# ---- a fresh interpreter ---------------------------------------------------
+
+test calc-50.1 {a fresh interpreter works from the first call, tuples first} -constraints hasCalcCmd -body {
+    set ip [interp create]
+    $ip eval [list ::tcl::tm::path add [pwd]]
+    $ip eval {package require colon}
+    $ip eval {set pt {3 4 5}}
+    set out {}
+    lappend out [$ip eval {= pt -> (a, b, c); list $a $b $c}]
+    lappend out [$ip eval {= pt => (d, e, f); list $d $e $f}]
+    lappend out [$ip eval {= 1 ? 2 : 3}] [$ip eval {= 1 && 0}] [$ip eval {= 0 || 2}]
+    lappend out [$ip eval {= ++n}] [$ip eval {= n++}] [$ip eval {= n}]
+    lappend out [$ip eval {proc= f {x} { = x * 2 }; f 4}]
+    interp delete $ip
+    set out
+} -result {{3 4 5} {3 4 5} 2 0 1 1 1 2 8} -cleanup {
+    catch {interp delete $ip}
+    unset -nocomplain ip out
+}
+
+# ---- round 2: exact preprocessor output, the debug hook, nesting, defaults ---
+
+proc esc53 {s} {string map [list \n {\n}] $s}
+
+test calc-51.1 {multi statement braces in proc= use locals} -constraints hasCalcCmd -body {
+    proc= t51 {x} {
+        = {a = x + 1; b = a * 2}
+    }
+    set body [info body t51]
+    list [t51 3] [string match *loadStk* $body] [string match *storeStk* $body] \
+         [string match {*store a*} $body] [string match {*store b*} $body] [string match {*load x*} $body]
+} -result {8 0 0 1 1 1} -cleanup {
+    rename t51 {}
+    unset -nocomplain body
+}
+
+test calc-51.2 {a single name target takes the whole value, top level and in proc=} -constraints hasCalcCmd -body {
+    set lst {p q r}
+    proc= t51 {l} {
+        = l -> w2
+        return $w2
+    }
+    list [= lst -> w] $w [= lst => v] $v [t51 {x y}] [string match {*store w2*} [info body t51]] [string match {*load l*} [info body t51]]
+} -result {{p q r} {p q r} {p q r} {p q r} {x y} 1 1} -cleanup {
+    rename t51 {}
+    unset -nocomplain lst w v
+}
+
+test calc-51.3 {the right side of a tuple assignment is a full expression} -constraints hasCalcCmd -body {
+    list [= (a, b) = c = list(1, 2)] $a $b $c
+} -result {{1 2} 1 2 {1 2}} -cleanup {
+    unset -nocomplain a b c
+}
+
+test calc-51.4 {an exponent sign with no digits is not a number} -constraints hasCalcCmd -body {
+    = 1e-
+} -returnCodes error -result {Calc: expected start of expression but found '1e'}
+
+test calc-52.1 {transform= defaults to a top level body with the source kept} -constraints hasCalcCmd -body {
+    esc53 [Calc::transform= {} "\n    = y = x + 1\n"]
+} -result {\n    if {0} {     = y = x + 1 } { tcl::unsupported::assemble {push y; push x; loadStk; push 1; add; storeStk; } }\n\n}
+
+test calc-52.2 {transform= unbraced line, inproc, source dropped or kept} -constraints hasCalcCmd -body {
+    list [esc53 [Calc::transform= {} "\n    = y = x + 1\n" 1 0]] [esc53 [Calc::transform= {} "\n    = y = x + 1\n" 1 1]]
+} -result {{\n    tcl::unsupported::assemble {load x; push 1; add; store y; }\n\n} {\n    if {0} {     = y = x + 1 } { tcl::unsupported::assemble {load x; push 1; add; store y; } }\n\n}}
+
+test calc-52.3 {transform= braced block over several lines} -constraints hasCalcCmd -body {
+    list [esc53 [Calc::transform= {} "\n    = \{\n      a = x;\n      b = a + 1\n    \}\n" 1 0]] \
+         [esc53 [Calc::transform= {} "\n    = \{z = x\}\n" 1 1]] \
+         [esc53 [Calc::transform= {} "\n    = \{a = x + 1; b = a * 2\}\n" 1 0]]
+} -result {{\n    tcl::unsupported::assemble {load x; store a; pop; load a; push 1; add; store b; }\n\n} {\n    if {0} {     = {z = x} } { tcl::unsupported::assemble {load x; store z; } }\n\n} {\n    tcl::unsupported::assemble {load x; push 1; add; store a; pop; load a; push 2; mult; store b; }\n\n}}
+
+test calc-52.4 {transform= inline [: {...}] with text before and after} -constraints hasCalcCmd -body {
+    list [esc53 [Calc::transform= {} "\n    set v \[: \{\n x + 1\n \}\] ; set w 5\n" 1 0]] \
+         [esc53 [Calc::transform= {} "\n    set v \[: \{ x + 1 \}\]\n" 1 1]]
+} -result {{\n    set v [tcl::unsupported::assemble {load x; push 1; add; }] ; set w 5\n\n} {\n    set v [if {0} {[: { x + 1 }]} {tcl::unsupported::assemble {load x; push 1; add; }}]\n\n}}
+
+test calc-52.5 {transform= inline [= expr], several per line, one at column 0} -constraints hasCalcCmd -body {
+    list [esc53 [Calc::transform= {} "\n    list \[= x + 1\] and \[: x * 2\] end\n" 1 0]] \
+         [esc53 [Calc::transform= {} "\n    list \[= x + 1\] and \[: x * 2\] end\n" 1 1]] \
+         [esc53 [Calc::transform= {} "\[= x + 1\] tail\n" 1 0]]
+} -result {{\n    list [tcl::unsupported::assemble {load x; push 1; add; }] and [tcl::unsupported::assemble {load x; push 2; mult; }] end\n\n} {\n    list [if {0} {= x + 1} {tcl::unsupported::assemble {load x; push 1; add; }}] and [if {0} {: x * 2} {tcl::unsupported::assemble {load x; push 2; mult; }}] end\n\n} {[tcl::unsupported::assemble {load x; push 1; add; }] tail\n\n}}
+
+test calc-52.6 {transform= passes other lines through} -constraints hasCalcCmd -body {
+    esc53 [Calc::transform= {} "\n    set q 1\n    puts hi\n" 1 0]
+} -result {\n    set q 1\n    puts hi\n\n}
+
+test calc-53.1 {a debug value above 1 calls Calc::debug (proc=, calc=, method=, transformProcs)} -constraints hasCalcCmd -body {
+    rename Calc::debug Calc::debug.saved
+    proc Calc::debug {args} {lappend ::dbgcalls [lindex $args 0]}
+    set ::dbgcalls {}
+    set rc [catch {
+        proc= dbg1 {x} { = x + 1 } 2
+        proc= dbg1n {x} { = x + 1 } -2
+        proc= dbg1x {x} { = x + 1 } 1
+        proc= dbg1z {x} { = x + 1 } 0
+        calc= dbg2 { = zz = 1 } 2
+        calc= dbg2x { = zz = 1 } 1
+        oo::class create DC53
+        oo::define DC53 { method= m {x} { = x + 1 } 2 }
+        oo::define DC53 { method= m1 {x} { = x + 1 } 1 }
+        proc dbg4 {x} { = x + 1 }
+        Calc::transformProcs -preserve 2 dbg4
+        Calc::transformProcs -preserve 1 dbg4
+    } msg]
+    rename Calc::debug {}
+    rename Calc::debug.saved Calc::debug
+    list $rc $::dbgcalls
+} -result {0 {dbg1 dbg1n dbg2 m ::dbg4}} -cleanup {
+    catch {DC53 destroy}
+    foreach p {dbg1 dbg1n dbg1x dbg1z dbg4} {catch {rename $p {}}}
+    unset -nocomplain rc msg zz ::dbgcalls
+}
+
+test calc-53.2 {method= output: locals, source kept unless debug is 0} -constraints hasCalcCmd -body {
+    oo::class create DC53b
+    oo::define DC53b { method= m1 {x} { = x + 1 } 1 }
+    oo::define DC53b { method= m0 {x} { = x + 1 } 0 }
+    oo::define DC53b { method= md {x} { = x + 1 } }
+    set out {}
+    foreach m {m1 m0 md} {
+        set b [lindex [info class definition DC53b $m] 1]
+        lappend out [string match *if* $b] [string match {*load x*} $b] [string match *loadStk* $b]
+    }
+    lappend out [[DC53b new] md 4]
+    set out
+} -result {1 1 0 0 1 0 1 1 0 5} -cleanup {
+    catch {DC53b destroy}
+    unset -nocomplain out m b
+}
+
+test calc-53.3 {transformProcs: each match once, sorted, default keeps the source} -constraints hasCalcCmd -body {
+    proc tp53d {x} { = x + 1 }
+    Calc::transformProcs tp53d
+    list [Calc::transformProcs -listonly ::tp49::a ::tp49::*] [Calc::transformProcs -listonly ::tp49::b ::tp49::a] \
+         [string match {*if {0}*} [info body tp53d]] [tp53d 1]
+} -result {{::tp49::a ::tp49::b} {::tp49::a ::tp49::b} 1 2} -cleanup {
+    rename tp53d {}
+}
+
+test calc-53.4 {transformProcs: -preserve with a value but no pattern} -constraints hasCalcCmd -body {
+    list [catch {Calc::transformProcs -preserve 0} m1] $m1 [catch {Calc::transformProcs -preserve 0 -listonly} m2] $m2
+} -result {1 {Calc::transformProcs: no proc name pattern(s) given} 1 {Calc::transformProcs: no proc name pattern(s) given}} -cleanup {
+    unset -nocomplain m1 m2
+}
+
+test calc-53.5 {AllProcsRecursive walks deep and sibling namespaces} -constraints hasCalcCmd -body {
+    namespace eval ::tq53 {
+        proc pt {} {}
+        namespace eval a { proc pa {} {}
+            namespace eval b { proc pb {} {}
+                namespace eval c { proc pc {} {} } }
+            namespace eval d { proc pd {} {} } }
+        namespace eval e { proc pe {} {} }
+        namespace eval f { namespace eval g { proc pg {} {} } }
+    }
+    set all [Calc::AllProcsRecursive]
+    set out {}
+    foreach p {::tq53::pt ::tq53::a::pa ::tq53::a::b::pb ::tq53::a::b::c::pc ::tq53::a::d::pd ::tq53::e::pe ::tq53::f::g::pg} {
+        lappend out [expr {[lsearch -exact $all $p] >= 0}]
+    }
+    set out
+} -result {1 1 1 1 1 1 1} -cleanup {
+    namespace delete ::tq53
+    unset -nocomplain all out p
+}
+
+# ============================================================================
 # CLEANUP
 # ============================================================================
 

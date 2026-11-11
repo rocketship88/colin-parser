@@ -305,3 +305,9 @@ The command names can be changed to anything — the test suite uses `=` through
 ## Testing
 
 All tests verify `=` command results against `expr` to ensure correctness.
+
+The `mutation` folder holds a mutation-testing harness: it makes about a thousand small changes to
+`colon-1.0.tm` and checks that the tests notice each one. See `mutation/README.md`. The tests it led to
+(precedence of every operator pair, `<=` and `>=`, native function arity, the exact output of
+`proc=`/`calc=`/`method=`, `Calc::transformProcs` options, the compile cache limit, and a fresh
+interpreter) are in `calc.test` (calc-45 to calc-53) and the end of `colon_test.tcl`.
