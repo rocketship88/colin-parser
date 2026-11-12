@@ -2295,16 +2295,15 @@ test calc-45.6 {assignment has lower precedence than the ternary and all binary 
     unset -nocomplain a b r s t u
 }
 
-testConstraint knownBug 0   ;# set to 1 to see the two conformance gaps below
 
-test calc-45.7 {nested ternary without parentheses matches expr (known gap)} -constraints {hasCalcCmd hasTernary knownBug} -body {
+test calc-45.7 {nested ternary without parentheses matches expr} -constraints {hasCalcCmd hasTernary} -body {
     set a 1; set b 2; set c 3; set d 4; set e 5
     list [= a ? b : c ? d : e] [= a ? b ? c : d : e]
 } -result {2 3} -cleanup {
     unset -nocomplain a b c d e
 }
 
-test calc-45.8 {|| and && do not evaluate the right side when the left decides (known gap)} -constraints {hasCalcCmd hasLogicalOps knownBug} -body {
+test calc-45.8 {|| and && do not evaluate the right side when the left decides} -constraints {hasCalcCmd hasLogicalOps} -body {
     list [= 1 || 1/0] [= 0 && 1/0]
 } -result {1 0}
 
@@ -2843,5 +2842,114 @@ test calc-53.5 {AllProcsRecursive walks deep and sibling namespaces} -constraint
 # ============================================================================
 # CLEANUP
 # ============================================================================
+
+# ---- calc-54: short-circuit && and || ----
+proc sc_t {name v} {incr ::sc_$name; return $v}
+foreach n {a b c d} {proc sc_$n {v} "incr ::sc_$n; return \$v"}
+proc sc_reset {} {foreach n {a b c d} {set ::sc_$n 0}}
+proc sc_counts {} {list $::sc_a $::sc_b $::sc_c $::sc_d}
+
+test calc-54.1 {|| skips right side when left is true} -constraints {hasCalcCmd hasLogicalOps} -body {
+    sc_reset; set r [= sc_a(1) || sc_b(1)]; list $r [sc_counts]
+} -result {1 {1 0 0 0}}
+test calc-54.2 {|| evaluates right side when left is false} -constraints {hasCalcCmd hasLogicalOps} -body {
+    sc_reset; set r [= sc_a(0) || sc_b(5)]; list $r [sc_counts]
+} -result {1 {1 1 0 0}}
+test calc-54.3 {&& skips right side when left is false} -constraints {hasCalcCmd hasLogicalOps} -body {
+    sc_reset; set r [= sc_a(0) && sc_b(1)]; list $r [sc_counts]
+} -result {0 {1 0 0 0}}
+test calc-54.4 {&& evaluates right side when left is true} -constraints {hasCalcCmd hasLogicalOps} -body {
+    sc_reset; set r [= sc_a(1) && sc_b(0)]; list $r [sc_counts]
+} -result {0 {1 1 0 0}}
+test calc-54.5 {chains stop at the deciding operand} -constraints {hasCalcCmd hasLogicalOps} -body {
+    sc_reset; set r1 [= sc_a(0) || sc_b(0) || sc_c(1) || sc_d(1)]; set c1 [sc_counts]
+    sc_reset; set r2 [= sc_a(1) && sc_b(1) && sc_c(0) && sc_d(1)]; set c2 [sc_counts]
+    list $r1 $c1 $r2 $c2
+} -result {1 {1 1 1 0} 0 {1 1 1 0}}
+test calc-54.6 {parenthesized operands} -constraints {hasCalcCmd hasLogicalOps} -body {
+    sc_reset; set r [= (sc_a(1)) || (sc_b(1))]; set c1 [sc_counts]
+    sc_reset; set r2 [= (sc_a(0) && sc_b(1)) || (sc_c(1) && sc_d(1))]; set c2 [sc_counts]
+    list $r $c1 $r2 $c2
+} -result {1 {1 0 0 0} 1 {1 0 1 1}}
+test calc-54.7 {function calls with two arguments each} -constraints {hasCalcCmd hasLogicalOps} -body {
+    proc sc_f {a b} {incr ::sc_a; expr {$a > $b}}
+    proc sc_g {c d} {incr ::sc_b; expr {$c > $d}}
+    set a 5; set b 1; set c 0; set d 1
+    sc_reset; set r [= sc_f(a,b) || sc_g(c,d)]; set c1 [sc_counts]
+    sc_reset; set r2 [= sc_g(c,d) || sc_f(a,b)]; set c2 [sc_counts]
+    list $r $c1 $r2 $c2
+} -result {1 {1 0 0 0} 1 {1 1 0 0}}
+test calc-54.8 {skipped right side does not assign or increment} -constraints {hasCalcCmd hasLogicalOps} -body {
+    set x 0; set i 5
+    = 1 || (x = 9)
+    = 0 && i++
+    list $x $i
+} -result {0 5}
+test calc-54.9 {executed right side does assign} -constraints {hasCalcCmd hasLogicalOps} -body {
+    set x 0; set i 5
+    = 0 || (x = 9)
+    = 1 && i++
+    list $x $i
+} -result {9 6}
+test calc-54.10 {mixed with ternary} -constraints {hasCalcCmd hasLogicalOps hasTernary} -body {
+    sc_reset; set r [= (sc_a(1) || sc_b(1)) ? sc_c(10) : sc_d(20)]; list $r [sc_counts]
+} -result {10 {1 0 1 0}}
+test calc-54.11 {mixed precedence a || b && c} -constraints {hasCalcCmd hasLogicalOps} -body {
+    sc_reset; set r [= sc_a(1) || sc_b(0) && sc_c(0)]; list $r [sc_counts]
+} -result {1 {1 0 0 0}}
+test calc-54.12 {results are 0 or 1, not the operand values} -constraints {hasCalcCmd hasLogicalOps} -body {
+    list [= 7 || 0] [= 0 || 7] [= 7 && 3] [= 0 && 3] [= 0 || 0] [= 2 && 0]
+} -result {1 1 1 0 0 0}
+test calc-54.13 {|| and && compile to the same instructions as expr} -constraints {hasCalcCmd hasLogicalOps} -body {
+    proc sc_ins {name} {
+        set out {}
+        foreach l [split [::tcl::unsupported::disassemble proc $name] \n] {
+            if {[regexp {^\s+\(\d+\) (\w+?)\d* } $l -> op]} {lappend out $op}
+        }
+        set out
+    }
+    proc= sc_p {a b} {: a || b}
+    proc  sc_e {a b} {expr {$a || $b}}
+    proc= sc_p2 {a b} {: a && b}
+    proc  sc_e2 {a b} {expr {$a && $b}}
+    list [expr {[sc_ins sc_p] eq [sc_ins sc_e]}] [expr {[sc_ins sc_p2] eq [sc_ins sc_e2]}] \
+        [sc_p 0 0] [sc_p 0 3] [sc_p2 2 0] [sc_p2 2 3]
+} -result {1 1 0 1 0 1}
+test calc-54.14 {many uses in one expression get distinct labels} -constraints {hasCalcCmd hasLogicalOps} -body {
+    list [= (1&&0)||(0&&1)||(1&&1)] [= (0||0)&&(1||1)] [= 1||0||0&&0||0]
+} -result {1 0 1}
+test calc-54.15 {inside a baked proc, side effects skipped} -constraints {hasCalcCmd hasLogicalOps} -body {
+    proc= sc_q {n} {: {c = 0; (n > 0 || c++); (n < 0 && c++); c}}
+    list [sc_q 1] [sc_q 0]
+} -result {0 1}
+
+# ---- calc-55: nested ternary is right associative, as in expr ----
+test calc-55.1 {nested ternary grid against expr} -constraints {hasCalcCmd hasTernary} -body {
+    set bad {}
+    foreach a {0 1} {foreach b {0 1} {foreach c {0 2} {
+        set d 7; set e 9
+        foreach {tmpl etmpl} {
+            {a ? b : c ? d : e}        {$a ? $b : $c ? $d : $e}
+            {a ? b ? c : d : e}        {$a ? $b ? $c : $d : $e}
+            {a ? b ? c : d : c ? d : e} {$a ? $b ? $c : $d : $c ? $d : $e}
+            {a ? b : c ? d : e ? 1 : 2} {$a ? $b : $c ? $d : $e ? 1 : 2}
+            {a || b ? c : d ? e : 1}   {$a || $b ? $c : $d ? $e : 1}
+            {a && b ? c ? 5 : 6 : d}   {$a && $b ? $c ? 5 : 6 : $d}
+        } {
+            set got [uplevel 0 [list = $tmpl]]
+            set want [expr $etmpl]
+            if {$got != $want} {lappend bad [list $tmpl $a $b $c $got $want]}
+        }
+    }}}
+    set bad
+} -result {}
+test calc-55.2 {nested ternary with assignment and parentheses} -constraints {hasCalcCmd hasTernary} -body {
+    set a 0; set b 1; set c 1; set d 4; set e 5
+    list [= x = a ? b : c ? d : e] $x [= (a ? b : c) ? d : e] [= a ? b : (c ? d : e)]
+} -result {4 4 4 4}
+test calc-55.3 {nested ternary inside proc=} -constraints {hasCalcCmd hasTernary} -body {
+    proc= sgn3 {n} {: n < 0 ? -1 : n == 0 ? 0 : 1}
+    list [sgn3 -5] [sgn3 0] [sgn3 8]
+} -result {-1 0 1}
 
 cleanupTests

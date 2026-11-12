@@ -4,6 +4,8 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 
 ## What's New
 - `++` and `--`, prefix and postfix: `: ++i`, `: i++`, `: --i`, `: i--`. They compile to the `incrImm` instruction, the same one `incr i` uses, and create an unset variable as `incr` does. Integers only, plain variable names only (see Increment and Decrement in the UserGuide)
+- `&&` and `||` now short circuit like `expr`: the right operand is not evaluated when the left decides (`= 1 || 1/0` is 1). They compile to the same instructions as `expr`
+- Nested `?:` without parentheses now works as in `expr`: `a ? b : c ? d : e` and `a ? b ? c : d : e`
 - Tuples: unpack a list into variables with `(x,y,z) = expr` or `expr -> (x,y,z)`, nested patterns, `_` to skip an element, and `(a,b,c)` to build a list, and `=>` as a strict `->` that errors when the sizes do not match (see the Tuples section in the UserGuide)
 - Repackaging into separate test file, and Tcl module
 - add Calc::transformProcs to compile multiple procs from existing procs

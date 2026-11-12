@@ -20,6 +20,7 @@ ap.add_argument('--timeout', type=int, default=30)
 ap.add_argument('--only', default='')
 ap.add_argument('--env', action='append', default=[])
 ap.add_argument('--progress', default='')
+ap.add_argument('--resume', action='store_true', help='skip mutants already in RESULTS.partial')
 args = ap.parse_args()
 
 env = dict(os.environ)
@@ -122,6 +123,17 @@ def do(m):
 
 rows, done, t_start = [], 0, time.time()
 counts = {}
+partial = args.results + '.partial'
+if args.resume and os.path.exists(partial):
+    seen = set()
+    for line in open(partial):
+        r = json.loads(line)
+        seen.add(r[0]); rows.append(tuple(r)); counts[r[4]] = counts.get(r[4], 0) + 1
+    done = len(rows)
+    mutants = [m for m in mutants if m['id'] not in seen]
+elif os.path.exists(partial):
+    os.remove(partial)
+total_all = len(mutants) + done
 with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as ex:
     futs = [ex.submit(do, m) for m in mutants]
     for f in concurrent.futures.as_completed(futs):
@@ -129,8 +141,10 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as ex:
         done += 1
         counts[status] = counts.get(status, 0) + 1
         rows.append((m['id'], m['line'], m['kind'], m['desc'], status, by))
-        if args.progress and (done % 20 == 0 or done == len(mutants)):
-            open(args.progress, 'w').write(json.dumps({'done': done, 'total': len(mutants), 'counts': counts,
+        with open(partial, 'a') as pf:
+            pf.write(json.dumps(rows[-1]) + '\n')
+        if args.progress and (done % 20 == 0 or done == total_all):
+            open(args.progress, 'w').write(json.dumps({'done': done, 'total': total_all, 'counts': counts,
                                                        'elapsed': int(time.time() - t_start)}))
 rows.sort()
 with open(args.results, 'w', newline='') as fh:

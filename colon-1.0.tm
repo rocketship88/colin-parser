@@ -159,7 +159,7 @@ proc compile toks {
 # Pratt Parser loosely based on https://www.rosettacode.org/wiki/Arithmetic_evaluation#Nim
 
 # Define infix operators, their precedences and bytecodes
-# with chatgpt providing the bytecode to replace the lor/land codes
+# (|| and && have no single bytecode; parse emits jumps for them, see below)
 foreach {op prec code} {
     )  0 -
     ,  0 -
@@ -168,8 +168,8 @@ foreach {op prec code} {
     => 0.5 -
     ?  1 -
     :  1 -
-    || 2 {jumpTrue true_res; jumpFalse pop_A; push 1; jump end_res; label pop_A; push 0; jump end_res; label true_res; pop; push 1; label end_res}
-    && 3 {jumpFalse pop_A; jumpFalse false_res; push 1; jump end_res; label pop_A; pop; label false_res; push 0; label end_res}
+    || 2 -
+    && 3 -
     |  4 bitor
     ^  5 bitxor
     &  6 bitand
@@ -249,7 +249,7 @@ proc parse min_prec {
             break
         }
     # Binary ops are left-associative except for **
-        if {$tok_prec == $min_prec && $token ne "**"} {
+        if {$tok_prec == $min_prec && $token ne "**" && $token ne "?"} {
             break
         }
         # if-then-else needs special handling
@@ -272,15 +272,25 @@ proc parse min_prec {
             set strictFlag 0
             continue
         }
+        if {$token eq "||" || $token eq "&&"} {
+            # short circuit: the jump comes straight after the left operand, so the
+            # code of the right operand is skipped when the left one decides, as in expr.
+            #   a || b :  <a> jumpTrue T  <b> jumpTrue T  push 0  jump E  label T  push 1  label E
+            #   a && b :  <a> jumpFalse F <b> jumpFalse F push 1  jump E  label F  push 0  label E
+            # Labels are made unique per use, as parseTernary does, so several can appear
+            # in one assemble.
+            set n [incr ::labelcount]
+            if {$token eq "||"} {
+                set jmp jumpTrue; set fall 0; set hit 1
+            } else {
+                set jmp jumpFalse; set fall 1; set hit 0
+            }
+            append opcodes "$jmp sc_hit$n; " [parse $tok_prec] \
+                "$jmp sc_hit$n; push $fall; jump sc_end$n; label sc_hit$n; push $hit; label sc_end$n; "
+            continue
+        }
         # Infix operator
         set code $incode($token)
-        if {$token eq "||" || $token eq "&&"} {
-            # these templates contain labels; make them unique per use,
-            # as parseTernary does, so several can appear in one assemble
-            set n [incr ::labelcount]
-            set code [string map [list pop_A pop_A$n true_res true_res$n \
-                false_res false_res$n end_res end_res$n] $code]
-        }
         append opcodes [parse $tok_prec] "$code; "
     }
     #deb2 "[string repeat {  } $dep]PARSE opcodes='$opcodes'"

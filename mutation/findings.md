@@ -1,16 +1,14 @@
 # Behavior found while writing the tests
 
-Writing tests for the mutants that survived turned up the following. None of these was changed in
-`colon-1.0.tm`. Two are in the test suites as skipped tests (constraint `knownBug`, set it to 1 near
-the top of the section in `calc.test` to run them).
+Writing tests for the mutants that survived turned up the following. Items 1 and 2 were fixed in
+`colon-1.0.tm` afterwards; the others were left as they are.
 
-1. **Nested ternary without parentheses.** With a=1 b=2 c=3 d=4 e=5:
-   - `= a ? b : c ? d : e` gives 4, `expr` gives 2. It is read as `(a ? b : c) ? d : e`.
-   - `= a ? b ? c : d : e` fails with `Calc: expected ':' but found '?'`.
-   - With parentheses both work: `a ? b : (c ? d : e)` and `a ? (b ? c : d) : e`.
-   - Test: calc-45.7 (skipped).
-2. **`&&` and `||` evaluate both sides.** `= 1 || 1/0` gives `divide by zero`, where `expr`
-   returns 1. The operator tests avoid zero divisors for that reason. Test: calc-45.8 (skipped).
+1. **Nested ternary without parentheses (fixed).** `a ? b : c ? d : e` used to be read as
+   `(a ? b : c) ? d : e`, and `a ? b ? c : d : e` was an error. The `?` operator is now right
+   associative, as in `expr` (tests calc-45.7 and calc-55.1 to 55.3).
+2. **`&&` and `||` evaluated both sides (fixed).** `= 1 || 1/0` used to give `divide by zero`.
+   They now short circuit like `expr` and compile to the same instructions (tests calc-45.8 and
+   calc-54.1 to 54.15). This was found by mutation testing and fixed afterwards.
 3. **Text between `}` and `]` is dropped.** In `set v [: { x + 1 } ; set k ]`, the preprocessor
    keeps only `set v [assemble {...}]` and loses `; set k`. This is the fallback branch for the
    closing bracket (survivors #818 to #826), which is why those are left alone: a test would

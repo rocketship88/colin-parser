@@ -1368,6 +1368,49 @@ foreach p {::tq53::pt ::tq53::a::pa ::tq53::a::b::pb ::tq53::a::b::c::pc ::tq53:
 verify "AllProcsRecursive deep and sibling namespaces" {1 1 1 1 1 1 1} $out
 namespace delete ::tq53
 
+puts "339 ========== short circuit && and || =========="
+set ::scn 0
+proc scbump {v} {incr ::scn; return $v}
+verify "1 || 1/0" 1 [= 1 || 1/0]
+verify "0 && 1/0" 0 [= 0 && 1/0]
+set scn 0; = scbump(1) || scbump(1)
+verify "|| right side skipped" 1 $scn
+set scn 0; = scbump(0) || scbump(1)
+verify "|| right side run" 2 $scn
+set scn 0; = scbump(0) && scbump(1)
+verify "&& right side skipped" 1 $scn
+set scn 0; = scbump(1) && scbump(1)
+verify "&& right side run" 2 $scn
+set scn 0; = scbump(0) || scbump(0) || scbump(1) || scbump(1)
+verify "|| chain stops at first true" 3 $scn
+set x 0; set i 5; = 1 || (x = 9); = 0 && i++
+verify "skipped assignment and ++" {0 5} [list $x $i]
+set a 5; set b 1; set c 0; set d 1
+proc scf {a b} {incr ::scn; expr {$a > $b}}
+proc scg {c d} {incr ::scn; expr {$c > $d}}
+set scn 0
+verify "f(a,b) || g(c,d)" {1 1} [list [= scf(a,b) || scg(c,d)] $scn]
+proc= scp {a b} {: a || b}
+proc  sce {a b} {expr {$a || $b}}
+proc scins {name} {set o {}; foreach l [split [::tcl::unsupported::disassemble proc $name] \n] {if {[regexp {^\s+\(\d+\) (\w+?)\d* } $l -> op]} {lappend o $op}}; set o}
+verify "same instructions as expr" [scins sce] [scins scp]
+
+puts "340 ========== nested ternary is right associative =========="
+set bad {}
+foreach a {0 1} {foreach b {0 1} {foreach c {0 2} {
+    set d 7; set e 9
+    foreach {t et} {
+        {a ? b : c ? d : e}  {$a ? $b : $c ? $d : $e}
+        {a ? b ? c : d : e}  {$a ? $b ? $c : $d : $e}
+        {a || b ? c : d ? e : 1} {$a || $b ? $c : $d ? $e : 1}
+    } {
+        if {[= $t] != [expr $et]} {lappend bad [list $t $a $b $c]}
+    }
+}}}
+verify "nested ternary against expr" {} $bad
+proc= sgn3 {n} {: n < 0 ? -1 : n == 0 ? 0 : 1}
+verify "sign by nested ternary in proc=" {-1 0 1} [list [sgn3 -5] [sgn3 0] [sgn3 8]]
+
 puts "\n=========================================="
 if {$failures == 0} {
     puts "ALL $::tests TESTS PASSED!"
