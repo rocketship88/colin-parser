@@ -680,12 +680,37 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
             append result $indent
             # path 1: = or : followed by {...} possibly multiline
             set accum $line
+            set startLine $i
             while {![info complete $accum]} {
                 incr i
+                if {$i >= [llength $lines]} {
+                    error "line [expr {$startLine + 1}]: Calc: unterminated block"
+                }
                 append accum \n [lindex $lines $i]
             }
             # extract expression - strip leading = or : and outer braces
-            regexp {[=:]\s+(\{.*\})} $accum -> braced
+            # the block ends at the first closing brace that makes it a complete word; anything after it
+            # on that line (such as  ; return $x ) is code that must be kept
+            regexp -indices {[=:]\s+(\{)} $accum -> bi
+            set open [lindex $bi 0]
+            set p $open
+            while {1} {
+                set p [string first \} $accum [expr {$p + 1}]]
+                if {$p < 0 || [info complete [string range $accum $open $p]]} break
+            }
+            if {$p < 0} {
+                regexp {[=:]\s+(\{.*\})} $accum -> braced
+                set rest {}
+            } else {
+                set braced [string range $accum $open $p]
+                set rest [string range $accum [expr {$p + 1}] end]
+                if {[regexp {^\s*(;\s*)?(#.*)?$} $rest]} {
+                    set rest {}
+                } else {
+                    set rest [string trimleft $rest]
+                    if {[string index $rest 0] ne ";"} {set rest "; $rest"}
+                }
+            }
             set expr [string range $braced 1 end-1]
             regsub {\s*;#[^\n]*$} $expr {} expr
             if {[catch {set tal [::Calc::compile0 $expr $inproc]} err_code]} {
@@ -695,9 +720,9 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
                 regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {load \1} tal
             }
             if {$preserve} {
-                append result "if \{0\} \{ $accum \} \{ tcl::unsupported::assemble \{$tal\} \}\n"
+                append result "if \{0\} \{ $accum \} \{ tcl::unsupported::assemble \{$tal\}$rest \}\n"
             } else {
-                append result "tcl::unsupported::assemble \{$tal\}\n"
+                append result "tcl::unsupported::assemble \{$tal\}$rest\n"
             }
         } elseif { [regexp {^(\s*)[=:]\s+(\S[^\n]*)} $line -> indent expr]} {
             append result $indent
@@ -723,8 +748,12 @@ proc transform= {arglist body {inproc 0} {preserve 1}} {
 
             # accumulate from the opening bracket onwards until info complete
             set accum [string range $line $bracketStart end]
+            set startLine $i
             while {![info complete $accum]} {
                 incr i
+                if {$i >= [llength $lines]} {
+                    error "line [expr {$startLine + 1}]: Calc: unterminated block"
+                }
                 append accum \n [lindex $lines $i]
             }
 

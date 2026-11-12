@@ -2,6 +2,17 @@
 # test suite for colon module 
 #
 ::tcl::tm::path add [file dirname [info script]]
+# load the colon module into interpreter $ip: the C extension if that is what this process has loaded,
+# otherwise the Tcl module from the module path
+proc loadColonInto {ip {dir .}} {
+    set lib [lsearch -inline -glob [info loaded] {*calcext*}]
+    if {$lib ne ""} {
+        load {*}$lib $ip
+    } else {
+        $ip eval [list ::tcl::tm::path add $dir]
+        $ip eval {package require colon}
+    }
+}
 package require colon
 catch {console show}
 # --------------------------- knobs -------------------------------------------
@@ -1268,8 +1279,7 @@ verify "transformProcs on plain Tcl" {6 12} [list [tp49plain 3] [tp49plain 3 4]]
 
 puts "379 ========== a fresh interpreter =========="
 set ip [interp create]
-$ip eval [list ::tcl::tm::path add [file dirname [info script]]]
-$ip eval {package require colon}
+loadColonInto $ip [file dirname [info script]]
 $ip eval {set pt {3 4 5}}
 set out {}
 lappend out [$ip eval {= pt -> (a, b, c); list $a $b $c}]

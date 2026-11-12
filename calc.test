@@ -5,6 +5,17 @@
 package require tcltest 2.5
 namespace import ::tcltest::*
 
+# load the colon module into interpreter $ip: the C extension if that is what this process has loaded,
+# otherwise the Tcl module from the module path
+proc loadColonInto {ip} {
+    set lib [lsearch -inline -glob [info loaded] {*calcext*}]
+    if {$lib ne ""} {
+        load {*}$lib $ip
+    } else {
+        $ip eval [list ::tcl::tm::path add [pwd]]
+        $ip eval {package require colon}
+    }
+}
 ::tcl::tm::path add [pwd] ;# add appropriate path here
 package require colon 1.0
     set calcCmd =
@@ -2676,8 +2687,7 @@ test calc-49.9 {transformProcs on a proc with no Calc code leaves it working} -c
 
 test calc-50.1 {a fresh interpreter works from the first call, tuples first} -constraints hasCalcCmd -body {
     set ip [interp create]
-    $ip eval [list ::tcl::tm::path add [pwd]]
-    $ip eval {package require colon}
+    loadColonInto $ip
     $ip eval {set pt {3 4 5}}
     set out {}
     lappend out [$ip eval {= pt -> (a, b, c); list $a $b $c}]
@@ -2951,5 +2961,19 @@ test calc-55.3 {nested ternary inside proc=} -constraints {hasCalcCmd hasTernary
     proc= sgn3 {n} {: n < 0 ? -1 : n == 0 ? 0 : 1}
     list [sgn3 -5] [sgn3 0] [sgn3 8]
 } -result {-1 0 1}
+
+test calc-52.7 {transform= reports an unterminated block instead of looping forever} -constraints hasCalcCmd -body {
+    list [catch {Calc::transform= {} "\n    = \{ x + 1\n    y = 2\n"} e1] $e1 \
+         [catch {Calc::transform= {} "\n    set a \[: \{ x + 1\n"} e2] $e2
+} -result {1 {line 2: Calc: unterminated block} 1 {line 2: Calc: unterminated block}}
+
+test calc-52.8 {code after a braced block on the same line is kept} -constraints hasCalcCmd -body {
+    proc= kb1 {args} {: { args -> (a, b, c) }; return "a=$a b=$b c=$c"}
+    proc= kb2 {x} {: { y = x * 2 } ;# note
+        return $y}
+    proc= kb3 {x} {if {$x} {: { y = 1 }} else {set y 0}; return $y}
+    proc= kb4 {x} {: { y = x + 1 }; if {$y > 2} {set y big}; return $y}
+    list [kb1 1 2 3] [kb2 4] [kb3 1] [kb3 0] [kb4 1] [kb4 5]
+} -result {{a=1 b=2 c=3} 8 1 0 2 big}
 
 cleanupTests
