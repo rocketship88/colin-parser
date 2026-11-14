@@ -3,6 +3,9 @@
 This is Colin Macleod's original bytecode-based expression evaluator for Tcl, with added support for array references, native functions, multiple statements with assignment operator, bytecode caching, and proc and method compiling.
 
 ## What's New
+- **`calcext.c`: the whole module as a C extension.** One `load ./calcext.so` (or `calcext.dll`) replaces `package require colon`: every proc of the Tcl module (`:`, `=`, `calc=`, `proc=`, `method=`, `Calc::transformProcs`, `Calc::debug` and the whole compiler) is now a C command with the same name and the same output. Loading, compiling and transforming are 2-4x faster, startup is about a third of the module's, and each additional interpreter or thread costs a few hundredths of a millisecond instead of several milliseconds. See "The C extension" below. `calc.c`, the older extension that only provided the `::` command, is kept for history
+- A braced block followed by more code on the same line now keeps that code: `proc= f {args} {: { args -> (a, b, c) }; return "$a $b $c"}` used to drop the `return`
+- An unterminated block (`: {` with no closing brace) now gives `line N: Calc: unterminated block` instead of running forever
 - `++` and `--`, prefix and postfix: `: ++i`, `: i++`, `: --i`, `: i--`. They compile to the `incrImm` instruction, the same one `incr i` uses, and create an unset variable as `incr` does. Integers only, plain variable names only (see Increment and Decrement in the UserGuide)
 - `&&` and `||` now short circuit like `expr`: the right operand is not evaluated when the left decides (`= 1 || 1/0` is 1). They compile to the same instructions as `expr`
 - Nested `?:` without parentheses now works as in `expr`: `a ? b : c ? d : e` and `a ? b ? c : d : e`
@@ -38,12 +41,13 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 - Skip with `_`: `: (first,_,last) = pt`
 - List builder: `: ((t1,t2),(t2,t3),(t3,t1))` builds a list of lists, same as nested `list()` calls
 - Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=` or `method=`)
-- Included C extension provides up to 2x performance outside of procs and methods
+- Optional C extension, `calcext.c`: replaces the Tcl module with a single `load`; same results, 2-4x faster compiling and startup. (`calc.c`, which only provided a faster `::` command, is kept for history)
   
 ## Requirements
 
 - Tcl 8.6 or 9.x
 - tcllib (for fibonacci tests with math::fibonacci)
+- To build `calcext.c`: a C compiler (Visual Studio or gcc/clang) and the Tcl headers and stub library for your Tcl version. Not needed when using the Tcl module
   
 ## Run with test files
 
@@ -63,6 +67,16 @@ wish rsa.tcl
 
 The file will run all tests automatically and display results. This requires both `colon_test.tcl` and `colon-1.0.tm` be in the same directory. Likewise, rsa.tcl should also be in the same directory with the module file. Unzipping all to a single directory and cd'ing to that directory is recomended. 
 
+### Running the tests against the C extension
+
+`calc.test` and `colon_test.tcl` load the Tcl module with `package require colon`. To test the C extension instead, build `calcext` (see below), put it in the same directory, and change that line near the top of each file to
+
+```tcl
+load ./calcext.so      ;# or  load calcext.dll
+```
+
+(the `::tcl::tm::path add` line is not needed). The tests that start a fresh interpreter use the helper `loadColonInto`, which loads whichever of the two the main interpreter has loaded, so nothing else needs to change. The results are the same with either: `calc.test` reports 324 tests, 322 passed, 2 skipped, 0 failed, and `colon_test.tcl` reports only the missing tcllib `math` package if tcllib is not installed.
+
 ## Use as a library
 
 All the code is now in a `Tcl module`. Either place the module `colon-1.0.tm` into a known module directory, or use the following command to add a directory path, similar to using auto_path for regular packages.
@@ -70,6 +84,14 @@ All the code is now in a `Tcl module`. Either place the module `colon-1.0.tm` in
 ::tcl::tm::path add <path to module>
 package require colon 1.0
 ```
+
+Or, with the C extension (no module file is needed at all):
+
+```
+load ./calcext.so        ;# calcext.dll on Windows
+```
+
+After the `load`, `package require colon` also succeeds. Use one or the other in a program, not both.
 ## Compiling with `proc=` and `method=`
 
 Changing `proc` to `proc=` or `method` to `method=` compiles expressions once at definition time, achieving performance identical to hand-written `set`/`expr` code.
@@ -78,7 +100,7 @@ A typical workflow is to develop and debug using normal `proc`/`method`, then sw
 
 An optional argument (default 1) controls source preservation — when enabled, the original source is wrapped in `if {0} {...}` alongside the assembled code, keeping line numbers correct for error reporting. The bytecode compiler eliminates the dead branch entirely so there is no performance cost.
 
-The C extension complements `proc=`/`method=` rather than replacing it — `proc=`/`method=` handles code inside procedures and methods, while the C extension improves performance for expressions evaluated outside of them. Both can be used together since `proc=`/`method=` generates only assembly code and the C extension never comes into play for compiled procs or methods.
+`proc=`/`method=` generate only assembly code, so a compiled proc or method runs at exactly the same speed whether the Tcl module or the C extension (`calcext`) produced it. What `calcext` improves is the work around it: the time to load, to compile and to define the procs. Expressions evaluated at runtime outside of compiled code (plain `:` and `=` calls) are cached by both. The older `calc.c` extension, which only provided a faster `::` command for those runtime calls, is no longer needed if you use `calcext`.
 
 Any attempt to use `[command]` substitutions inside a `:` or `=` expression is caught at definition time with a clear error message. And `$var` is mapped to a bare var for compatibility. `${...}` is still an error. Only use standard variable names.
 
@@ -150,7 +172,7 @@ ByteCode 0x00000000081B44B0, refCt 1, epoch 17, interp 0x00000000009AFBD0 (epoch
 The rounded rectangle example below demonstrates real-world performance. Three versions were benchmarked with 1000 iterations:
 
 - **`proc=` version** — matches `expr`/`set` performance exactly, within the margin of error of the `time` command
-- **C extension version** — 2x slower overall, 4x slower for pure calculation
+- **`calc.c` version (the older C `::` command)** — 2x slower overall, 4x slower for pure calculation
 - **Uncompiled `:` version** — 3x slower overall, 8x slower for pure calculation
 
 The overall timings include polygon drawing, which dominates and masks the calculation differences. When timing only the mathematical calculations, `proc=` and hand-written `expr`/`set` are indistinguishable, while the gap to the other versions becomes more apparent.
@@ -248,65 +270,90 @@ set glist [: { x = sin(rad(90))**2;
 puts $glist
 # 1.0 3.749399456654644e-33 1.0 # output
 ```
-## Building The C extension
+## The C extension
 
-### Windows (Visual Studio 2022)
+`calcext.c` is the complete Tcl module, written in C. It defines the same commands with the same names, arguments, error messages and generated assembly, so it is a drop-in replacement: replace `package require colon` with a `load` and nothing else changes. It provides `:`, `=`, `calc=`, `proc=`, `oo::define::method=`, `Calc::transformProcs`, `Calc::debug` and the compiler's own commands (`Calc::compile`, `Calc::compile0`, `Calc::transform=`, `Calc::tokenise` and so on), and it creates `Calc::cache` and `Calc::calc` as ordinary Tcl variables just as the module did.
 
-Open "x64 Native Tools Command Prompt for VS 2022" and run:
+Code that has already been compiled runs at the same speed either way, since the bytecode is the same. The gain is in loading and compiling. Measured on Linux with Tcl 8.6 and 9.1 (module vs. C extension):
 
-**For Tcl 8.6:**
-```batch
-cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS -IC:\Path\To\Tcl\include calc.c  ^
-   /link -dll C:\Path\To\Tcl\lib\tclstub86.lib /OUT:calc.dll
-```
+| | Tcl module | C extension |
+|---|---|---|
+| compile 400 different expressions | 38-40 ms | 18-20 ms |
+| 200 `proc=` definitions of a small proc | 55 ms | 14 ms |
+| `transform=` of a 1200 line body | 44-46 ms | 12-14 ms |
+| first start (load / source) | about 3 ms | about 1 ms |
+| each further interpreter or thread | 2-7 ms | 0.02-0.07 ms |
+| 10 threads, each with its own interpreter | 23-31 ms | 6.5-8.5 ms |
+| running `calc.test` or `colon_test.tcl` | 0.12-0.15 s | 0.09-0.12 s |
+
+Differences from the Tcl module:
+- Because the compiler procs are now C commands, `info procs` no longer lists them and `Calc::transformProcs ::Calc::*` no longer matches them.
+- Calling `Calc::parsePattern` or `Calc::parseTernary` by hand before any expression has been compiled reports a different unset-variable name in its error message.
+- The debug-only `depth` counter is not maintained.
+
+Notes on loading:
+- The library is built once per Tcl version: use the Tcl 8.6 build with 8.6 and the Tcl 9 build with 9.x. Both come from the same source.
+- Each interpreter (and each thread) needs its own `load`. The library is mapped once per process, so later loads are very cheap. Loading the same file a second time into the same interpreter does nothing.
+- A changed build cannot replace one already loaded in a running process. Start a new process, or load it under a different file name.
+- If you rename the file (for example `calcext-tcl9.1.so`) give the init name: `load ./calcext-tcl9.1.so Calcext`. For `calcext.so` or `calcext.dll` the name is optional.
+- `calc.c` and `calcext` are not meant to be loaded into the same process.
+
+### Building the C extension
+
+Build `calcext.c` once for each Tcl version you use, with stubs (`-DUSE_TCL_STUBS`), so the same binary works with any patch release of that Tcl version. The comment at the top of `calcext.c` has the same commands.
+
+#### Windows (Visual Studio 2022)
+
+Open "x64 Native Tools Command Prompt for VS 2022". The paths must name the folder that holds `tcl.h` and the stub library (the 64-bit DLL needs a 64-bit tclsh).
 
 **For Tcl 9.x:**
 ```batch
-cl /O2 /Ob2 /Oi /Ot /GL  /DUSE_TCL_STUBS /DTCL9 -IC:\Path\To\Tcl\include calc.c  ^
-   /link -dll C:\Path\To\Tcl\lib\tclstub.lib /OUT:calc9.dll
+cl /O2 /Ob2 /Oi /Ot /GL /DUSE_TCL_STUBS -IC:\Path\To\Tcl\include calcext.c ^
+   /link -dll C:\Path\To\Tcl\lib\tclstub.lib /OUT:calcext.dll
 ```
 
-**Note:** 
-- Replace `C:\Path\To\Tcl` with your Tcl installation path
-- Tcl 9.x uses `tclstub.lib` (no version number) instead of `tclstub86.lib`
+**For Tcl 8.6:**
+```batch
+cl /O2 /Ob2 /Oi /Ot /GL /DUSE_TCL_STUBS -IC:\Path\To\Tcl\include calcext.c ^
+   /link -dll C:\Path\To\Tcl\lib\tclstub86.lib /OUT:calcext.dll
+```
 
-### Linux
+- Replace `C:\Path\To\Tcl` with your Tcl installation path. A common mistake is a doubled drive such as `-IC:A:\...`
+- Tcl 9.x uses `tclstub.lib` (no version number), Tcl 8.6 uses `tclstub86.lib`
+- No `/DTCL9` define is needed, the source reads the version from `tcl.h`. (`calc.c` still used it.)
+
+#### Linux
+
+With an installed Tcl, link its stub library:
 ```bash
-gcc -O3 -march=native -flto -shared -fPIC -o calc.so calc.c  \
-    -I/usr/include/tcl8.6 -ltclstub8.6
+gcc -O2 -shared -fPIC -DUSE_TCL_STUBS -I/usr/include/tcl8.6 -o calcext.so calcext.c -ltclstub8.6
 ```
-
-If Tcl headers are in a different location:
+For Tcl 9, use its include directory and `-ltclstub`. When building against a Tcl source tree instead, compile the two stub sources straight in:
 ```bash
-gcc -O3 -march=native -flto -shared -fPIC -o calc.so calc.c  \
-    $(pkg-config --cflags tcl) -ltclstub8.6
+gcc -O2 -shared -fPIC -DUSE_TCL_STUBS -I<tcl>/generic -I<tcl>/unix -I<tcl>/libtommath \
+    -o calcext.so calcext.c <tcl>/generic/tclStubLib.c <tcl>/generic/tclTomMathStubLib.c
 ```
-### Using the C Extension
+The Linux builds were tested with Tcl 8.6.14 and 9.1.1. The Windows build was tested with Tcl 9.1. macOS has not been tried (use `-dynamiclib -undefined dynamic_lookup` instead of `-shared`).
 
-The C extension provides the `::` command, which is functionally identical to the pure Tcl `:` and `=` commands — the Tcl module defines both as aliases for the same implementation. All three use the same `::Calc::cache`, and the same assembler. The C extension is faster in several ways: it uses a single C call for the cache lookup rather than two Tcl commands, and it joins multiple arguments into a single expression string more efficiently than the pure Tcl version. It also caches the pointer to the assemble command avoiding a runtime string lookup. These are enough to gain 2x or more in performance.
-
-To load the appropriate version and switch the `=` alias to use the C extension:
+### Using the C extension
 
 ```tcl
-if { $tcl_version >= "9.0" } {
-    load calc9.dll  ;# Windows 9.x
-} else {
-    load calc.dll   ;# Windows 8.6
-}
-# load calc.so     ;# Linux
-
-# By default both = and : use the pure Tcl implementation
-# Uncomment to switch = to the C extension:
-# rename = old=
-# rename :: =
-
+load ./calcext.so            ;# Linux; on Windows:  load ./calcext.dll
+: 2 + 3 * 4                  ;# 14
+proc= f {x y} { : { z = x * y + 1 }; return $z }
 ```
 
-The command names can be changed to anything — the test suite uses `=` throughout, and `rename` makes it easy to switch implementations without changing any other code.
+There is no `rename` step and nothing else to configure: `:` and `=` are already the C commands.
+
+### The older `calc.c`
+
+`calc.c` provides only the `::` command (the runtime cache lookup and assemble call) and is meant to be used together with the Tcl module. It is kept for historical reasons. It is built like `calcext` (Windows: `cl ... calc.c`, with `/DTCL9` for Tcl 9) and loaded with `load calc.dll` followed by `rename = old=; rename :: =`. New projects should use `calcext` instead.
 
 ## Testing
 
 All tests verify `=` command results against `expr` to ensure correctness.
+
+The C extension is held to the Tcl module's results: both test files give the same results with either, a differential test of about 9,000 expressions and `transform=` bodies compared the two with no differences, and 6,000 randomly generated bodies produced identical `transform=` output. Statement coverage of `calcext.c` by the test files and those comparisons is about 89%; most of the rest is error cleanup for failures of Tcl's own API calls.
 
 The `mutation` folder holds a mutation-testing harness: it makes about a thousand small changes to
 `colon-1.0.tm` and checks that the tests notice each one. See `mutation/README.md`. The tests it led to

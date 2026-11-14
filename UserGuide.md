@@ -19,6 +19,7 @@
 - [Performance Notes](#performance-notes)
 - [proc= method= calc= Compilation Limitations](#proc-method-calc-compilation-limitations)
 - [calc= — Toplevel Code Blocks](#calc--toplevel-code-blocks)
+- [The C extension (calcext)](#the-c-extension-calcext)
 - [Complete Examples](#complete-examples)
 - [Differences from expr](#differences-from-expr)
 - [Summary](#summary)
@@ -28,6 +29,8 @@
 Calc (aka colon) is a high-performance expression evaluator for Tcl that compiles expressions to Tcl Assembly Language (TAL) bytecode. It provides a clean syntax for mathematical calculations with support for variables, arrays, functions, and multiple statements.
 
 The code is contained in the file `colon-1.0.tm` that is organized as a `Tcl module`. There is a separate `colon_test.tcl` file that can load the module and contains a variety of tests. See the readme for more information on running the test file.
+
+The same code is also available as a C extension, `calcext.c`, that replaces the module with a single `load`. It produces identical results and loads and compiles 2-4x faster; see [The C extension (calcext)](#the-c-extension-calcext).
 
 ## Compile vs. Interpretive execution
 
@@ -48,6 +51,8 @@ where patterns can include wildcards for names and/or namespaces using glob or r
 ```tcl
 # Load the Calc module
 package require colon 1.0
+# or, with the C extension (use one or the other):
+# load ./calcext.so          ;# calcext.dll on Windows
 
 # Simple calculation
 : 2 + 3 * 4
@@ -767,7 +772,7 @@ This is a **feature**, not a bug - it helps you identify performance problems ea
 
 ## proc= method= calc= Compilation Limitations
 
-`proc=`, `method=` and `calc=`,use a simple line-oriented preprocessor rather than a full Tcl parser. This is a deliberate tradeoff — a true full parser would need to be character-by-character rather than line-by-line, would be as complex as Tcl's own parser, and would likely need to be written in C for adequate performance. That would make it a C extension rather than a pure Tcl module — possible, but a very different proposition requiring its own maintenance burden. The lightweight pure Tcl approach handles the vast majority of real-world code patterns correctly.
+`proc=`, `method=` and `calc=`,use a simple line-oriented preprocessor rather than a full Tcl parser. This is a deliberate tradeoff — a true full parser would need to be character-by-character rather than line-by-line, would be as complex as Tcl's own parser, and would likely need to be written in C for adequate performance. That would be a very different proposition requiring its own maintenance burden. The lightweight line-oriented approach handles the vast majority of real-world code patterns correctly, and the C extension (`calcext`) implements exactly the same line-oriented preprocessor, so both behave alike.
 
 ### How the preprocessor works
 
@@ -874,7 +879,7 @@ for {set i 0} {$i < 1000} {incr i} {
 
 ### Performance
 
-With `preserve 0`, `calc=` executes bare `assemble` calls with no cache lookup overhead — comparable to the C extension for toplevel code. With `preserve 1` (default), a small `if {0}` overhead is added but original source is preserved for debugging.
+With `preserve 0`, `calc=` executes bare `assemble` calls with no cache lookup overhead — comparable to the older `calc.c` extension for toplevel code. With `preserve 1` (default), a small `if {0}` overhead is added but original source is preserved for debugging.
 
 ### Inspecting the transformed code
 
@@ -906,7 +911,7 @@ Calc= error in section 'myblock' line 3: Calc: expected start of expression but 
 During final testing, you can verify that all expressions were found and transformed by temporarily renaming `:` and `=` after the module is loaded and any toplevel (not inside procs or methods) initialization is finished:
 
 ```tcl
-package require colon     ;# loads module
+package require colon     ;# loads module (or  load ./calcext.so  for the C extension)
 ... initial top level code, can contain :/= commands ...
 ... proc and method definitions ....
 rename : {}               ;# disable : command
@@ -927,6 +932,67 @@ Any expression that `transform=` missed will now produce an "invalid command nam
 The preprocessor hits the sweet spot — trivial complexity, no core changes, expr-level performance for the vast majority of real-world code patterns.
 
 ---
+
+[Back to top](#contents)
+
+## The C extension (calcext)
+
+`calcext.c` is the entire module written in C. It defines every command of `colon-1.0.tm` with the same names, arguments, error messages and generated assembly. For a program the only change is how Calc is loaded:
+
+```tcl
+load ./calcext.so            ;# Linux
+load ./calcext.dll           ;# Windows, instead of:  package require colon
+```
+
+Nothing is needed besides the one library file: not the `.tm` module, a `tm::path`, or a `rename`. After the load, `package require colon` also succeeds, so code that asks for the package keeps working. Use one or the other in a program, not both.
+
+### What is faster
+
+Code that has been compiled by `proc=`, `method=`, `calc=` or `Calc::transformProcs` runs at the same speed with either version, since both produce the same TAL and the Tcl byte compiler does the rest. The C extension makes the work around it faster:
+
+| | Tcl module | C extension |
+|---|---|---|
+| compile 400 different expressions | 38-40 ms | 18-20 ms |
+| 200 `proc=` definitions of a small proc | 55 ms | 14 ms |
+| `transform=` of a 1200 line body | 44-46 ms | 12-14 ms |
+| first start (source the module / load the library) | about 3 ms | about 1 ms |
+| each further interpreter or thread | 2-7 ms | 0.02-0.07 ms |
+| 10 threads, each with its own interpreter | 23-31 ms | 6.5-8.5 ms |
+
+(Linux, Tcl 8.6 and 9.1, best of several runs.) So it pays off for programs that define many `proc=`s at startup, that use `calc=` blocks, that transform large files, or that create many interpreters or threads. A plain runtime `:` or `=` call is also a C command, but it still goes through the cache lookup and `assemble`, which is why the manual's advice stands: use `proc=`, `method=` or `calc=` for anything performance-critical.
+
+### Loading
+
+- The library is built once for each Tcl version (8.6 or 9.x) from the same source. Use the build that matches the `tclsh` or `wish` running it.
+- Each interpreter, and each thread, needs its own `load`. The file is mapped once per process, so later loads are very cheap; loading the same file again into the same interpreter does nothing.
+- A running process cannot replace a loaded library with a new build. Start a new process, or load the new build under a different file name.
+- If the file is renamed, for example `calcext-tcl9.1.so`, give the init name: `load ./calcext-tcl9.1.so Calcext`. With `calcext.so` or `calcext.dll` the name is optional.
+- Do not load `calc.c` (the older, `::`-only extension) into the same process.
+
+### Differences from the Tcl module
+
+The results are identical, and the same tests (`calc.test`, `colon_test.tcl`) pass with either. These are the only differences:
+
+- The compiler's own commands (`Calc::compile`, `Calc::parse`, `Calc::tokenise`, ...) are C commands, not procs, so `info procs` does not list them and `Calc::transformProcs ::Calc::*` no longer matches them (it never makes sense to transform them).
+- `Calc::parsePattern` and `Calc::parseTernary` called directly, before any expression has been compiled, report a different variable name in the "no such variable" error.
+- The debug-only `depth` counter is not maintained.
+
+### Building it
+
+Compile `calcext.c` with `-DUSE_TCL_STUBS` and link the Tcl stub library; the comment at the top of the file has the commands. For example, Windows (Visual Studio x64 prompt), Tcl 9:
+
+```batch
+cl /O2 /Ob2 /Oi /Ot /GL /DUSE_TCL_STUBS -IC:\Path\To\Tcl\include calcext.c ^
+   /link -dll C:\Path\To\Tcl\lib\tclstub.lib /OUT:calcext.dll
+```
+
+For Tcl 8.6 use `tclstub86.lib`. On Linux:
+
+```bash
+gcc -O2 -shared -fPIC -DUSE_TCL_STUBS -I/usr/include/tcl8.6 -o calcext.so calcext.c -ltclstub8.6
+```
+
+`-I` must name the folder that contains `tcl.h`. See the readme for details and for how to run the test files against the C extension.
 
 [Back to top](#contents)
 
@@ -1035,6 +1101,7 @@ Calc provides:
 - ✅ Native array and list operations
 - ✅ Extensible via `tcl::mathfunc::*`
 - ✅ Performance bug detection (cache overflow)
+- ✅ Optional C extension: one `load`, the same results, faster startup and compiling
 
 **When to use Calc:**
 - Mathematical calculations with variables and no $
