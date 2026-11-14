@@ -86,6 +86,16 @@ static Tcl_Obj *Parse(struct CalcState *st, Tcl_Interp *interp, double minPrec);
 #else
 #   define CALC_CREATE Tcl_CreateObjCommand
 #endif
+/* Append formatted text to an object.  Tcl 9's Tcl_AppendPrintfToObj rebuilds the whole target string every
+ * time (cost proportional to its length, so a long result becomes quadratic); formatting into a small
+ * temporary object and appending that is linear on both Tcl versions and gives the same text. */
+#define APPEND_F(dst, ...) do { \
+        Tcl_Obj *af_tmp_ = Tcl_ObjPrintf(__VA_ARGS__); \
+        Tcl_IncrRefCount(af_tmp_); \
+        Tcl_AppendObjToObj((dst), af_tmp_); \
+        Tcl_DecrRefCount(af_tmp_); \
+    } while (0)
+
 #define LOCAL_NAME(var, str) do { var = Tcl_NewStringObj(str, -1); Tcl_IncrRefCount(var); } while (0)
 
 /* ------------------------------------------------------------------------------------
@@ -577,9 +587,9 @@ static Tcl_Obj *Destructure(CalcState *st, Tcl_Interp *interp, Tcl_Obj *pat) {
         long want = (long) n - 1;
         if (NextLabel(st, interp, &lab) != TCL_OK) { Tcl_DecrRefCount(out); return NULL; }
         if (PatternText(interp, pat, &txt) != TCL_OK) { Tcl_DecrRefCount(out); return NULL; }
-        Tcl_AppendPrintfToObj(out, "dup; listLength; push %ld; neq; jumpFalse tupok%ld; ", want, lab);
-        Tcl_AppendPrintfToObj(out, "push error; push {Calc: tuple mismatch: pattern %s expects %ld, data has }; ", Tcl_GetString(txt), want);
-        Tcl_AppendPrintfToObj(out, "over 2; listLength; push { (use -> to allow a mismatch)}; strcat 3; invokeStk 2; pop; label tupok%ld; ", lab);
+        APPEND_F(out, "dup; listLength; push %ld; neq; jumpFalse tupok%ld; ", want, lab);
+        APPEND_F(out, "push error; push {Calc: tuple mismatch: pattern %s expects %ld, data has }; ", Tcl_GetString(txt), want);
+        APPEND_F(out, "over 2; listLength; push { (use -> to allow a mismatch)}; strcat 3; invokeStk 2; pop; label tupok%ld; ", lab);
         Tcl_DecrRefCount(txt);
     }
     for (i = 1; i < n; i++) {
@@ -593,13 +603,13 @@ static Tcl_Obj *Destructure(CalcState *st, Tcl_Interp *interp, Tcl_Obj *pat) {
         if (Tcl_ListObjGetElements(interp, kid, &kn, &ke) != TCL_OK) { Tcl_DecrRefCount(out); return NULL; }
         k0 = kn > 0 ? Tcl_GetString(ke[0]) : "";
         if (strcmp(k0, "n") == 0 && !inproc) {
-            Tcl_AppendPrintfToObj(out, "push %s; over 1; listIndexImm %ld; storeStk; pop; ", kn > 1 ? Tcl_GetString(ke[1]) : "", idx);
+            APPEND_F(out, "push %s; over 1; listIndexImm %ld; storeStk; pop; ", kn > 1 ? Tcl_GetString(ke[1]) : "", idx);
         } else if (strcmp(k0, "n") == 0) {
-            Tcl_AppendPrintfToObj(out, "dup; listIndexImm %ld; store %s; pop; ", idx, kn > 1 ? Tcl_GetString(ke[1]) : "");
+            APPEND_F(out, "dup; listIndexImm %ld; store %s; pop; ", idx, kn > 1 ? Tcl_GetString(ke[1]) : "");
         } else {
             Tcl_Obj *sub = Destructure(st, interp, kid);
             if (sub == NULL) { Tcl_DecrRefCount(out); return NULL; }
-            Tcl_AppendPrintfToObj(out, "dup; listIndexImm %ld; %spop; ", idx, Tcl_GetString(sub));
+            APPEND_F(out, "dup; listIndexImm %ld; %spop; ", idx, Tcl_GetString(sub));
             Tcl_DecrRefCount(sub);
         }
     }
@@ -661,10 +671,10 @@ static Tcl_Obj *ParseFuncArgs(CalcState *st, Tcl_Interp *interp, Tcl_Obj *funcna
                         goto failtok;
                     }
                 }
-                if (expected < 0) Tcl_AppendPrintfToObj(opcodes, "%s %ld; ", instr, actual);
-                else Tcl_AppendPrintfToObj(opcodes, "%s; ", instr);
+                if (expected < 0) APPEND_F(opcodes, "%s %ld; ", instr, actual);
+                else APPEND_F(opcodes, "%s; ", instr);
             } else {
-                Tcl_AppendPrintfToObj(opcodes, "invokeStk %ld; ", argNum);
+                APPEND_F(opcodes, "invokeStk %ld; ", argNum);
             }
             Tcl_DecrRefCount(token);
             return opcodes;
@@ -728,12 +738,12 @@ static Tcl_Obj *ParseTernary(CalcState *st, Tcl_Interp *interp) {
     }
     if (SetTokpos(st, interp, pos + 1) != TCL_OK) goto fail;
 
-    Tcl_AppendPrintfToObj(opcodes, "jump end%ld; label else%ld; ", lab, lab);
+    APPEND_F(opcodes, "jump end%ld; label else%ld; ", lab, lab);
     colonPrec = Tcl_ObjGetVar2(interp, st->v_inprec, st->colonObj, TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
     if (colonPrec == NULL || (sub = CallParse(st, interp, colonPrec)) == NULL) goto fail;
     Tcl_AppendObjToObj(opcodes, sub);
     Tcl_DecrRefCount(sub);
-    Tcl_AppendPrintfToObj(opcodes, "label end%ld; nop; ", lab);
+    APPEND_F(opcodes, "label end%ld; nop; ", lab);
     return opcodes;
 fail:
     Tcl_DecrRefCount(opcodes);
@@ -987,7 +997,7 @@ static Tcl_Obj *ParsePrefix(CalcState *st, Tcl_Interp *interp, Tcl_Obj *tokenIn)
             }
             if (strcmp(Tcl_GetString(t), ")") == 0) {
                 if (SetTokpos(st, interp, pos + 1) != TCL_OK) { Tcl_DecrRefCount(opcodes); goto done; }
-                if (cnt > 1) Tcl_AppendPrintfToObj(opcodes, "list %ld; ", cnt);
+                if (cnt > 1) APPEND_F(opcodes, "list %ld; ", cnt);
                 res = opcodes;
                 goto done;
             }
@@ -1006,7 +1016,7 @@ static Tcl_Obj *ParsePrefix(CalcState *st, Tcl_Interp *interp, Tcl_Obj *tokenIn)
         code = Tcl_ObjGetVar2(interp, st->v_precode, token, TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
         if (code == NULL) { Tcl_DecrRefCount(sub); goto done; }
         res = sub;
-        Tcl_AppendPrintfToObj(res, "%s; ", Tcl_GetString(code));
+        APPEND_F(res, "%s; ", Tcl_GetString(code));
         goto done;
     }
 
@@ -1090,7 +1100,7 @@ static Tcl_Obj *ParsePrefix(CalcState *st, Tcl_Interp *interp, Tcl_Obj *tokenIn)
                     goto done;
                 }
                 if (SetTokpos(st, interp, pos + 1) != TCL_OK) { Tcl_DecrRefCount(opcodes); goto done; }
-                if (indexCount > 1) Tcl_AppendPrintfToObj(opcodes, "strcat %ld; ", indexCount * 2 - 1);
+                if (indexCount > 1) APPEND_F(opcodes, "strcat %ld; ", indexCount * 2 - 1);
                 Tcl_AppendToObj(opcodes, "loadArrayStk; ", -1);
                 res = opcodes;
                 goto done;
@@ -1117,7 +1127,7 @@ static Tcl_Obj *ParsePrefix(CalcState *st, Tcl_Interp *interp, Tcl_Obj *tokenIn)
                 res = Tcl_DuplicateObj(ic);
                 Tcl_IncrRefCount(res);
                 Tcl_DecrRefCount(ic);
-                Tcl_AppendPrintfToObj(res, "push %s; sub; ", delta);
+                APPEND_F(res, "push %s; sub; ", delta);
             }
             Tcl_DecrRefCount(name);
             goto done;
@@ -1218,11 +1228,11 @@ static Tcl_Obj *Parse(CalcState *st, Tcl_Interp *interp, double minPrec) {
             int fall = ts[0] == '|' ? 0 : 1, hit = 1 - fall;
             Tcl_DecrRefCount(token);
             if (NextLabel(st, interp, &lab) != TCL_OK) goto fail;
-            Tcl_AppendPrintfToObj(opcodes, "%s sc_hit%ld; ", jmp, lab);
+            APPEND_F(opcodes, "%s sc_hit%ld; ", jmp, lab);
             if ((sub = Parse(st, interp, tokPrec)) == NULL) goto fail;
             Tcl_AppendObjToObj(opcodes, sub);
             Tcl_DecrRefCount(sub);
-            Tcl_AppendPrintfToObj(opcodes, "%s sc_hit%ld; push %d; jump sc_end%ld; label sc_hit%ld; push %d; label sc_end%ld; ",
+            APPEND_F(opcodes, "%s sc_hit%ld; push %d; jump sc_end%ld; label sc_hit%ld; push %d; label sc_end%ld; ",
                                   jmp, lab, fall, lab, lab, hit, lab);
             continue;
         }
@@ -1234,7 +1244,7 @@ static Tcl_Obj *Parse(CalcState *st, Tcl_Interp *interp, double minPrec) {
         if ((sub = Parse(st, interp, tokPrec)) == NULL) { Tcl_DecrRefCount(code); goto fail; }
         Tcl_AppendObjToObj(opcodes, sub);
         Tcl_DecrRefCount(sub);
-        Tcl_AppendPrintfToObj(opcodes, "%s; ", Tcl_GetString(code));
+        APPEND_F(opcodes, "%s; ", Tcl_GetString(code));
         Tcl_DecrRefCount(code);
     }
     return opcodes;
@@ -1689,9 +1699,9 @@ static Tcl_Obj *Transform(CalcState *st, Tcl_Interp *interp, Tcl_Obj *body, Tcl_
             if (tal == NULL) { if (restObj) Tcl_DecrRefCount(restObj); Tcl_DecrRefCount(accum); FAIL(); }
             NEED_BOOL(preserve, preserveObj);
             if (preserve) {
-                Tcl_AppendPrintfToObj(result, "if {0} { %s } { tcl::unsupported::assemble {%s}%s }\n", Tcl_GetString(accum), Tcl_GetString(tal), restObj ? Tcl_GetString(restObj) : "");
+                APPEND_F(result, "if {0} { %s } { tcl::unsupported::assemble {%s}%s }\n", Tcl_GetString(accum), Tcl_GetString(tal), restObj ? Tcl_GetString(restObj) : "");
             } else {
-                Tcl_AppendPrintfToObj(result, "tcl::unsupported::assemble {%s}%s\n", Tcl_GetString(tal), restObj ? Tcl_GetString(restObj) : "");
+                APPEND_F(result, "tcl::unsupported::assemble {%s}%s\n", Tcl_GetString(tal), restObj ? Tcl_GetString(restObj) : "");
             }
             if (restObj) Tcl_DecrRefCount(restObj);
             Tcl_DecrRefCount(tal);
@@ -1715,9 +1725,9 @@ static Tcl_Obj *Transform(CalcState *st, Tcl_Interp *interp, Tcl_Obj *body, Tcl_
             if (tal == NULL) FAIL();
             NEED_BOOL(preserve, preserveObj);
             if (preserve) {
-                Tcl_AppendPrintfToObj(result, "if {0} { %s } { tcl::unsupported::assemble {%s} }\n", Tcl_GetString(line), Tcl_GetString(tal));
+                APPEND_F(result, "if {0} { %s } { tcl::unsupported::assemble {%s} }\n", Tcl_GetString(line), Tcl_GetString(tal));
             } else {
-                Tcl_AppendPrintfToObj(result, "tcl::unsupported::assemble {%s}\n", Tcl_GetString(tal));
+                APPEND_F(result, "tcl::unsupported::assemble {%s}\n", Tcl_GetString(tal));
             }
             Tcl_DecrRefCount(tal);
             continue;
@@ -1789,10 +1799,10 @@ static Tcl_Obj *Transform(CalcState *st, Tcl_Interp *interp, Tcl_Obj *body, Tcl_
             }
             NEED_BOOL(preserve, preserveObj);
             if (preserve) {
-                Tcl_AppendPrintfToObj(result, "%s[if {0} {%s} {tcl::unsupported::assemble {%s}}]%s\n",
+                APPEND_F(result, "%s[if {0} {%s} {tcl::unsupported::assemble {%s}}]%s\n",
                                       Tcl_GetString(prefix), Tcl_GetString(accum), Tcl_GetString(tal), Tcl_GetString(suffix));
             } else {
-                Tcl_AppendPrintfToObj(result, "%s[tcl::unsupported::assemble {%s}]%s\n",
+                APPEND_F(result, "%s[tcl::unsupported::assemble {%s}]%s\n",
                                       Tcl_GetString(prefix), Tcl_GetString(tal), Tcl_GetString(suffix));
             }
             Tcl_DecrRefCount(prefix); Tcl_DecrRefCount(accum); Tcl_DecrRefCount(tal); Tcl_DecrRefCount(suffix);
@@ -1819,10 +1829,10 @@ static Tcl_Obj *Transform(CalcState *st, Tcl_Interp *interp, Tcl_Obj *body, Tcl_
                 NEED_BOOL(preserve, preserveObj);
                 if (preserve) {
                     Tcl_Obj *src = Sub(line, ms + 1, me - 1);     /* strip the [ and ] */
-                    Tcl_AppendPrintfToObj(newline, "[if {0} {%s} {tcl::unsupported::assemble {%s}}]", Tcl_GetString(src), Tcl_GetString(tal));
+                    APPEND_F(newline, "[if {0} {%s} {tcl::unsupported::assemble {%s}}]", Tcl_GetString(src), Tcl_GetString(tal));
                     Tcl_DecrRefCount(src);
                 } else {
-                    Tcl_AppendPrintfToObj(newline, "[tcl::unsupported::assemble {%s}]", Tcl_GetString(tal));
+                    APPEND_F(newline, "[tcl::unsupported::assemble {%s}]", Tcl_GetString(tal));
                 }
                 Tcl_DecrRefCount(tal);
                 pos = me;
