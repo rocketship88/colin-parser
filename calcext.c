@@ -1285,6 +1285,25 @@ static int CalcCompile(void *cd, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *con
  *   - newlines are blanks, $ is dropped, empty statements are ignored
  *   - inside a proc, "push name; <expr>; storeStk;" becomes "<expr>; store name;"
  * ---------------------------------------------------------------------------------- */
+/* ---- plain-C versions of the two patterns that post-process generated code inside procs ----
+ * They apply to ASCII text only (always true for generated code except for odd variable names);
+ * anything else takes the regular expression path, so the results are the same either way. */
+static int AllAscii(const char *s, Tcl_Size n) {
+    Tcl_Size i;
+    for (i = 0; i < n; i++) if ((unsigned char) s[i] >= 0x80) return 0;
+    return 1;
+}
+static int IsAlphaU(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'; }
+static int IsNameStop(char c) { return c == ':' || c == ';' || c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r'; }
+
+/* at s[i] (< n): "[[:alpha:]_][^:;\s]*" ; returns the index after the name, or -1 */
+static Tcl_Size ScanName(const char *s, Tcl_Size n, Tcl_Size i) {
+    if (i >= n || !IsAlphaU(s[i])) return -1;
+    i++;
+    while (i < n && !IsNameStop(s[i])) i++;
+    return i;
+}
+
 static Tcl_Obj *PeepSub(Tcl_Obj *obj, Tcl_Size start, Tcl_Size endExcl) {
     Tcl_Obj *r = (endExcl <= start) ? Tcl_NewObj() : Tcl_GetRange(obj, start, endExcl - 1);
     Tcl_IncrRefCount(r);
@@ -1293,9 +1312,31 @@ static Tcl_Obj *PeepSub(Tcl_Obj *obj, Tcl_Size start, Tcl_Size endExcl) {
 
 static Tcl_Obj *Peephole(CalcState *st, Tcl_Interp *interp, Tcl_Obj *code) {
     /* regexp {^push ([[:alpha:]_][^:;\s]*); (.*); storeStk; $} $code -> name expr */
-    Tcl_RegExp re = Tcl_GetRegExpFromObj(interp, st->peepRe, TCL_REG_ADVANCED);
+    Tcl_RegExp re;
     Tcl_RegExpInfo info;
     int rc;
+    {
+        /* ^push NAME; (.*); storeStk; $   in plain C */
+        Tcl_Size n, e;
+        const char *c = Tcl_GetStringFromObj(code, &n);
+        static const char tail[] = "; storeStk; ";
+        const Tcl_Size tl = (Tcl_Size) (sizeof(tail) - 1);
+        if (AllAscii(c, n)) {
+            if (n >= 5 && memcmp(c, "push ", 5) == 0 && (e = ScanName(c, n, 5)) > 0
+                    && e + 2 <= n && c[e] == ';' && c[e + 1] == ' ' && n - (e + 2) >= tl
+                    && memcmp(c + n - tl, tail, tl) == 0) {
+                Tcl_Obj *r = Tcl_NewStringObj(c + e + 2, n - tl - (e + 2));
+                Tcl_AppendToObj(r, "; store ", -1);
+                Tcl_AppendToObj(r, c + 5, e - 5);
+                Tcl_AppendToObj(r, "; ", -1);
+                Tcl_IncrRefCount(r);
+                return r;
+            }
+            Tcl_IncrRefCount(code);
+            return code;
+        }
+    }
+    re = Tcl_GetRegExpFromObj(interp, st->peepRe, TCL_REG_ADVANCED);
     if (re == NULL) return NULL;
     rc = Tcl_RegExpExecObj(interp, re, code, 0, 3, 0);
     if (rc < 0) return NULL;
@@ -1490,6 +1531,36 @@ static Tcl_Obj *TransCompile(CalcState *st, Tcl_Interp *interp, Tcl_Obj *expr, T
     }
     if (inproc) {
         /* regsub -all {push ([[:alpha:]_][^:;\s]*); loadStk} $tal {load \1} tal */
+        Tcl_Size tn;
+        const char *tc = Tcl_GetStringFromObj(tal, &tn);
+        if (AllAscii(tc, tn)) {
+            static const char tail[] = "; loadStk";
+            Tcl_Size i = 0, last = 0, tl = (Tcl_Size) (sizeof(tail) - 1);
+            Tcl_Obj *out = NULL;
+            while (i + 5 <= tn) {
+                const char *q = memchr(tc + i, 'p', (size_t) (tn - i - 4));
+                Tcl_Size e;
+                if (q == NULL) break;
+                i = (Tcl_Size) (q - tc);
+                if (i + 5 <= tn && memcmp(tc + i, "push ", 5) == 0 && (e = ScanName(tc, tn, i + 5)) > 0
+                        && e + tl <= tn && memcmp(tc + e, tail, (size_t) tl) == 0) {
+                    if (out == NULL) out = Tcl_NewObj();
+                    Tcl_AppendToObj(out, tc + last, i - last);
+                    Tcl_AppendToObj(out, "load ", 5);
+                    Tcl_AppendToObj(out, tc + i + 5, e - (i + 5));
+                    i = last = e + tl;
+                } else {
+                    i++;
+                }
+            }
+            if (out == NULL) return tal;
+            Tcl_AppendToObj(out, tc + last, tn - last);
+            Tcl_IncrRefCount(out);
+            Tcl_DecrRefCount(tal);
+            return out;
+        }
+    }
+    if (inproc) {
         Tcl_Obj *out = Tcl_NewObj(), *piece;
         Tcl_Size off = 0, len = Tcl_GetCharLength(tal);
         ReMatch info;

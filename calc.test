@@ -2976,4 +2976,149 @@ test calc-52.8 {code after a braced block on the same line is kept} -constraints
     list [kb1 1 2 3] [kb2 4] [kb3 1] [kb3 0] [kb4 1] [kb4 5]
 } -result {{a=1 b=2 c=3} 8 1 0 2 big}
 
+test calc-54.1 {Unicode letters in variable names inside proc= and calc=} -constraints hasCalcCmd -body {
+    set m [list @U \u00fc @E \u00e9 @N \u00f1]
+    proc= ufn [string map $m {@E @N}] [string map $m {: { @U = @E * @N + 1 }; : { @U = @U + 2 } ; return [list [set @U] [: @E + @N]]}]
+    set r [ufn 3 4]
+    calc= ucalc [string map $m {
+        set @E 5
+        = @U = @E * 2
+    }]
+    lappend r [set [string map $m @U]]
+} -result {15 7 10}
+
+test calc-55.1 {incrCode gives a by-name increment outside a proc and a slot increment inside one} -constraints hasCalcCmd -body {
+    set Calc::inprocFlag 0
+    set a [Calc::incrCode x 1]
+    set Calc::inprocFlag 1
+    set b [Calc::incrCode x -1]
+    set Calc::inprocFlag 0
+    list $a $b [catch {Calc::incrCode x} e] $e
+} -result {{push x; incrStkImm 1; } {incrImm x -1; } 1 {wrong # args: should be "Calc::incrCode name delta"}}
+
+test calc-55.2 {wrong number of arguments gives the usual message for every command} -constraints hasCalcCmd -body {
+    set out {}
+    foreach cmd {
+        Calc::patternText Calc::tokenise Calc::compile0 Calc::transform= Calc::compile Calc::parse
+        Calc::destructure Calc::parseFuncArgs Calc::parsePrefix Calc::debug : calc= proc= oo::define::method=
+        {Calc::tokenise a b} {Calc::patternText a b} {Calc::compile0 a 0 1} {Calc::transform= a b c d e}
+        {Calc::transform= a} {calc= L} {proc= p {x}} {calc= L {} 1 2} {Calc::transformProcs}
+    } {
+        catch $cmd m
+        lappend out $m
+    }
+    join $out \n
+} -result {wrong # args: should be "Calc::patternText pat"
+wrong # args: should be "Calc::tokenise input"
+wrong # args: should be "Calc::compile0 exp ?inproc?"
+wrong # args: should be "Calc::transform= arglist body ?inproc? ?preserve?"
+wrong # args: should be "Calc::compile toks"
+wrong # args: should be "Calc::parse min_prec"
+wrong # args: should be "Calc::destructure pat"
+wrong # args: should be "Calc::parseFuncArgs funcname nativeInfo"
+wrong # args: should be "Calc::parsePrefix token"
+wrong # args: should be "Calc::debug label arglist body newbody"
+wrong # args: should be ": arg ?arg ...?"
+wrong # args: should be "calc= label body ?debug?"
+wrong # args: should be "proc= name arglist body ?debug?"
+wrong # args: should be "oo::define::method= name arglist body ?debug?"
+wrong # args: should be "Calc::tokenise input"
+wrong # args: should be "Calc::patternText pat"
+wrong # args: should be "Calc::compile0 exp ?inproc?"
+wrong # args: should be "Calc::transform= arglist body ?inproc? ?preserve?"
+wrong # args: should be "Calc::transform= arglist body ?inproc? ?preserve?"
+wrong # args: should be "calc= label body ?debug?"
+wrong # args: should be "proc= name arglist body ?debug?"
+wrong # args: should be "calc= label body ?debug?"
+Calc::transformProcs: no proc name pattern(s) given}
+
+test calc-55.3 {transform= rejects a non-boolean preserve flag} -constraints hasCalcCmd -body {
+    list [catch {Calc::transform= {} "  = x = 1\n" 1 maybe} e] $e
+} -result {1 {expected boolean value but got "maybe"}}
+
+test calc-55.4 {function calls with the wrong number of arguments, and unfinished expressions} -constraints hasCalcCmd -body {
+    set out {}
+    foreach e {
+        {x = strlen()} {x = strlen(1, 2)} {x = lindex(a)} {x = list()} {x = max(1 2)} {x = max(1,}
+        {x = max(} {x = (1} {x = >} {x = a ? b} {x = xstrindex(a)} {x = xstrrange(a, b)} {x = strlen(a b)}
+    } {
+        catch {Calc::compile0 $e 0} m
+        lappend out $m
+    }
+    join $out \n
+} -result {Calc: strlen expects exactly 1 args, got 0
+Calc: strlen expects exactly 1 args, got 2
+Calc: lindex expects at least 2 args, got 1
+Calc: list expects at least 1 args, got 0
+Calc: expected start of expression but found '1 2'
+Calc: expected ')' or ',' but found ''
+Calc: expected ')' or ',' but found ''
+Calc: expected ')' but found ''
+Calc: expected start of expression but found '>'
+Calc: expected ':' but found ''
+Calc: xstrindex expects exactly 2 args, got 1
+Calc: xstrrange expects exactly 3 args, got 2
+Calc: expected start of expression but found 'a b'}
+
+test calc-55.5 {return, break and continue in a calc= block end the calc= like a proc body, not the caller} -constraints hasCalcCmd -body {
+    proc t55a {} { calc= L55a {
+ = a = 5
+ return 7
+ } ; return after }
+    proc t55b {} { foreach i {1 2} { calc= L55b {
+ = a = 5
+ break
+ } } ; return done }
+    proc t55c {} { foreach i {1 2} { calc= L55c {
+ continue
+ } } ; return done }
+    proc t55d {} { calc= L55d { return -level 2 up } ; return notreached }
+    proc t55e {} { t55d ; return n5 }
+    proc t55f {} { calc= L55f { return -code error -errorcode {A B} bad } ; return notreached }
+    proc t55g {} { foreach i {1 2} { calc= L55g { return -code continue } ; return notreached } ; return done8 }
+    proc t55h {} { calc= L55h { error boom } ; return notreached }
+    proc t55i {} { calc= L55i { return -code return deep } ; return notreached }
+    set out {}
+    foreach t {t55a t55b t55c t55d t55e t55f t55g t55h t55i} {
+        set rc [catch $t r o]
+        lappend out [list $t $rc $r [dict get $o -code]]
+    }
+    lappend out [list [catch t55f r o] [dict get $o -errorcode]]
+    join $out \n
+} -result {t55a 0 after 0
+t55b 1 {invoked "break" outside of a loop} 1
+t55c 1 {invoked "continue" outside of a loop} 1
+t55d 0 up 0
+t55e 0 n5 0
+t55f 1 bad 1
+t55g 0 done8 0
+t55h 1 boom 1
+t55i 0 deep 0
+1 {A B}}
+
+test calc-55.6 {debug opens the external diff on two temporary files and deletes them afterwards} -constraints hasCalcCmd -body {
+    set dir [makeDirectory dbg55]
+    set hadTemp [info exists ::env(TEMP)]
+    if {$hadTemp} { set oldTemp $::env(TEMP) }
+    set ::env(TEMP) $dir
+    rename exec exec.real
+    set ::execcalls {}
+    proc exec {args} {
+        lappend ::execcalls [list [lindex $args 0] [file tail [lindex $args 1]] [file tail [lindex $args 2]] [file exists [lindex $args 1]] [file exists [lindex $args 2]]]
+        return
+    }
+    set rc1 [catch {Calc::debug LBL {x y} {= a = 1} {assemble {push 1}}} r1]
+    set left1 [glob -nocomplain -tails -directory $dir *]
+    proc exec {args} { error "no diff tool" }
+    set rc2 [catch {Calc::debug LBL {x y} {= a = 1} {assemble {push 1}}} r2]
+    set left2 [lsort [glob -nocomplain -tails -directory $dir *]]
+    rename exec {}
+    rename exec.real exec
+    unset ::env(TEMP)
+    set rc3 [catch {Calc::debug LBL {x y} {= a = 1} {assemble {push 1}}} r3]
+    if {$hadTemp} { set ::env(TEMP) $oldTemp }
+    removeDirectory dbg55
+    list $rc1 $r1 $::execcalls $left1 $rc2 $r2 $left2 $rc3 $r3
+} -result {0 {} {{{C:/Program Files (x86)/Beyond Compare 2/BC2.exe} calc-temp-1.tcl calc-temp-2.tcl 1 1}} {} 1 {no diff tool} {calc-temp-1.tcl calc-temp-2.tcl} 1 {can't read "::env(TEMP)": no such variable}}
+
 cleanupTests
