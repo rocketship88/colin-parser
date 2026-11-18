@@ -272,6 +272,18 @@ set glist [: { x = sin(rad(90))**2;
 puts $glist
 # 1.0 3.749399456654644e-33 1.0 # output
 ```
+## Example program: polyhedra.tcl
+
+`polyhedra.tcl` is a larger example of converting existing code. It is Gerard Sookahet's rotating polyhedra demo from the Tcl wiki (2005), a Tk canvas program with flat shaded and wireframe models, and its vector and matrix procs (`MatrixRotation`, `MatrixProduct`, `Projection`, `Transformations` and so on) are rewritten in the Calc `:` language. The original code is left as it was wherever Calc does not help, and the converted program draws exactly the same pictures as the original.
+
+To run it, keep `polyhedra.tcl` in the same directory as `colon-1.0.tm` and start it with `tclsh polyhedra.tcl` (or `wish polyhedra.tcl`). Its header adds its own directory to the module path and does `package require colon`. To use the C extension instead, replace the `package require colon` line with `load ./calcext.so` (or `calcext.dll`).
+
+The procs are written as plain `proc` and compiled together by one `Calc::transformProcs` call just before `Main`. After that call `:` and `=` are renamed away, so any Calc command that was not compiled stops with an error that shows where it is.
+
+I also added a few things that are not about Calc: sliders for the background, brightness and contrast, a back edges option for the wireframe, mouse wheel control of the sliders, a close box that exits, and Shaded/Wireframe switching that restarts the current model.
+
+`polyhedra-compare.html` shows the original and converted procs side by side with the changed lines shaded, and it also compares `MatrixRotation` with a version written in the syntax of TIP 759. It is a single self-contained page, so it can be opened from a file or served by GitHub Pages.
+
 ## The C extension
 
 `calcext.c` is the complete Tcl module, written in C. It defines the same commands with the same names, arguments, error messages and generated assembly, so it is a drop-in replacement: replace `package require colon` with a `load` and nothing else changes. It provides `:`, `=`, `calc=`, `proc=`, `oo::define::method=`, `Calc::transformProcs`, `Calc::debug` and the compiler's own commands (`Calc::compile`, `Calc::compile0`, `Calc::transform=`, `Calc::tokenise` and so on), and it creates `Calc::cache` and `Calc::calc` as ordinary Tcl variables just as the module did.
