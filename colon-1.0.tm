@@ -12,6 +12,7 @@ proc : {arg args} {
 #        incr ::Calc::cachehits($arg) ;# keep here, who knows, might be faster than being above, needed to actually count hits
         tailcall  ::tcl::unsupported::assemble $::Calc::cache($arg)
     }
+    set ::Calc::curns [uplevel 1 {namespace current}]
     tailcall ::tcl::unsupported::assemble  [set ::Calc::cache($arg) [::Calc::compile0 $arg]]
 }
 proc = {arg args} {
@@ -22,12 +23,14 @@ proc = {arg args} {
 #        incr ::Calc::cachehits($arg) ;# keep here, who knows, might be faster than being above, needed to actually count hits
         tailcall  ::tcl::unsupported::assemble $::Calc::cache($arg)
     }
+    set ::Calc::curns [uplevel 1 {namespace current}]
     tailcall ::tcl::unsupported::assemble  [set ::Calc::cache($arg) [::Calc::compile0 $arg]]
 }
 #interp alias {} = {} : ;# shorthands 
 
 namespace eval Calc {
 variable strictFlag 0
+variable curns ::   ;# namespace the Calc code being compiled lives in, used to find the procs it calls
 
 # breakup compile into 2 parts to handle ; up front, 
 # also allow for '  alias, ' needs no bracing
@@ -316,6 +319,7 @@ proc parsePrefix token {
     variable tokens
     variable tokpos
     variable nativeFunc
+    variable curns
  
     set dep [incr depth]
     #deb2 "[string repeat {  } $dep]PARSEPREFIX token`$token` tokpos=$tokpos"
@@ -413,7 +417,7 @@ proc parsePrefix token {
             }
             
             # Check if it's a mathfunc SECOND
-            set fun [namespace which tcl::mathfunc::$name]
+            set fun [namespace eval $curns [list namespace which -command tcl::mathfunc::$name]]
             if {$fun ne {}} {
                 set opcodes "push $fun; "
                 append opcodes [parseFuncArgs $name ""]
@@ -421,7 +425,7 @@ proc parsePrefix token {
             }
             
             # Check if it's a general command or proc THIRD
-            set fun [namespace which $name]
+            set fun [namespace eval $curns [list namespace which -command $name]]
             if {$fun ne {}} {
                 set opcodes "push $fun; "
                 append opcodes [parseFuncArgs $name ""]
@@ -902,6 +906,12 @@ proc AllProcsRecursive {} {
     lsort -unique $out
 }
 
+# the namespace a fully qualified proc name lives in, :: for the global namespace
+proc nsOf {procName} {
+    set q [namespace qualifiers $procName]
+    expr {$q eq {} ? "::" : $q}
+}
+
 proc transformProcs {args} {
     set debug 1
     set useRegex 0
@@ -990,6 +1000,7 @@ proc transformProcs {args} {
         }
         set body [info body $procName]
 
+        set ::Calc::curns [::Calc::nsOf $procName]
         if {[catch {
             set newbody [::Calc::transform= $arglist $body 1 $preserve]
         } err_code]} {
@@ -1010,6 +1021,7 @@ proc transformProcs {args} {
 } ;############### end namespace Calc
 
 proc calc= {label body {debug 1}} {
+    set ::Calc::curns [uplevel 1 {namespace current}]
     set preserve [expr {   max($debug,0)   }]
         
     if {[catch {
@@ -1028,6 +1040,7 @@ proc calc= {label body {debug 1}} {
     uplevel 1 $newbody
 }
 proc proc= {name arglist body {debug 1}} {
+    set ::Calc::curns [uplevel 1 {namespace current}]
     set preserve [expr {   max($debug,0)   }]
     
     if {[catch {
@@ -1043,6 +1056,7 @@ proc proc= {name arglist body {debug 1}} {
     uplevel 1 [list proc $name $arglist $newbody]
 }
 proc oo::define::method= {name arglist body {debug 1}} {
+    set ::Calc::curns [uplevel 1 {namespace current}]
     set preserve [expr {   max($debug,0)   }]
     
     if {[catch {

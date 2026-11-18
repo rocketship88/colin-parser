@@ -120,6 +120,8 @@ calc= setup {
 
 Similar to `proc=` one can choose instead to define procs normally, and then later re-compile them. The Calc::transformProcs procedure can compile a list of procs and/or proc patterns, including namespace patterns. The patterns can be glob or regex. There is also a `-testonly` option to check what procs the wildcard patterns produce.
 
+A function call in Calc code, such as `DotProduct(a, b)`, names a proc of the namespace the code is in, or a global proc, so procs in a namespace can call each other by their plain names. A name that is not a command there is read as an array. Putting all the procs in a namespace also lets one call compile them all, for example `Calc::transformProcs ::poly::*`, and a proc with no Calc code in it is left as it is.
+
 ## A look Under the Hood
 
 To illustrate how proc= works, here is a simple canvas helper that tags a rectangular region. The three views — source, generated assembly, and disassembled bytecode — show how clean source code translates to optimal execution with no extra steps.

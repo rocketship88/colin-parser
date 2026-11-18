@@ -3121,4 +3121,46 @@ test calc-55.6 {debug opens the external diff on two temporary files and deletes
     list $rc1 $r1 $::execcalls $left1 $rc2 $r2 $left2 $rc3 $r3
 } -result {0 {} {{{C:/Program Files (x86)/Beyond Compare 2/BC2.exe} calc-temp-1.tcl calc-temp-2.tcl 1 1}} {} 1 {no diff tool} {calc-temp-1.tcl calc-temp-2.tcl} 1 {can't read "::env(TEMP)": no such variable}}
 
+# calls to procs by their plain name from Calc code that lives in a namespace
+namespace eval nsct56 {
+    proc plain {a} { return [expr {$a * 2}] }
+    proc calc1 {a} {
+        : r = a * 3
+        return $r
+    }
+    proc calc2 {a} { return [: plain(a) + calc1(a)] }
+    proc glob {a} { return [: nsct56gl(a) + plain(a)] }
+    proc qual {a} { return [: ::nsct56::plain(a) + nsct56::plain(a)] }
+}
+proc nsct56gl {a} { return [expr {$a + 100}] }
+test calc-56.1 {transformProcs: a call to a sibling proc, a global proc and qualified names from inside a namespace} -constraints hasCalcCmd -body {
+    Calc::transformProcs ::nsct56::*
+    list [nsct56::calc2 2] [nsct56::glob 2] [nsct56::qual 2]
+} -result {10 106 8}
+test calc-56.2 {a proc compiled in a namespace keeps working} -constraints hasCalcCmd -body {
+    nsct56::calc2 5
+} -result 25
+test calc-56.3 {the plain : command called from a namespace finds the procs of that namespace} -constraints hasCalcCmd -body {
+    namespace eval nsct56 { : plain(5) + calc1(5) }
+} -result 25
+test calc-56.4 {proc= in a namespace finds the procs of that namespace} -constraints hasCalcCmd -body {
+    namespace eval nsct56 { proc= viaProcEq {a} { return [: plain(a) + 1] } }
+    nsct56::viaProcEq 4
+} -result 9
+test calc-56.5 {a name that is not a proc of the namespace or a global one is still an array} -constraints hasCalcCmd -body {
+    namespace eval nsct56 { proc= viaArr {} { global arr; return [: arr(1) + 1] } }
+    set ::arr(1) 7
+    nsct56::viaArr
+} -result 8
+
+test calc-56.6 {a math function defined in the namespace is found from Calc code in that namespace} -constraints hasCalcCmd -body {
+    namespace eval nsct56 {
+        namespace eval tcl::mathfunc {}
+        proc tcl::mathfunc::triple {x} { expr {$x * 3} }
+        proc useTriple {a} { return [: triple(a) + 1] }
+    }
+    Calc::transformProcs ::nsct56::useTriple
+    nsct56::useTriple 4
+} -result 13
+
 cleanupTests

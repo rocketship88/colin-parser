@@ -830,10 +830,34 @@ static int CalcParsePattern(void *cd, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj
  * Returns the TAL (new object, refcount 1) or NULL on error.
  * ---------------------------------------------------------------------------------- */
 
-/* [namespace which name] resolved from ::Calc, the namespace the Tcl proc lived in */
+/* The namespace of the code being compiled is kept in ::Calc::curns, so a function call can name a proc
+ * of that namespace (or a global one) without qualifying it.  The Tcl module does the same. */
+static void SetCurNs(Tcl_Interp *interp, const char *ns) {
+    Tcl_SetVar2(interp, "::Calc::curns", NULL, (ns == NULL || *ns == '\0') ? "::" : ns, TCL_GLOBAL_ONLY);
+}
+/* the namespace of the command that called us */
+static void SetCurNsCaller(Tcl_Interp *interp) {
+    SetCurNs(interp, Tcl_GetCurrentNamespace(interp)->fullName);
+}
+/* the namespace a fully qualified proc name lives in */
+static void SetCurNsOfProc(Tcl_Interp *interp, const char *procName) {
+    const char *p = strrchr(procName, ':');
+    Tcl_Obj *q;
+    if (p == NULL || p == procName || p[-1] != ':' || p - 1 == procName) { SetCurNs(interp, "::"); return; }
+    q = Tcl_NewStringObj(procName, (Tcl_Size) (p - 1 - procName));
+    Tcl_IncrRefCount(q);
+    SetCurNs(interp, Tcl_GetString(q));
+    Tcl_DecrRefCount(q);
+}
+
+/* [namespace which -command name] resolved in the namespace of the code being compiled (then the global one) */
 static Tcl_Obj *WhichCmd(Tcl_Interp *interp, Tcl_Obj *name) {
-    Tcl_Namespace *ns = Tcl_FindNamespace(interp, "::Calc", NULL, 0);
-    Tcl_Command cmd = Tcl_FindCommand(interp, Tcl_GetString(name), ns, 0);
+    Tcl_Namespace *ns = NULL;
+    Tcl_Obj *cur = Tcl_GetVar2Ex(interp, "::Calc::curns", NULL, TCL_GLOBAL_ONLY);
+    Tcl_Command cmd;
+    if (cur != NULL) ns = Tcl_FindNamespace(interp, Tcl_GetString(cur), NULL, 0);
+    if (ns == NULL) ns = Tcl_GetGlobalNamespace(interp);
+    cmd = Tcl_FindCommand(interp, Tcl_GetString(name), ns, 0);
     Tcl_Obj *r;
     if (cmd == NULL) return NULL;
     r = Tcl_NewObj();
@@ -2007,6 +2031,7 @@ static int CalcTransformProcs(void *cd, Tcl_Interp *interp, Tcl_Size objc, Tcl_O
         Tcl_DecrRefCount(args);
         if (RunV(interp, &body, 3, S("info"), S("body"), procName) != TCL_OK) { Tcl_DecrRefCount(arglist); goto out; }
 
+        SetCurNsOfProc(interp, Tcl_GetString(procName));
         newbody = Transform(st, interp, body, st->oneObj, preserve);
         if (newbody == NULL) {
             CALC_ERROR(interp, "Calc::transformProcs error compiling '%s'  %s", Tcl_GetString(procName), Tcl_GetString(Tcl_GetObjResult(interp)));
@@ -2087,6 +2112,7 @@ static int CalcColon(void *cd, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const
         rc = RunAssemble(st, interp, tal);
         Tcl_DecrRefCount(tal);
     } else {
+        SetCurNsCaller(interp);
         tal = Compile0(st, interp, arg, st->zeroObj);
         if (tal == NULL) {
             rc = TCL_ERROR;
@@ -2138,6 +2164,7 @@ static int CalcDefine(CalcState *st, Tcl_Interp *interp, int kind, Tcl_Size objc
     if (objc < base || objc > base + 1) { Tcl_WrongNumArgs(interp, 1, objv, usage[kind]); return TCL_ERROR; }
     if (DebugLevels(interp, debug, &preserve, &showDiff) != TCL_OK) return TCL_ERROR;
 
+    SetCurNsCaller(interp);
     newbody = Transform(st, interp, body, kind == 0 ? st->zeroObj : st->oneObj, preserve);
     if (newbody == NULL) {
         msg = Tcl_ObjPrintf(errFmt[kind], Tcl_GetString(name), Tcl_GetString(Tcl_GetObjResult(interp)));
