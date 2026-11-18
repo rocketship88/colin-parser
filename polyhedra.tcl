@@ -47,22 +47,20 @@ proc MatrixVectorProduct {M V} {
 }
 
 proc MatrixProduct {M1 M2} {
-    set M {{0 0 0 0} {0 0 0 0} {0 0 0 0} {0 0 0 0}}
+    : { L = (0, 0, 0, 0) ; M = (L, L, L, L) }
 
     for {set i 0} {$i<4} {incr i} {
         for {set j 0} {$j<4} {incr j} {
-            : s = 0
-            for {set k 0} {$k<4} {incr k} {
-                : s = s + lindex(M1, i, k) * lindex(M2, k, j)
-            }
-            lset M $i $j $s
+            lset M $i $j [: lindex(M1, i, 0) * lindex(M2, 0, j) + \
+                            lindex(M1, i, 1) * lindex(M2, 1, j) + \
+                            lindex(M1, i, 2) * lindex(M2, 2, j) + \
+                            lindex(M1, i, 3) * lindex(M2, 3, j)]
         }
     }
     return $M
 }
 
 proc MatrixRotation { ax ay az } {
-    #puts "ax= |$ax| ay= |$ay| az= |$az| "
   : {
     # Rotation matrix around X axis with angle ax
     Mx = ((1, 0        , 0       , 0), 
@@ -127,17 +125,15 @@ proc Transformations {lvtx lnv} {
     set lvn {}
     # Compute matrix rotation
     : M = MatrixRotation(ax, ay, az)
-    set i 0
     # Apply projection
     foreach vtx $lvtx {
         : (x, y, z) = vtx
         lappend lnew [: Projection(x, y, z, M)]
-        incr i
     }
     # Normal vector rotation
     foreach v $lnv {lappend lvn [: MatrixVectorProduct(M, v)]}
   
-    return [list $M $lnew $lvn]
+    return [: (M, lnew, lvn)]
 }
 
 # Compute color entensity for each face
@@ -172,8 +168,7 @@ proc DisplayModel {w s} {
     global iterations
     : (ax, ay, az, tx, ty, tz) = (0.2, 0.1, 0.3, 0, 0, 0)
   
-    set ::curmodel $s   ;# remembered so Shaded/Wireframe can restart it
-    set d $display
+    : ::curmodel = s; d = display   ;# curmodel is remembered so Shaded/Wireframe can restart it
     foreach {t lvtx lcnx lclr} [ReadData $s] {}
     $w.c create text 10 10 -anchor w -tags label -text $t \
         -fill [expr {$::bggray < 128 ? "white" : "black"}]
