@@ -10,7 +10,7 @@ package require Tcl 8.5-
 package require Tk 8.4-
 
 #tcl::tm::path add {path/to/colon-module/dir} ;# point this to the module directory
-::tcl::tm::path add [file dirname [info script]] ;# works if script and moudle in same directory
+::tcl::tm::path add [file dirname [info script]] ;# works if script and module in same directory
 package require colon
 
 bind all <Escape> {exit}
