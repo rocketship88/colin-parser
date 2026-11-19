@@ -2336,7 +2336,7 @@ test calc-46.3 {native functions with the wrong number of arguments} -constraint
     set s abc; set l {x y z}
     set out {}
     foreach e {
-        {strlen(s, s)} {strlen()} {llength()} {llength(l, l)} {lindex(l)} {list()}
+        {strlen(s, s)} {strlen()} {llength()} {llength(l, l)} {lindex(l)}
         {xtoupper(s, s)} {xtolower()} {xstrindex(s)} {xstrindex(s, 1, 2)} {xstrrange(s, 0)} {xstrrange(s, 0, 1, 2)}
     } {
         catch {= $e} msg
@@ -2348,7 +2348,6 @@ Calc: strlen expects exactly 1 args, got 0
 Calc: llength expects exactly 1 args, got 0
 Calc: llength expects exactly 1 args, got 2
 Calc: lindex expects at least 2 args, got 1
-Calc: list expects at least 1 args, got 0
 Calc: xtoupper expects exactly 1 args, got 2
 Calc: xtolower expects exactly 1 args, got 0
 Calc: xstrindex expects exactly 2 args, got 1
@@ -2356,6 +2355,13 @@ Calc: xstrindex expects exactly 2 args, got 3
 Calc: xstrrange expects exactly 3 args, got 2
 Calc: xstrrange expects exactly 3 args, got 4} -cleanup {
     unset -nocomplain s l out e msg
+}
+
+test calc-46.4 {list() with no arguments is an empty list, and list(x) has one element} -constraints hasCalcCmd -body {
+    set x 5
+    list [llength [= list()]] [= list()] [= list(x)] [= list(x, x)]
+} -result {0 {} 5 {5 5}} -cleanup {
+    unset -nocomplain x
 }
 
 test calc-46.4 {native functions compile to their own instructions in proc=} -constraints hasCalcCmd -body {
@@ -3039,7 +3045,7 @@ test calc-55.3 {transform= rejects a non-boolean preserve flag} -constraints has
 test calc-55.4 {function calls with the wrong number of arguments, and unfinished expressions} -constraints hasCalcCmd -body {
     set out {}
     foreach e {
-        {x = strlen()} {x = strlen(1, 2)} {x = lindex(a)} {x = list()} {x = max(1 2)} {x = max(1,}
+        {x = strlen()} {x = strlen(1, 2)} {x = lindex(a)} {x = max(1 2)} {x = max(1,}
         {x = max(} {x = (1} {x = >} {x = a ? b} {x = xstrindex(a)} {x = xstrrange(a, b)} {x = strlen(a b)}
     } {
         catch {Calc::compile0 $e 0} m
@@ -3049,7 +3055,6 @@ test calc-55.4 {function calls with the wrong number of arguments, and unfinishe
 } -result {Calc: strlen expects exactly 1 args, got 0
 Calc: strlen expects exactly 1 args, got 2
 Calc: lindex expects at least 2 args, got 1
-Calc: list expects at least 1 args, got 0
 Calc: expected start of expression but found '1 2'
 Calc: expected ')' or ',' but found ''
 Calc: expected ')' or ',' but found ''

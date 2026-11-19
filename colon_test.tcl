@@ -1068,13 +1068,13 @@ foreach {e msg} {
     {strlen(s, s)}      "Calc: strlen expects exactly 1 args, got 2"
     {llength()}         "Calc: llength expects exactly 1 args, got 0"
     {lindex(l)}         "Calc: lindex expects at least 2 args, got 1"
-    {list()}            "Calc: list expects at least 1 args, got 0"
     {xtoupper(s, s)}    "Calc: xtoupper expects exactly 1 args, got 2"
     {xstrindex(s)}      "Calc: xstrindex expects exactly 2 args, got 1"
     {xstrrange(s, 0)}   "Calc: xstrrange expects exactly 3 args, got 2"
 } {
     verify "arity: $e" $msg [tryerr [list = $e]]
 }
+verify "list() is an empty list, list(x) has one element" {{} 7} [list [= list()] [= list(7)]]
 proc= nf_shape {l s} { = {a = llength(l); b = strlen(s); c = lindex(l, 1); d = list(a, b)} }
 set body [info body nf_shape]
 verify "native function results in proc=" {3 5} [nf_shape {p q r} hello]

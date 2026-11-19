@@ -205,11 +205,13 @@ foreach {op code} {
     set precode($op) $code
 }
 
-# our name, vs. inline bytecode name and arg count, negative arg count means variable with minimum abs(count)
+# our name, vs. inline bytecode name and arg count. A count of 0 or more is an exact number of args.
+# A negative count means a variable number of args with a minimum of -count - 1, so -1 is any number
+# of args (the minimum is 0), -2 is at least 1 arg, -3 is at least 2 args, and so on.
 array set nativeFunc {
     strlen      {strlen 1}
     llength     {listLength 1}
-    lindex		 {lindexMulti -2}
+    lindex		 {lindexMulti -3}
     list        {list -1}
     xstrcat      {strcat 2}
     xtoupper     {strcaseUpper 1}
@@ -587,14 +589,14 @@ proc parseFuncArgs {funcname nativeInfo} {
                 lassign $nativeInfo instruction expectedArgs
                 
 			    set actualArgs [expr {$arg_num - 1}]
-			    if {$expectedArgs > 0} {
-			        # Positive: exact match required
+			    if {$expectedArgs >= 0} {
+			        # 0 or more: exact match required
 			        if {$actualArgs != $expectedArgs} {
 			            error "Calc: $funcname expects exactly $expectedArgs args, got $actualArgs"
 			        }
 			    } else {
-			        # Negative: at least abs(expectedArgs) required
-			        set minArgs [expr {abs($expectedArgs)}]
+			        # Negative: variable, with a minimum of -expectedArgs - 1
+			        set minArgs [expr {-$expectedArgs - 1}]
 			        if {$actualArgs < $minArgs} {
 			            error "Calc: $funcname expects at least $minArgs args, got $actualArgs"
 			        }

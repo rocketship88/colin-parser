@@ -659,13 +659,14 @@ static Tcl_Obj *ParseFuncArgs(CalcState *st, Tcl_Interp *interp, Tcl_Obj *funcna
                 instr = ln > 0 ? Tcl_GetString(le[0]) : "";
                 if (ln < 2) { Tcl_SetObjResult(interp, Tcl_NewStringObj("can't use empty string as operand of \">\"", -1)); goto failtok; }
                 if (Tcl_GetLongFromObj(interp, le[1], &expected) != TCL_OK) goto failtok;
-                if (expected > 0) {
+                if (expected >= 0) {
                     if (actual != expected) {
                         CALC_ERROR(interp, "Calc: %s expects exactly %ld args, got %ld", Tcl_GetString(funcname), expected, actual);
                         goto failtok;
                     }
                 } else {
-                    long minArgs = expected < 0 ? -expected : expected;
+                    /* negative: a variable number of args, with a minimum of -expected - 1 */
+                    long minArgs = -expected - 1;
                     if (actual < minArgs) {
                         CALC_ERROR(interp, "Calc: %s expects at least %ld args, got %ld", Tcl_GetString(funcname), minArgs, actual);
                         goto failtok;
@@ -2356,7 +2357,7 @@ int Calcext_Init(Tcl_Interp *interp) {
         };
         static const char *const prefix[][2] = {{"+", "uplus"}, {"-", "uminus"}, {"!", "not"}, {"~", "bitnot"}};
         static const char *const native[][2] = {
-            {"strlen", "strlen 1"}, {"llength", "listLength 1"}, {"lindex", "lindexMulti -2"}, {"list", "list -1"},
+            {"strlen", "strlen 1"}, {"llength", "listLength 1"}, {"lindex", "lindexMulti -3"}, {"list", "list -1"},
             {"xstrcat", "strcat 2"}, {"xtoupper", "strcaseUpper 1"}, {"xtolower", "strcaseLower 1"},
             {"xstrindex", "strindex 2"}, {"xstrrange", "strrange 3"}
         };
