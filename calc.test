@@ -3168,4 +3168,281 @@ test calc-56.6 {a math function defined in the namespace is found from Calc code
     nsct56::useTriple 4
 } -result 13
 
+# ============================================================================
+# Operators defined with Calc::defineOperator (calc-57.*).  They run in their own interpreter so the
+# other tests never see the added operators.
+# ============================================================================
+set opip [interp create]
+loadColonInto $opip
+$opip eval {
+    proc ::tcl::mathop::pair {a b} {list $a $b}
+    proc ::tcl::mathop::triple {a b} {list $a $b 3}
+    set ::calls 0
+    proc ::tcl::mathop::min {a b} {incr ::calls; expr {$a < $b ? $a : $b}}
+    Calc::defineOperator <+> -name pair -spelled :pair:
+    Calc::defineOperator <~> -name pair -prec 9
+    Calc::defineOperator <-> -name pair -prec 10
+    # a minimum compiled in place; the three labels are made unique for each use
+    Calc::defineOperator :min: -name min -inline {over 1; over 1; lt; jumpFalse takeb@; pop; jump done@; label takeb@; reverse 2; pop; label done@;}
+    Calc::defineOperator :tag: -inline {pop; pop; push {x@@y@}}
+}
+
+test calc-57.1 {a defined operator calls tcl::mathop::NAME} -constraints hasCalcCmd -body {
+    $opip eval {: 1 <+> 2}
+} -result {1 2}
+test calc-57.2 {the spelled out alias means the same} -constraints hasCalcCmd -body {
+    $opip eval {: 1 :pair: 2}
+} -result {1 2}
+test calc-57.3 {precedence 11 is the level of * and /, left associative} -constraints hasCalcCmd -body {
+    $opip eval {: 2 * 3 <+> 4}
+} -result {6 4}
+test calc-57.4 {a defined operator with -prec 10 ranks with + and -, below *} -constraints hasCalcCmd -body {
+    $opip eval {: 1 * 2 <-> 3 * 4}
+} -result {2 12}
+test calc-57.5 {-prec 9 ranks below + and -} -constraints hasCalcCmd -body {
+    $opip eval {: 1 + 2 <~> 3 + 4}
+} -result {3 7}
+test calc-57.6 {left associative} -constraints hasCalcCmd -body {
+    $opip eval {: 1 <+> 2 <+> 3}
+} -result {{1 2} 3}
+test calc-57.7 {parentheses change the grouping} -constraints hasCalcCmd -body {
+    $opip eval {: 1 <+> (2 <+> 3)}
+} -result {1 {2 3}}
+test calc-57.8 {an inline operator, labels unique for each use in one expression} -constraints hasCalcCmd -body {
+    $opip eval {: (3 :min: 5) + (9 :min: 2) + (4 :min: 4)}
+} -result 9
+test calc-57.9 {an inline operator inside a compiled proc and nested} -constraints hasCalcCmd -body {
+    $opip eval {
+        proc least3 {a b c} { return [: a :min: (b :min: c)] }
+        Calc::transformProcs ::least3
+        list [least3 5 2 8] [least3 1 2 3] [least3 9 8 7]
+    }
+} -result {2 1 7}
+test calc-57.10 {an inline operator costs no call; with Calc::inlineOps 0 it calls its command} -constraints hasCalcCmd -body {
+    $opip eval {
+        set ::calls 0
+        set a [: 7 :min: 4]
+        set b $::calls
+        set Calc::inlineOps 0
+        set c [: 6 :min: 9]
+        set d $::calls
+        set Calc::inlineOps 1
+        list $a $b $c $d
+    }
+} -result {4 0 6 1}
+test calc-57.11 {every @ in a template is the use's number, @@ is a literal @} -constraints hasCalcCmd -body {
+    regexp {^x@y[0-9]+$} [$opip eval {: 1 :tag: 2}]
+} -result 1
+test calc-57.12 {a use of @ gets a new number each time} -constraints hasCalcCmd -body {
+    lindex [$opip eval {: (1 :tag: 2) <+> (1 :tag: 2)}] 0
+} -match regexp -result {^x@y[0-9]+$}
+test calc-57.13 {the two numbers of two uses differ} -constraints hasCalcCmd -body {
+    lassign [$opip eval {: (1 :tag: 2) <+> (1 :tag: 2)}] a b
+    expr {$a ne $b}
+} -result 1
+test calc-57.14 {\uXXXX in the expression text means that character, also inside braces} -constraints hasCalcCmd -body {
+    $opip eval [list Calc::defineOperator ⊕ -name pair]
+    list [$opip eval {: { 1 \u2295 2 }}] [$opip eval [list : 3 ⊕ 4]]
+} -result {{1 2} {3 4}}
+test calc-57.15 {a spelled out operator is replaced by its symbol by the tokenizer} -constraints hasCalcCmd -body {
+    list [$opip eval {Calc::tokenise {a :pair: b}}] [$opip eval {Calc::tokenise {a<+>b}}]
+} -result {{a <+> b} {a <+> b}}
+test calc-57.16 {the longest operator wins} -constraints hasCalcCmd -body {
+    $opip eval {
+        Calc::defineOperator <+ -name triple
+        list [: 1 <+> 2] [: 1 <+ 2]
+    }
+} -result {{1 2} {1 2 3}}
+test calc-57.17 {operators made of characters that mean something in a regular expression} -constraints hasCalcCmd -body {
+    $opip eval {
+        Calc::defineOperator .* -name pair
+        Calc::defineOperator (|) -name triple
+        Calc::defineOperator \[\] -name pair
+        set a 1; set b 2
+        list [: a .* b] [: a (|) b] [: a \[\] b]
+    }
+} -result {{1 2} {1 2 3} {1 2}}
+test calc-57.18 {defining an operator again replaces it} -constraints hasCalcCmd -body {
+    $opip eval {
+        Calc::defineOperator <=< -name pair
+        set r1 [: 1 <=< 2]
+        Calc::defineOperator <=< -name triple
+        list $r1 [: 3 <=< 4]
+    }
+} -result {{1 2} {3 4 3}}
+test calc-57.19 {an operator with -inline and no -name} -constraints hasCalcCmd -body {
+    $opip eval {
+        Calc::defineOperator :first: -inline {pop}
+        : 8 :first: 9
+    }
+} -result 8
+test calc-57.20 {with no inline code and a missing command the error names both} -constraints hasCalcCmd -body {
+    $opip eval {
+        Calc::defineOperator <!> -name nosuchcommand
+        : 1 <!> 2
+    }
+} -returnCodes error -result {Calc: the operator <!> needs the command tcl::mathop::nosuchcommand}
+test calc-57.21 {an operator that is already built in can not be redefined} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator + -name pair}
+} -returnCodes error -result {Calc::defineOperator: + is a built in operator}
+test calc-57.22 {prefix only operators are built in too} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator ! -name pair}
+} -returnCodes error -result {Calc::defineOperator: ! is a built in operator}
+test calc-57.23 {a spelling that is built in is refused too} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator <q> -name pair -spelled ==}
+} -returnCodes error -result {Calc::defineOperator: == is a built in operator}
+test calc-57.24 {an unknown option} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator <q> -name pair -colour red}
+} -returnCodes error -result {Calc::defineOperator: unknown option -colour}
+test calc-57.25 {an option without a value} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator <q> -name}
+} -returnCodes error -result {Calc::defineOperator: option -name needs a value}
+test calc-57.26 {one of -name and -inline is needed} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator <q> -prec 5}
+} -returnCodes error -result {Calc::defineOperator: one of -name and -inline is needed}
+test calc-57.27 {an operator can not contain white space} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator {<q q>} -name pair}
+} -returnCodes error -result {Calc::defineOperator: an operator can not be empty or contain white space}
+test calc-57.28 {an operator can not be empty} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator {} -name pair}
+} -returnCodes error -result {Calc::defineOperator: an operator can not be empty or contain white space}
+test calc-57.29 {a spelling can not contain white space} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator <q> -name pair -spelled {a b}}
+} -returnCodes error -result {Calc::defineOperator: an operator can not be empty or contain white space}
+test calc-57.30 {-prec must be a number} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator <q> -name pair -prec high}
+} -returnCodes error -result {Calc::defineOperator: -prec must be a number}
+test calc-57.31 {a refused definition leaves the operators as they were} -constraints hasCalcCmd -body {
+    $opip eval {
+        catch {Calc::defineOperator <z> -name pair -prec high}
+        catch {: 1 <z> 2}
+    }
+} -result 1
+test calc-57.32 {the default -prec is 11, the level of *} -constraints hasCalcCmd -body {
+    $opip eval {set Calc::inprec(<+>)}
+} -result 11
+test calc-57.33 {operands are expressions, so a call and arithmetic work on both sides} -constraints hasCalcCmd -body {
+    $opip eval {
+        proc ::tcl::mathfunc::sq {x} {expr {$x * $x}}
+        : sq(2 + 1) <+> max(4, 5)
+    }
+} -result {9 5}
+test calc-57.34 {an operator command found in the namespace of the Calc code} -constraints hasCalcCmd -body {
+    $opip eval {
+        namespace eval opns {
+            namespace eval tcl::mathop {}
+            proc tcl::mathop::local {a b} {list local $a $b}
+            ::Calc::defineOperator <L> -name local
+            proc go {} { return [: 1 <L> 2] }
+        }
+        Calc::transformProcs ::opns::go
+        opns::go
+    }
+} -result {local 1 2}
+test calc-57.35 {an inline operator that is an exact match is not mistaken for a longer name} -constraints hasCalcCmd -body {
+    $opip eval {
+        set mine 3
+        : mine :min: 7
+    }
+} -result 3
+
+test calc-57.36 {an operator with only inline code can not be used while Calc::inlineOps is 0} -constraints hasCalcCmd -body {
+    $opip eval {
+        set Calc::inlineOps 0
+        set code [catch {: 7 :first: 8} msg]
+        set Calc::inlineOps 1
+        list $code $msg [: 7 :first: 8]
+    }
+} -result {1 {Calc: the operator :first: has only inline code and Calc::inlineOps is 0} 7}
+
+test calc-57.37 {\uXXXX forms: at the start, upper case hex, adjacent, five digits and short ones} -constraints hasCalcCmd -body {
+    list [$opip eval {Calc::tokenise {\u2295 b}}] \
+         [$opip eval {Calc::tokenise {a \u2295 b}}] \
+         [$opip eval {Calc::tokenise {a \u2295\u2295 b}}] \
+         [$opip eval {Calc::tokenise {a \u22955 b}}] \
+         [$opip eval {Calc::tokenise {a \u229 b}}] \
+         [$opip eval {Calc::tokenise {a \u00D7 b}}]
+} -result [list [list ⊕ b] [list a ⊕ b] [list a ⊕ ⊕ b] [list a ⊕ {5 b}] [list {a \u229 b}] [list "a × b"]]
+test calc-57.38 {redefining an operator forgets the old inline code and command} -constraints hasCalcCmd -body {
+    $opip eval {
+        proc ::tcl::mathop::one {a b} {return one}
+        Calc::defineOperator :redef: -name one -inline {pop; pop; push inline}
+        set r1 [: 1 :redef: 2]
+        Calc::defineOperator :redef: -name one
+        set r2 [: 1 :redef: 3]
+        Calc::defineOperator :redef: -inline {pop; pop; push inline2}
+        set Calc::inlineOps 0
+        set code [catch {: 1 :redef: 4}]
+        set Calc::inlineOps 1
+        list $r1 $r2 $code [: 1 :redef: 5]
+    }
+} -result {inline one 1 inline2}
+test calc-57.39 {the longer of two operators wins even when the shorter was defined first} -constraints hasCalcCmd -body {
+    $opip eval {
+        Calc::defineOperator <* -name triple
+        Calc::defineOperator <*> -name pair
+        list [: 1 <* 2] [: 1 <*> 2] [expr {[lsearch -exact $Calc::opExtra <*>] < [lsearch -exact $Calc::opExtra <*]}]
+    }
+} -result {{1 2 3} {1 2} 1}
+test calc-57.40 {defineOperator returns nothing} -constraints hasCalcCmd -body {
+    $opip eval {Calc::defineOperator <ret> -name pair}
+} -result {}
+test calc-57.41 {the tokenizer's list of added operators is longest first} -constraints hasCalcCmd -body {
+    $opip eval {
+        set n {}
+        foreach e $Calc::opExtra {lappend n [string length $e]}
+        expr {$n eq [lsort -integer -decreasing $n]}
+    }
+} -result 1
+
+interp delete $opip
+
+
+# ============================================================================
+# calc-58: every entry point records the namespace of the code it compiles.  Each test uses a fresh
+# interpreter, so no earlier test can have left the right namespace behind.
+# ============================================================================
+proc nsIp {} {
+    set ip [interp create]
+    loadColonInto $ip
+    $ip eval {namespace eval n1 {proc helper {x} {expr {$x * 2}}}}
+    return $ip
+}
+test calc-58.1 {the : command called from a namespace finds that namespace's procs} -constraints hasCalcCmd -body {
+    set ip [nsIp]
+    $ip eval {namespace eval n1 {proc run {a} {return [: helper(a) + 1]}}; n1::run 4}
+} -result 9 -cleanup {interp delete $ip}
+test calc-58.2 {the = command called from a namespace finds that namespace's procs} -constraints hasCalcCmd -body {
+    set ip [nsIp]
+    $ip eval {namespace eval n1 {proc run {a} {return [= helper(a) + 2]}}; n1::run 4}
+} -result 10 -cleanup {interp delete $ip}
+test calc-58.3 {proc= in a namespace finds that namespace's procs} -constraints hasCalcCmd -body {
+    set ip [nsIp]
+    $ip eval {namespace eval n1 {proc= run {a} {return [: helper(a) + 3]}}; n1::run 4}
+} -result 11 -cleanup {interp delete $ip}
+test calc-58.4 {calc= in a namespace finds that namespace's procs} -constraints hasCalcCmd -body {
+    set ip [nsIp]
+    $ip eval {namespace eval n1 {calc= blk {= r = helper(5) + 4}; set r}}
+} -result 14 -cleanup {interp delete $ip}
+test calc-58.5 {method= resets the namespace: a bare name is not found in the namespace an earlier compile used} -constraints hasCalcCmd -body {
+    set ip [nsIp]
+    $ip eval {namespace eval n1 {proc run {a} {return [: helper(a) + 1]}}; n1::run 4}
+    $ip eval {oo::class create K {method= m {a} {= helper(a) + 5}}}
+    catch {$ip eval {[K new] m 4}} msg
+    set msg
+} -result {can't read "helper(4)": no such variable} -cleanup {interp delete $ip}
+test calc-58.5b {method= finds a global proc} -constraints hasCalcCmd -body {
+    set ip [nsIp]
+    $ip eval {proc ::gh {x} {expr {$x * 2}}; oo::class create K {method= m {a} {= gh(a) + 5}}; [K new] m 4}
+} -result 13 -cleanup {interp delete $ip}
+test calc-58.6 {Calc::transformProcs finds that namespace's procs} -constraints hasCalcCmd -body {
+    set ip [nsIp]
+    $ip eval {namespace eval n1 {proc run {a} {return [: helper(a) + 6]}}; Calc::transformProcs ::n1::run; n1::run 4}
+} -result 14 -cleanup {interp delete $ip}
+test calc-58.7 {Calc::transform= with the namespace set by the caller} -constraints hasCalcCmd -body {
+    set ip [nsIp]
+    $ip eval {set ::Calc::curns ::n1; string match *helper* [Calc::transform= a {: helper(a) + 1}]}
+} -result 1 -cleanup {interp delete $ip}
+
+
 cleanupTests

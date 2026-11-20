@@ -102,7 +102,15 @@ proc compile0 {exp {inproc 0}} {
 }
 #instrument+  Calc::compile0  
 proc tokenise {input} {  
-    set op_re  {\+\+|--|\*\*|%|/|\*|->|-|\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}  
+    variable op_re      ;# the operators, built by rebuildOpRe: the user defined ones first, longest first
+    variable opspell    ;# spelled out operator -> its symbol, set by defineOperator
+    # \uXXXX (exactly 4 hex digits) written out in the expression text, as it is when it comes from
+    # inside braces, means that character, so a script can be plain ASCII
+    if {[string first {\u} $input] >= 0} {
+        set map {}
+        foreach {m h} [regexp -all -inline {\\u([0-9a-fA-F]{4})} $input] {lappend map $m [format %c 0x$h]}
+        set input [string map $map $input]
+    }
     #                                                  ^ added = here (after ==)  
     # ... rest stayed the same
   
@@ -119,7 +127,9 @@ proc tokenise {input} {
                 set needsMerge 1
             }
         }
-        lappend output [string range $input $start $end]  
+        set optok [string range $input $start $end]
+        if {[info exists opspell($optok)]} {set optok $opspell($optok)}
+        lappend output $optok
         set pos [expr {$end + 1}]  
     }  
     set rest [string trim [string range $input $pos end]]  
@@ -223,11 +233,104 @@ array set nativeFunc {
 # Prefix ops all have the same precedence
 set preprec 13
 
+# ---- Operators defined by the user ----------------------------------------------------------
+#
+#   Calc::defineOperator SYMBOL ?-name NAME? ?-prec N? ?-spelled TEXT? ?-inline TAL?
+#
+#   SYMBOL    the operator: any text without white space that is not a built in operator, for
+#             example a circled dot, written \u2299 so the script stays ASCII, or a spelled out
+#             operator such as :dot3:
+#   -name     "a SYMBOL b" calls the command tcl::mathop::NAME a b (looked up when the code is compiled)
+#   -prec     precedence, on the scale of inprec: + and - are 10, * / and % are 11, ** is 12.
+#             Default 11.  Operators are left associative.
+#   -spelled  a second spelling with the same meaning, for example :dot: for a circled dot
+#   -inline   TAL (assembler) text to compile in place of the call.  The two operands are on the stack,
+#             the right one on top, and the text must leave one value in their place.  Every @ in it
+#             becomes a number that is new for each use, so labels such as loop@ are unique;
+#             @@ stands for a literal @.  It is used when Calc::inlineOps is 1 (the default);
+#             with 0, or without -inline, the operator calls the -name command instead (an operator
+#             with only -inline can not be used while it is 0).
+#   One of -name and -inline is required.  Operators must be defined before the code that uses
+#   them is compiled.
+variable opBase {\+\+|--|\*\*|%|/|\*|->|-|\+|>>|<<|>=|<=|>|<|!=|==|=>|=|&&|&|\|\||\||\^|::|:|\?|,|!|~|\(|\)}
+variable opExtra {}       ;# the user defined symbols and spellings, longest first
+variable op_re $opBase    ;# the tokenizer's regular expression
+variable inlineOps 1
+variable opcmd
+variable opinline
+variable opspell
+array set opcmd {}
+array set opinline {}
+array set opspell {}
+
+proc rebuildOpRe {} {
+    variable opBase
+    variable opExtra
+    variable op_re
+    set alts {}
+    foreach e $opExtra {
+        lappend alts [regsub -all {[][\\^$.|?*+(){}]} $e {\\&}]
+    }
+    set op_re [join [concat $alts [list $opBase]] |]
+}
+
+proc defineOperator {symbol args} {
+    variable opExtra
+    variable opcmd
+    variable opinline
+    variable opspell
+    variable inprec
+    variable incode
+    variable precode
+    set opts {-name {} -prec 11 -spelled {} -inline {}}
+    if {[llength $args] % 2} {error "Calc::defineOperator: option $args needs a value"}
+    foreach {k v} $args {
+        if {![dict exists $opts $k]} {error "Calc::defineOperator: unknown option $k"}
+        dict set opts $k $v
+    }
+    set spelled [dict get $opts -spelled]
+    foreach w [expr {$spelled eq {} ? [list $symbol] : [list $symbol $spelled]}] {
+        if {$w eq {} || [regexp {\s} $w]} {
+            error "Calc::defineOperator: an operator can not be empty or contain white space"
+        }
+        if {[info exists incode($w)] || [info exists precode($w)]} {
+            error "Calc::defineOperator: $w is a built in operator"
+        }
+    }
+    if {[dict get $opts -name] eq {} && [dict get $opts -inline] eq {}} {
+        error "Calc::defineOperator: one of -name and -inline is needed"
+    }
+    if {![string is double -strict [dict get $opts -prec]]} {error "Calc::defineOperator: -prec must be a number"}
+    set inprec($symbol) [dict get $opts -prec]
+    unset -nocomplain opcmd($symbol) opinline($symbol)
+    if {[dict get $opts -name] ne {}} {set opcmd($symbol) tcl::mathop::[dict get $opts -name]}
+    if {[dict get $opts -inline] ne {}} {set opinline($symbol) [dict get $opts -inline]}
+    if {$spelled ne {}} {set opspell($spelled) $symbol}
+    foreach w [list $symbol $spelled] {
+        if {$w ne {} && $w ni $opExtra} {lappend opExtra $w}
+    }
+    set opExtra [lsort -decreasing -command {apply {{a b} {expr {[string length $a] - [string length $b]}}}} $opExtra]
+    rebuildOpRe
+    return
+}
+
+# the TAL for one use of an inline operator: every @ is a number that is new for this use
+proc inlineCode {template} {
+    set n [incr ::labelcount]
+    set code [string trimright [string map [list @@ @ @ $n] $template]]
+    if {[string index $code end] ne ";"} {append code ";"}
+    return "$code "
+}
+
 # Parse expression until we hit an operator with precedence lower than min_prec.
 # The expression is supplied as a list of tokens in the global var tokens.
 # The current position in the input is in global var tokpos.
 # Returns the TAL bytecode to evaluate the expression.
 proc parse min_prec {
+    variable curns
+    variable opcmd
+    variable opinline
+    variable inlineOps
     variable depth
     variable incode
     variable inprec
@@ -293,6 +396,21 @@ proc parse min_prec {
             append opcodes "$jmp sc_hit$n; " [parse $tok_prec] \
                 "$jmp sc_hit$n; push $fall; jump sc_end$n; label sc_hit$n; push $hit; label sc_end$n; "
             continue
+        }
+        if {[info exists opinline($token)] && $inlineOps} {
+            # a user defined operator compiled in place
+            set opcodes "$opcodes[parse $tok_prec][inlineCode $opinline($token)]"
+            continue
+        }
+        if {[info exists opcmd($token)]} {
+            # a user defined operator that calls a command: push the command, then both operands
+            set fun [namespace eval $curns [list namespace which -command $opcmd($token)]]
+            if {$fun eq {}} {error "Calc: the operator $token needs the command $opcmd($token)"}
+            set opcodes "push $fun; $opcodes[parse $tok_prec]invokeStk 3; "
+            continue
+        }
+        if {[info exists opinline($token)]} {
+            error "Calc: the operator $token has only inline code and Calc::inlineOps is 0"
         }
         # Infix operator
         set code $incode($token)

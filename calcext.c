@@ -75,6 +75,10 @@ typedef struct CalcState {
     Tcl_Obj *v_incode;         /* ::Calc::incode (array) */
     Tcl_Obj *v_preprec;        /* ::Calc::preprec */
     Tcl_Obj *v_nativeFunc;     /* ::Calc::nativeFunc (array) */
+    Tcl_Obj *v_opspell;        /* ::Calc::opspell (array): spelled out operator -> its symbol */
+    Tcl_Obj *v_opinline;       /* ::Calc::opinline (array): operator -> TAL template */
+    Tcl_Obj *v_opcmd;          /* ::Calc::opcmd (array): operator -> command */
+    Tcl_Obj *v_inlineOps;      /* ::Calc::inlineOps */
 } CalcState;
 
 static Tcl_Obj *Parse(struct CalcState *st, Tcl_Interp *interp, double minPrec);
@@ -413,9 +417,17 @@ static void TrimRange(const char **sp, const char **ep) {
  * Splits an expression into operator and operand tokens; operands are trimmed.
  * Scientific notation split by the operator scan (3.0e - 33) is joined again.
  * ---------------------------------------------------------------------------------- */
-/* length of the operator that starts at p (0 if none); the longest match wins */
-static int OpLen(const char *p, const char *e) {
+/* length of the operator that starts at p (0 if none); the longest match wins.  The operators the user
+ * defined with Calc::defineOperator are tried first, longest first, as the Tcl module's regexp does. */
+static int OpLen(const char *p, const char *e, Tcl_Obj *const *extra, Tcl_Size nExtra, int *isExtra) {
     char c = p[0], d = (p + 1 < e) ? p[1] : '\0';
+    Tcl_Size k;
+    *isExtra = 0;
+    for (k = 0; k < nExtra; k++) {
+        Tcl_Size el;
+        const char *es = Tcl_GetStringFromObj(extra[k], &el);
+        if (el > 0 && el <= (Tcl_Size) (e - p) && memcmp(p, es, (size_t) el) == 0) { *isExtra = 1; return (int) el; }
+    }
     switch (c) {
     case '+': return d == '+' ? 2 : 1;
     case '-': return (d == '-' || d == '>') ? 2 : 1;
@@ -445,7 +457,7 @@ static int IsSciPrefix(const char *s, Tcl_Size n) {
     return digitsAfter > 0;
 }
 
-static int Tokenise(Tcl_Interp *interp, Tcl_Obj *input, Tcl_Obj **result) {
+static int TokeniseCore(Tcl_Interp *interp, Tcl_Obj *input, Tcl_Obj *const *extraV, Tcl_Size nExtra, Tcl_Obj **result) {
     Tcl_Size len, i = 0, nOut;
     const char *str = Tcl_GetStringFromObj(input, &len);
     const char *end = str + len, *pos = str;
@@ -454,7 +466,8 @@ static int Tokenise(Tcl_Interp *interp, Tcl_Obj *input, Tcl_Obj **result) {
     Tcl_IncrRefCount(out);
 
     while (i < len) {
-        int ol = OpLen(str + i, end);
+        int isExtra;
+        int ol = OpLen(str + i, end, extraV, nExtra, &isExtra);
         if (ol == 0) { i++; continue; }
         /* operand text between pos and the operator */
         {
@@ -475,7 +488,20 @@ static int Tokenise(Tcl_Interp *interp, Tcl_Obj *input, Tcl_Obj **result) {
                 }
             }
         }
-        Tcl_ListObjAppendElement(NULL, out, Tcl_NewStringObj(str + i, ol));
+        {
+            Tcl_Obj *optok;
+            if (isExtra) {
+                /* a spelled out operator such as :dot: stands for its symbol */
+                Tcl_Obj *key = Tcl_NewStringObj(str + i, ol), *sym;
+                Tcl_IncrRefCount(key);
+                sym = Tcl_GetVar2Ex(interp, "::Calc::opspell", Tcl_GetString(key), TCL_GLOBAL_ONLY);
+                optok = Tcl_DuplicateObj(sym != NULL ? sym : key);
+                Tcl_DecrRefCount(key);
+            } else {
+                optok = Tcl_NewStringObj(str + i, ol);
+            }
+            Tcl_ListObjAppendElement(NULL, out, optok);
+        }
         i += ol;
         pos = str + i;
     }
@@ -519,6 +545,50 @@ static int Tokenise(Tcl_Interp *interp, Tcl_Obj *input, Tcl_Obj **result) {
         *result = merged;
     }
     return TCL_OK;
+}
+
+/* \uXXXX (exactly 4 hex digits) in the expression text means that character, so a script can be plain
+ * ASCII.  Returns a new object (refcount 1) when something was replaced, else NULL. */
+static int HexVal(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+static Tcl_Obj *ExpandUEscapes(Tcl_Obj *input) {
+    Tcl_Size len, i = 0, from = 0;
+    const char *s = Tcl_GetStringFromObj(input, &len);
+    Tcl_Obj *res = NULL;
+    while (i + 6 <= len) {
+        if (s[i] == '\\' && s[i + 1] == 'u') {
+            int h0 = HexVal(s[i + 2]), h1 = HexVal(s[i + 3]), h2 = HexVal(s[i + 4]), h3 = HexVal(s[i + 5]);
+            if (h0 >= 0 && h1 >= 0 && h2 >= 0 && h3 >= 0) {
+                char buf[8];
+                int n = Tcl_UniCharToUtf((h0 << 12) | (h1 << 8) | (h2 << 4) | h3, buf);
+                if (res == NULL) { res = Tcl_NewObj(); Tcl_IncrRefCount(res); }
+                Tcl_AppendToObj(res, s + from, i - from);
+                Tcl_AppendToObj(res, buf, n);
+                i += 6;
+                from = i;
+                continue;
+            }
+        }
+        i++;
+    }
+    if (res != NULL) Tcl_AppendToObj(res, s + from, len - from);
+    return res;
+}
+
+static int Tokenise(Tcl_Interp *interp, Tcl_Obj *input, Tcl_Obj **result) {
+    Tcl_Obj *extras = Tcl_GetVar2Ex(interp, "::Calc::opExtra", NULL, TCL_GLOBAL_ONLY), **extraV = NULL;
+    Tcl_Size nExtra = 0;
+    Tcl_Obj *expanded = NULL;
+    int rc;
+    if (extras != NULL && Tcl_ListObjGetElements(NULL, extras, &nExtra, &extraV) != TCL_OK) nExtra = 0;
+    if (strstr(Tcl_GetString(input), "\\u") != NULL) expanded = ExpandUEscapes(input);
+    rc = TokeniseCore(interp, expanded != NULL ? expanded : input, extraV, nExtra, result);
+    if (expanded != NULL) Tcl_DecrRefCount(expanded);
+    return rc;
 }
 
 static int CalcTokenise(void *cd, Tcl_Interp *interp, Tcl_Size objc, Tcl_Obj *const objv[]) {
@@ -1260,6 +1330,73 @@ static Tcl_Obj *Parse(CalcState *st, Tcl_Interp *interp, double minPrec) {
             APPEND_F(opcodes, "%s sc_hit%ld; push %d; jump sc_end%ld; label sc_hit%ld; push %d; label sc_end%ld; ",
                                   jmp, lab, fall, lab, lab, hit, lab);
             continue;
+        }
+        /* an operator the user defined: compiled in place from its template, or as a call of its command */
+        {
+            Tcl_Obj *tmpl = Tcl_ObjGetVar2(interp, st->v_opinline, token, TCL_GLOBAL_ONLY);
+            Tcl_Obj *cmdName = Tcl_ObjGetVar2(interp, st->v_opcmd, token, TCL_GLOBAL_ONLY);
+            int inl = 0;
+            if (tmpl != NULL && GetFlag(st, interp, st->v_inlineOps, &inl) != TCL_OK) { Tcl_DecrRefCount(token); goto fail; }
+            if (tmpl != NULL && inl) {
+                long lab;
+                Tcl_Obj *body = Tcl_DuplicateObj(tmpl);
+                const char *t;
+                Tcl_Size tl, q;
+                Tcl_Obj *outT;
+                Tcl_IncrRefCount(body);
+                Tcl_DecrRefCount(token);
+                if (NextLabel(st, interp, &lab) != TCL_OK) { Tcl_DecrRefCount(body); goto fail; }
+                if ((sub = Parse(st, interp, tokPrec)) == NULL) { Tcl_DecrRefCount(body); goto fail; }
+                Tcl_AppendObjToObj(opcodes, sub);
+                Tcl_DecrRefCount(sub);
+                /* every @ becomes this use's number, @@ is a literal @ */
+                t = Tcl_GetStringFromObj(body, &tl);
+                outT = Tcl_NewObj();
+                Tcl_IncrRefCount(outT);
+                for (q = 0; q < tl; q++) {
+                    if (t[q] == '@' && q + 1 < tl && t[q + 1] == '@') { Tcl_AppendToObj(outT, "@", 1); q++; }
+                    else if (t[q] == '@') APPEND_F(outT, "%ld", lab);
+                    else Tcl_AppendToObj(outT, t + q, 1);
+                }
+                /* the code ends with exactly one "; " so what follows starts a new instruction */
+                {
+                    Tcl_Size ol2;
+                    const char *os = Tcl_GetStringFromObj(outT, &ol2);
+                    while (ol2 > 0 && (os[ol2 - 1] == ' ' || os[ol2 - 1] == '\t' || os[ol2 - 1] == '\n' || os[ol2 - 1] == '\r')) ol2--;
+                    Tcl_AppendToObj(opcodes, os, ol2);
+                    if (ol2 == 0 || os[ol2 - 1] != ';') Tcl_AppendToObj(opcodes, ";", 1);
+                    Tcl_AppendToObj(opcodes, " ", 1);
+                }
+                Tcl_DecrRefCount(outT);
+                Tcl_DecrRefCount(body);
+                continue;
+            }
+            if (cmdName != NULL) {
+                Tcl_Obj *fun = WhichCmd(interp, cmdName), *nc;
+                if (fun == NULL || Tcl_GetCharLength(fun) == 0) {
+                    CALC_ERROR(interp, "Calc: the operator %s needs the command %s", ts, Tcl_GetString(cmdName));
+                    if (fun != NULL) Tcl_DecrRefCount(fun);
+                    Tcl_DecrRefCount(token);
+                    goto fail;
+                }
+                Tcl_DecrRefCount(token);
+                if ((sub = Parse(st, interp, tokPrec)) == NULL) { Tcl_DecrRefCount(fun); goto fail; }
+                nc = Tcl_ObjPrintf("push %s; ", Tcl_GetString(fun));
+                Tcl_IncrRefCount(nc);
+                Tcl_DecrRefCount(fun);
+                Tcl_AppendObjToObj(nc, opcodes);
+                Tcl_DecrRefCount(opcodes);
+                opcodes = nc;
+                Tcl_AppendObjToObj(opcodes, sub);
+                Tcl_DecrRefCount(sub);
+                Tcl_AppendToObj(opcodes, "invokeStk 3; ", -1);
+                continue;
+            }
+            if (tmpl != NULL) {
+                CALC_ERROR(interp, "Calc: the operator %s has only inline code and Calc::inlineOps is 0", ts);
+                Tcl_DecrRefCount(token);
+                goto fail;
+            }
         }
         /* an ordinary infix operator */
         code = Tcl_ObjGetVar2(interp, st->v_incode, token, TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
@@ -2178,7 +2315,7 @@ static int CalcDefine(CalcState *st, Tcl_Interp *interp, int kind, Tcl_Size objc
         double d;
         if (Tcl_GetDoubleFromObj(interp, preserve, &d) != TCL_OK) { Tcl_DecrRefCount(preserve); Tcl_DecrRefCount(newbody); return TCL_ERROR; }
         if (d != 0) {
-            Tcl_Obj *idx = Tcl_ObjPrintf("\"calc=%s\"", Tcl_GetString(name)), *vn = S("Calc::calc");
+            Tcl_Obj *idx = Tcl_ObjPrintf("\"calc=%s\"", Tcl_GetString(name)), *vn = S("::Calc::calc");
             Tcl_Obj *res;
             Tcl_IncrRefCount(idx); Tcl_IncrRefCount(vn);
             res = Tcl_ObjSetVar2(interp, vn, idx, newbody, TCL_LEAVE_ERR_MSG);
@@ -2263,6 +2400,10 @@ static void CalcStateFree(void *cd, Tcl_Interp *interp) {
     Tcl_DecrRefCount(st->v_incode);
     Tcl_DecrRefCount(st->v_preprec);
     Tcl_DecrRefCount(st->v_nativeFunc);
+    Tcl_DecrRefCount(st->v_opspell);
+    Tcl_DecrRefCount(st->v_opinline);
+    Tcl_DecrRefCount(st->v_opcmd);
+    Tcl_DecrRefCount(st->v_inlineOps);
     Tcl_Free((char *) st);
 }
 
@@ -2306,6 +2447,10 @@ int Calcext_Init(Tcl_Interp *interp) {
     LOCAL_NAME(st->v_incode, "::Calc::incode");
     LOCAL_NAME(st->v_preprec, "::Calc::preprec");
     LOCAL_NAME(st->v_nativeFunc, "::Calc::nativeFunc");
+    LOCAL_NAME(st->v_opspell, "::Calc::opspell");
+    LOCAL_NAME(st->v_opinline, "::Calc::opinline");
+    LOCAL_NAME(st->v_opcmd, "::Calc::opcmd");
+    LOCAL_NAME(st->v_inlineOps, "::Calc::inlineOps");
 
     CALC_CREATE(interp, "::Calc::incrCode", CalcIncrCode, st, NULL);
 
@@ -2372,6 +2517,59 @@ int Calcext_Init(Tcl_Interp *interp) {
             Tcl_SetVar2Ex(interp, "::Calc::nativeFunc", native[k][0], Tcl_NewStringObj(native[k][1], -1), TCL_GLOBAL_ONLY);
         Tcl_SetVar2Ex(interp, "::Calc::preprec", NULL, Tcl_NewStringObj("13", -1), TCL_GLOBAL_ONLY);
         Tcl_SetVar2Ex(interp, "::Calc::strictFlag", NULL, Tcl_NewStringObj("0", -1), TCL_GLOBAL_ONLY);
+    }
+    /* Calc::defineOperator: kept in step with the Tcl module (the C code reads what it records) */
+    {
+        static const char defineOp[] =
+        "namespace eval ::Calc {\n"
+        "    variable opExtra {}\n"
+        "    variable inlineOps 1\n"
+        "    variable opcmd\n"
+        "    variable opinline\n"
+        "    variable opspell\n"
+        "    array set opcmd {}\n"
+        "    array set opinline {}\n"
+        "    array set opspell {}\n"
+        "    proc defineOperator {symbol args} {\n"
+        "        variable opExtra\n"
+        "        variable opcmd\n"
+        "        variable opinline\n"
+        "        variable opspell\n"
+        "        variable inprec\n"
+        "        variable incode\n"
+        "        variable precode\n"
+        "        set opts {-name {} -prec 11 -spelled {} -inline {}}\n"
+        "        if {[llength $args] % 2} {error \"Calc::defineOperator: option $args needs a value\"}\n"
+        "        foreach {k v} $args {\n"
+        "            if {![dict exists $opts $k]} {error \"Calc::defineOperator: unknown option $k\"}\n"
+        "            dict set opts $k $v\n"
+        "        }\n"
+        "        set spelled [dict get $opts -spelled]\n"
+        "        foreach w [expr {$spelled eq {} ? [list $symbol] : [list $symbol $spelled]}] {\n"
+        "            if {$w eq {} || [regexp {\\s} $w]} {\n"
+        "                error \"Calc::defineOperator: an operator can not be empty or contain white space\"\n"
+        "            }\n"
+        "            if {[info exists incode($w)] || [info exists precode($w)]} {\n"
+        "                error \"Calc::defineOperator: $w is a built in operator\"\n"
+        "            }\n"
+        "        }\n"
+        "        if {[dict get $opts -name] eq {} && [dict get $opts -inline] eq {}} {\n"
+        "            error \"Calc::defineOperator: one of -name and -inline is needed\"\n"
+        "        }\n"
+        "        if {![string is double -strict [dict get $opts -prec]]} {error \"Calc::defineOperator: -prec must be a number\"}\n"
+        "        set inprec($symbol) [dict get $opts -prec]\n"
+        "        unset -nocomplain opcmd($symbol) opinline($symbol)\n"
+        "        if {[dict get $opts -name] ne {}} {set opcmd($symbol) tcl::mathop::[dict get $opts -name]}\n"
+        "        if {[dict get $opts -inline] ne {}} {set opinline($symbol) [dict get $opts -inline]}\n"
+        "        if {$spelled ne {}} {set opspell($spelled) $symbol}\n"
+        "        foreach w [list $symbol $spelled] {\n"
+        "            if {$w ne {} && $w ni $opExtra} {lappend opExtra $w}\n"
+        "        }\n"
+        "        set opExtra [lsort -decreasing -command {apply {{a b} {expr {[string length $a] - [string length $b]}}}} $opExtra]\n"
+        "        return\n"
+        "    }\n"
+        "}\n";
+        if (Tcl_EvalEx(interp, defineOp, -1, TCL_EVAL_GLOBAL) != TCL_OK) return TCL_ERROR;
     }
     if (Tcl_PkgProvide(interp, "colon", "1.0") != TCL_OK) return TCL_ERROR;
 

@@ -119,7 +119,7 @@ def main(src, out):
         if m and 'incr ' + m.group(1) + ' ' not in code:
             add(n, 'incr', f'incr {m.group(1)} -> incr {m.group(1)} -1', {n: code[:m.end(1)] + ' -1' + code[m.end(1):] + tail})
         # --- tokenizer regex alternatives
-        if 'set op_re' in code:
+        if code.lstrip().startswith('variable opBase {'):
             m = re.search(r'\{(.*)\}', code)
             body = m.group(1)
             alts = re.split(r'(?<!\\)\|', body)

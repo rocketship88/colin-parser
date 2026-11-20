@@ -7,6 +7,7 @@
 - [Basic Usage](#basic-usage)
 - [Command Syntax](#command-syntax)
 - [Operators](#operators)
+- [Defining Operators](#defining-operators)
 - [Variables](#variables)
 - [Assignments](#assignments)
 - [Increment and Decrement](#increment-and-decrement)
@@ -113,6 +114,8 @@ Calc supports standard operators with C-like precedence:
 - `=` (right associative)
 - `->` takes a list apart into a pattern of variables (see Tuples)
 - `=>` the same, but the sizes must match exactly (see Tuples)
+
+More operators can be added without changing Calc: see [Defining Operators](#defining-operators). The optional `calcvec` module uses that to add vector and matrix operators (`⊙`, `×`, `⊠`, `⊗`).
 
 ### Operator Precedence (lowest to highest)
 
@@ -617,6 +620,98 @@ Functions are checked first in the native set, then the  tcl::math:: namespace a
 
 [Back to top](#contents)
 
+## Defining Operators
+
+Calc has a small table of operators, and a call lets you add your own. This is how the vector and matrix operators of `calcvec` are written, and the main module stays as it is. An operator you add is a binary (infix) operator written between two operands; it works anywhere an operator does, with the precedence you choose.
+
+```tcl
+Calc::defineOperator SYMBOL ?-name NAME? ?-prec N? ?-spelled TEXT? ?-inline TAL?
+```
+
+| Option | Meaning |
+|---|---|
+| `SYMBOL` | The operator. Any text without white space that is not already an operator: a character such as `⊙`, or a spelled out word such as `:dot3:` |
+| `-name NAME` | `a SYMBOL b` calls the command `tcl::mathop::NAME a b`. It is looked up when the expression is compiled |
+| `-prec N` | Precedence, on the same scale as the table above: `+` and `-` are 10, `*` `/` `%` are 11, `**` is 12. The default is 11. Operators are left associative |
+| `-spelled TEXT` | A second spelling with exactly the same meaning, for example `:dot:` for `⊙` |
+| `-inline TAL` | Assembler text to compile in place of the call (see below) |
+
+One of `-name` and `-inline` is needed. The call returns nothing, and defining the same operator again replaces it. Operators that already exist (`+`, `!`, `==`, ...) can not be redefined. Define operators before the code that uses them is compiled, so before `Calc::transformProcs` and before the first `:` that uses one.
+
+### The simplest operator: a command
+
+```tcl
+proc ::tcl::mathop::pair {a b} {list $a $b}
+Calc::defineOperator <+> -name pair -spelled :pair:
+
+: 1 <+> 2            ;# {1 2}
+: 1 :pair: 2         ;# the same
+: 2 * 3 <+> 4        ;# {6 4}, the same level as *, left to right
+```
+
+Both operands are ordinary Calc expressions, and the command is an ordinary Tcl proc. Inside a compiled proc the operator is one `invokeStk` call, the same cost as calling the proc.
+
+### Writing the symbol
+
+The symbol can be a real character or an escape. `Calc::defineOperator \u2299 -name dot` makes the script pure ASCII: Tcl turns the unbraced `\u2299` into the character. Inside braces Tcl does not, so Calc does it itself: in expression text, `\uXXXX` with exactly four hex digits means that character, and `: { u \u2299 v }` works. A script can therefore be plain ASCII everywhere, or it can contain the characters themselves:
+
+- Tcl 9 reads source files as UTF-8.
+- Tcl 8.6 on Windows reads them in the system encoding, so a file with real symbols needs `tclsh86 -encoding utf-8 file.tcl` or `source -encoding utf-8 file.tcl`. (`encoding system utf-8` inside the file is too late.)
+- Your editor needs a font that has the symbol. DejaVu Sans Mono is fixed width and has all the ones in `calcvec` except the big `⨂`.
+- Printing a symbol with `puts` needs a UTF-8 output encoding. Do not rely on it; use the spelled out form in messages.
+
+The spelled form is always available, so a user whose editor can not show a symbol can write `:dot:` instead. If two operators start with the same characters, the longest one wins.
+
+### The `-inline` option
+
+A call has a price: a push, a call, a return. `-inline` gives Calc assembler text to paste into the bytecode instead. Its contract:
+
+- When the text starts, the left operand is on the stack with the right operand on top.
+- When it ends, both are gone and exactly one value, the result, is there in their place.
+- Every `@` in the text becomes a number that is new for each use, so labels such as `loop@` and `done@` do not collide when the operator is used twice in one expression. All the `@` of one use get the same number, so `jump done@` finds `label done@`. Write `@@` for a literal `@`.
+- It is used when `Calc::inlineOps` is 1 (the default). With 0, or without `-inline`, Calc calls the `-name` command instead; that is the way to compare the two and to debug. (An operator that has only `-inline` and no `-name` gives an error while `Calc::inlineOps` is 0.)
+
+```tcl
+# the smaller of two numbers, in place: stack a b -> a or b
+Calc::defineOperator :min: -name min -inline {
+    over 1; over 1; lt; jumpFalse takeb@; pop; jump done@;
+    label takeb@; reverse 2; pop; label done@;
+}
+```
+
+Keep the text on the stack. It must not use local variables, because it can not know which names the user is using. Count stack positions with `over N` (0 is the top). The only instructions are those of `::tcl::unsupported::assemble`: Tcl 8.6 has fewer than 9.x (there is no `swap` in 8.6; use `reverse 2`).
+
+Inline code saves the call, which is a small gain on short operands: for 3 element vectors `:dot3:` runs in 0.57 µs against 0.80 µs for a `foreach` proc, and the 3 element cross product in 0.99 µs against 1.2 µs for the command. On long lists a `foreach` in a proc is faster than any loop assembled by hand, because `foreach` has instructions that the assembler does not offer. Write the proc first, check it, and add `-inline` only where it pays.
+
+When you write inline code, test it against the proc: compare the results on a few hundred random inputs, and compare with `set Calc::inlineOps 0`. `calcvec.test` does this.
+
+### What an operator can not do
+
+- Operators are infix and binary. There are no postfix operators (a transpose mark) and no prefix ones; use a function, `transpose(m)`.
+- All defined operators are left associative.
+- The compile cache is keyed by the expression text. If you define an operator after an expression using it was compiled, or redefine one, expressions already in the cache keep the old code. Define operators first.
+- Operators are global to the interpreter, and each interpreter needs its own definitions.
+
+### The calcvec module
+
+`calcvec-1.0.tm` is a ready set of vector and matrix operators written with `Calc::defineOperator`. Put it next to `colon-1.0.tm` and use `package require calcvec` (it loads `colon` itself; with the C extension, `load` the extension first).
+
+| Operator | Spelled | Meaning | How |
+|---|---|---|---|
+| `a ⊙ b` | `:dot:` | dot product of two lists of numbers of the same length (an error if the lengths differ) | inline loop |
+| `a :dot3: b` | | dot product of two 3 element lists | inline, no loop |
+| `a × b` | `:cross:` | cross product of two 3 element lists | inline, no loop |
+| `A ⊠ B` | `:mmul:` | matrix product, matrices as lists of rows of any sizes that fit | proc `tcl::mathop::mmul` |
+| `u ⊗ v` | `:outer:` | outer product: row i holds `u[i]*v[j]` | proc `tcl::mathop::outer` |
+
+All five are at the level of `*`, so `1 + u ⊙ v * 2` is `1 + ((u ⊙ v) * 2)`. `2 * u ⊙ v` is `(2 * u) ⊙ v`, which is an error, because `2 * u` is a number times a list; write `2 * (u ⊙ v)`. A 1x1 matrix prints as a single number (`14`, not `{14}`) because that is how Tcl writes a list of one list of one element.
+
+`:dot3:` and `×` do not check the length: a shorter list gives an error from `expr` about an empty value, and extra elements are ignored.
+
+To make your own set, copy `calcvec-1.0.tm`, change the definitions and the package name, and `package require` it. `claude_notes.md` describes how to ask Claude to do that for you.
+
+[Back to top](#contents)
+
 ## Multiple Statements
 
 Calc supports multiple statements separated by:
@@ -971,11 +1066,12 @@ Code that has been compiled by `proc=`, `method=`, `calc=` or `Calc::transformPr
 
 ### Differences from the Tcl module
 
-The results are identical, and the same tests (`calc.test`, `colon_test.tcl`) pass with either. These are the only differences:
+The results are identical, and the same tests (`calc.test`, `colon_test.tcl`, `calcvec.test`) pass with either. These are the only differences:
 
 - The compiler's own commands (`Calc::compile`, `Calc::parse`, `Calc::tokenise`, ...) are C commands, not procs, so `info procs` does not list them and `Calc::transformProcs ::Calc::*` no longer matches them (it never makes sense to transform them).
 - `Calc::parsePattern` and `Calc::parseTernary` called directly, before any expression has been compiled, report a different variable name in the "no such variable" error.
 - The debug-only `depth` counter is not maintained.
+- `Calc::defineOperator` exists in both and works the same, and `calcvec` runs with either: `load` the extension, then `package require calcvec`. In the module, the helper procs `Calc::rebuildOpRe` and `Calc::inlineCode` and the variable `Calc::op_re` exist; the extension needs none of them.
 
 ### Building it
 

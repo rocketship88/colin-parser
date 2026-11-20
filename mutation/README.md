@@ -6,25 +6,36 @@ the test suites, and sees whether anything fails. A mutant that makes no test fa
 
 ## Result
 
-1002 mutants of `colon-1.0.tm` (the C extension `calc.c` is not covered).
+1168 mutants of `colon-1.0.tm` (the C extension `calcext.c` is not covered).
 
 | Tcl | killed | survived | share killed |
 |---|---|---|---|
-| 8.6.14 | 922 | 80 | 92.0% |
-| 9.1.1 | 921 | 81 | 91.9% |
+| 8.6.14 | 1058 | 109 | 90.7% |
+| 9.1.1 | 1057 | 110 | 90.6% |
 
-On 9.1.1 one more mutant survives (#374, which deletes the removal of `_` from `1_000`): Tcl 9 reads
-`1_000` as a number itself, so the removal only matters on 8.6.
+One mutant (#249, which deletes the definition of the tokenizer's operator list) does not load and is
+left out of the score. On 9.1.1 one more mutant survives (#487, which deletes the removal of `_` from
+`1_000`): Tcl 9 reads `1_000` as a number itself, so the removal only matters on 8.6.
 
-The numbers are for the module as it is now, after `&&` and `||` were changed to short circuit and
-nested `?:` was made right associative. Before those two changes the module had 1003 mutants, and
-the tests killed 923 of them (a first run with the older tests had killed 680). The changes removed
-the old `&&`/`||` templates and added the jump code in `parse`; every mutant in the new code was
-killed, and the two new survivors (#429 and #536, `parse 0` changed to `parse 1`) are equivalent now
-that `?` keeps going at equal precedence. The 80 survivors are listed in `survivors.md`, each with
-the reason I think it is equivalent or dead code.
+These numbers are for the module with `Calc::defineOperator` (the user defined operators), the
+namespace lookup for function calls and the variable argument count for native functions. Before those
+were added the module had 1002 mutants and 922 were killed on 8.6. Three suites are run against every
+mutant: `calc.test`, `colon_test.tcl` and `calcvec.test` (the vector operators, which exercise the
+inline code and the `@` labels through the module).
 
-By kind of change (8.6.14): `num` 237 of 269; `cmp` 103 of 113; `neg` 114 of 116; `del` 305 of 335; `swap` 108 of 109; `incr` 23 of 28; `opre` 32 of 32.
+How the final numbers were made: all 1168 mutants were run on both versions. The survivors were read
+(`survivors.md`); some pointed at real gaps, namely that nothing tested the places that record the
+namespace of the compiled code (`:`, `=`, `proc=`, `calc=`, `method=`) with a fresh interpreter, that
+the `\uXXXX` escape in expression text was never really exercised, and the redefinition and
+longest-operator rules of `Calc::defineOperator`. Tests for those were added (`calc-57.37` to
+`57.39`, `calc-57.40`, `57.41` and `calc-58`), and only the survivors were run again with the new
+tests; 7 more mutants were killed on 8.6 and 7 on 9.1, and the table counts them as killed (the
+`killed_by` column of the two csv files says "re-run with calc-58" for them). A mutant that was killed
+stays killed when tests are added, so this gives the same result as running everything again. The
+other 109 and 110 survivors are listed in `survivors.md`, each group with the reason I think it is
+equivalent or dead code.
+
+By kind of change (8.6.14): `num` 264 of 308; `cmp` 123 of 138; `neg` 137 of 140; `del` 363 of 404; `swap` 116 of 117; `incr` 23 of 28; `opre` 32 of 32.
 
 ## Files
 
@@ -32,10 +43,10 @@ By kind of change (8.6.14): `num` 237 of 269; `cmp` 103 of 113; `neg` 114 of 116
 |---|---|
 | `mutate.py` | Makes the mutants from `colon-1.0.tm` and writes `mutants.json` |
 | `run_mutants.py` | Runs `calc.test` and `colon_test.tcl` against each mutant |
-| `mutants.json` | The 1002 mutants (line number, kind, the edit) |
+| `mutants.json` | The 1168 mutants (line number, kind, the edit) |
 | `results.csv` | Status of every mutant on 8.6.14 and what killed it |
 | `results-9.1.csv` | The same run on Tcl 9.1.1 |
-| `survivors.md` | The 80 survivors, grouped by why they do not matter |
+| `survivors.md` | The 110 survivors (on either version), grouped by why they do not matter |
 | `findings.md` | Behavior of the module found along the way |
 
 ## Running it
@@ -47,12 +58,12 @@ python3 mutate.py ../colon-1.0.tm mutants.json
 python3 run_mutants.py .. mutants.json results.csv
 ```
 
-`run_mutants.py` takes the folder that holds `colon-1.0.tm`, `calc.test` and `colon_test.tcl`. Options:
+`run_mutants.py` takes the folder that holds `colon-1.0.tm`, `calc.test`, `colon_test.tcl`, `calcvec.test` and `calcvec-1.0.tm`. On Linux with Tcl 8.6 add `--env LC_ALL=C.UTF-8` so the test file with real symbols is read as UTF-8. Options:
 `--tclsh PATH` to use another interpreter, `--jobs N` (default 2), `--timeout SEC` (default 30),
 `--only 1,2,3` to run only some mutants, `--env NAME=VALUE` (for example `TCL_LIBRARY`), and
 `--progress FILE` to get a small JSON file with the count so far, and `--resume` to continue an
-interrupted run (each result is also appended to `RESULTS.partial` as it finishes). About 1000 mutants take roughly
-15 minutes on two cores, because a mutant that makes a suite loop runs until its timeout.
+interrupted run (each result is also appended to `RESULTS.partial` as it finishes). About 1170 mutants take roughly
+25 minutes on two cores, because a mutant that makes a suite loop runs until its timeout.
 
 The line numbers in `mutants.json` belong to this version of `colon-1.0.tm`. If the module changes,
 run `mutate.py` again.
@@ -63,7 +74,7 @@ run `mutate.py` again.
 - **KILLED**: the output of either suite differs from the unmodified output, or a suite hangs
   past the timeout.
 - **SURVIVED**: both outputs are identical.
-- **STILLBORN**: the mutated module does not load. None of the 1002 were.
+- **STILLBORN**: the mutated module does not load. One of the 1168 was (#249, which deletes the operator list).
 - The timing section at the end of `colon_test.tcl` is cut out of the temporary copy, and timing
   lines are ignored, so only the test results are compared.
 - `colon_test.tcl` always reports one failure in an environment without the tcllib `math` package

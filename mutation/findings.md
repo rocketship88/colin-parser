@@ -25,3 +25,15 @@ Writing tests for the mutants that survived turned up the following. Items 1 and
 7. **Several `[: ...]` on one line.** If the line also contains a `[: {` form, the other brackets on
    that line stay interpreted (still correct, but not assembled). Lines with only unbraced forms
    are all assembled.
+8. **`method=` compiles in the namespace `::oo::define`.** Inside an `oo::define` or `oo::class create`
+   body, `namespace current` is `::oo::define` even when the class is created inside a namespace, so a
+   bare name in a `method=` body is found as a global proc (or `tcl::mathfunc`) but not as a proc of the
+   class's namespace. Qualify those names. `proc=`, `calc=`, `:`, `=` and `Calc::transformProcs` do use
+   the namespace of the calling code (calc-58).
+9. **The compile cache is keyed by the expression text.** Redefining an operator with
+   `Calc::defineOperator` does not change expressions that were already compiled with the old
+   definition; define operators first (see the UserGuide). The tests of redefinition use a different
+   expression text each time for this reason.
+10. **A test file written through a tool can lose a backslash.** `\u2295` typed into a test was turned into the
+    character itself, so the escape was not tested until mutation testing showed that deleting the
+    expansion made no test fail. Check the bytes of such a file with a script, not by eye.

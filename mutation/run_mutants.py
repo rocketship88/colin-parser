@@ -4,8 +4,8 @@
 usage: run_mutants.py SRC_DIR MUTANTS_JSON RESULTS_CSV [--tclsh PATH] [--jobs N] [--only 1,2,3]
                       [--timeout SEC] [--env NAME=VALUE ...]
 
-SRC_DIR holds colon-1.0.tm, calc.test and colon_test.tcl (the files from the zip).
-A mutant is KILLED if the output of calc.test or colon_test.tcl differs from the
+SRC_DIR holds colon-1.0.tm, calc.test, colon_test.tcl, calcvec.test and calcvec-1.0.tm (the files from the zip).
+A mutant is KILLED if the output of calc.test, colon_test.tcl or calcvec.test differs from the
 output of the unmodified module, SURVIVED if neither does. A mutant whose module
 will not even load is STILLBORN and is left out of the score. A mutant that makes
 a suite hang past the timeout counts as KILLED (timeout).
@@ -60,6 +60,8 @@ def loads(d):
 
 def prepare(d, module_text):
     shutil.copy(os.path.join(args.src, 'calc.test'), d)
+    shutil.copy(os.path.join(args.src, 'calcvec.test'), d)
+    shutil.copy(os.path.join(args.src, 'calcvec-1.0.tm'), d)
     t = open(os.path.join(args.src, 'colon_test.tcl')).read()
     open(os.path.join(d, 'colon_test.tcl'), 'w').write(strip_timing(t))
     open(os.path.join(d, 'colon-1.0.tm'), 'w').write(module_text)
@@ -67,7 +69,8 @@ def prepare(d, module_text):
 def signature(d):
     a, ta = run_suite(d, 'calc.test')
     b, tb = run_suite(d, 'colon_test.tcl')
-    return a, b, ta, tb
+    c, tc = run_suite(d, 'calcvec.test')
+    return a, b, c, ta or tc, tb
 
 def first_diff(base, got):
     bl, gl = base.splitlines(), got.splitlines()
@@ -86,9 +89,9 @@ for i in range(3):
     prepare(d, '\n'.join(module))
     s = signature(d)
     if base is None: base = s
-    elif s[:2] != base[:2]:
+    elif s[:3] != base[:3]:
         print('baseline output is not stable between runs, cannot continue'); sys.exit(2)
-print('baseline stable;', len(base[0].splitlines()), 'and', len(base[1].splitlines()), 'lines of output')
+print('baseline stable;', len(base[0].splitlines()), ',', len(base[1].splitlines()), 'and', len(base[2].splitlines()), 'lines of output')
 
 mutants = json.load(open(args.mutants))
 if args.only:
@@ -107,13 +110,15 @@ def do(m):
         if not loads(d):
             status, by = 'STILLBORN', ''
         else:
-            a, b, ta, tb = signature(d)
+            a, b, c, ta, tb = signature(d)
             if ta or tb:
                 status, by = 'KILLED', 'timeout'
             elif a != base[0]:
                 status, by = 'KILLED', 'calc.test ' + first_diff(base[0], a)
             elif b != base[1]:
                 status, by = 'KILLED', 'colon_test.tcl ' + first_diff(base[1], b)
+            elif c != base[2]:
+                status, by = 'KILLED', 'calcvec.test ' + first_diff(base[2], c)
             else:
                 status, by = 'SURVIVED', ''
     except Exception as e:

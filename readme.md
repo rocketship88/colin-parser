@@ -3,6 +3,7 @@
 This is Colin Macleod's original bytecode-based expression evaluator for Tcl, with added support for array references, native functions, multiple statements with assignment operator, bytecode caching, and proc and method compiling.
 
 ## What's New
+- **Your own operators: `Calc::defineOperator`.** Add an infix operator with a symbol (a Unicode character, written `\u2299` so a script can stay ASCII, or a spelled out `:name:`), a precedence, a `tcl::mathop` command or inline assembler for it, and an optional second spelling. The main module stays the same, so a new set of operators is a small separate file. `calcvec-1.0.tm` is the first: `⊙` / `:dot:` dot product, `:dot3:`, `×` / `:cross:` cross product, `⊠` / `:mmul:` matrix product and `⊗` / `:outer:` outer product. Works in the Tcl module and in `calcext.c`. See "Defining Operators" in the UserGuide, and `claude_notes.md` for how to ask Claude to make a set for your own field
 - **`calcext.c`: the whole module as a C extension.** One `load ./calcext.so` (or `calcext.dll`) replaces `package require colon`: every proc of the Tcl module (`:`, `=`, `calc=`, `proc=`, `method=`, `Calc::transformProcs`, `Calc::debug` and the whole compiler) is now a C command with the same name and the same output. Loading, compiling and transforming are 2-4x faster, startup is about a third of the module's, and each additional interpreter or thread costs a few hundredths of a millisecond instead of several milliseconds. See "The C extension" below. `calc.c`, the older extension that only provided the `::` command, is kept for history
 - A braced block followed by more code on the same line now keeps that code: `proc= f {args} {: { args -> (a, b, c) }; return "$a $b $c"}` used to drop the `return`
 - An unterminated block (`: {` with no closing brace) now gives `line N: Calc: unterminated block` instead of running forever
@@ -40,6 +41,8 @@ This is Colin Macleod's original bytecode-based expression evaluator for Tcl, wi
 - Strict form: `: edge => ((x1,y1),(x2,y2))` raises an error if the list sizes do not match the pattern
 - Skip with `_`: `: (first,_,last) = pt`
 - List builder: `: ((t1,t2),(t2,t3),(t3,t1))` builds a list of lists, same as nested `list()` calls
+- Your own operators with `Calc::defineOperator`: a symbol or spelled out name, a precedence, a command or inline assembler. `calcvec` adds `⊙` `×` `⊠` `⊗` for vectors and matrices
+- In expression text `\uXXXX` (four hex digits) means that character, so scripts with Unicode operators can be ASCII
 - Command alias, `=` or `:` or choose your own (must use `:` or `=` when using `proc=` or `method=`)
 - Optional C extension, `calcext.c`: replaces the Tcl module with a single `load`; same results, 2-4x faster compiling and startup. (`calc.c`, which only provided a faster `::` command, is kept for history)
   
@@ -69,7 +72,7 @@ The file will run all tests automatically and display results. This requires bot
 
 ### Running the tests against the C extension
 
-`calc.test` and `colon_test.tcl` load the Tcl module with `package require colon`. To test the C extension instead, build `calcext` (see below), put it in the same directory, and change that line near the top of each file to
+`calc.test`, `colon_test.tcl` and `calcvec.test` load the Tcl module with `package require colon`. To test the C extension instead, build `calcext` (see below), put it in the same directory, and change that line near the top of each file to
 
 ```tcl
 load ./calcext.so      ;# or  load calcext.dll
@@ -284,6 +287,34 @@ I also added a few things that are not about Calc: sliders for the background, b
 
 `polyhedra-compare.html` shows the original and converted procs side by side with the changed lines shaded, and it also compares `MatrixRotation` with a version written in the syntax of TIP 759. It is a single self-contained page, so it can be opened from a file or served by GitHub Pages.
 
+## Defining operators and the `calcvec` module
+
+Calc can be extended with new infix operators without editing it:
+
+```tcl
+package require calcvec          ;# loads colon too; with the C extension, load it first
+
+set u {1 2 3}; set v {4 5 6}
+: u ⊙ v                         ;# 32, dot product    (or  : u :dot: v )
+: u × v                       ;# -3 6 -3, cross product  (or  : u :cross: v )
+: 1 + u ⊙ v * 2                 ;# 65: ⊙ is at the level of *, left to right
+: A ⊠ B                          ;# matrix product, matrices as lists of rows
+```
+
+An operator is one call, made in a small module of your own:
+
+```tcl
+proc ::tcl::mathop::pair {a b} {list $a $b}
+Calc::defineOperator <+> -name pair -spelled :pair:     ;# : 1 <+> 2  is  {1 2}
+Calc::defineOperator :min: -inline {                    ;# compiled in place, no call
+    over 1; over 1; lt; jumpFalse takeb@; pop; jump done@; label takeb@; reverse 2; pop; label done@;
+}
+```
+
+`-name` names the `tcl::mathop` command that is called, `-prec` the precedence (11, the level of `*`, by default), `-spelled` a second spelling, and `-inline` assembler text where every `@` becomes a number that is new for each use, so the labels stay unique. The full description, the rules for inline code, the limits (infix and left associative only) and the encoding notes for Unicode symbols are in the UserGuide under "Defining Operators". The speed gain of inline code is small, so the main reason for the symbols is that the source reads like the mathematics.
+
+`claude_notes.md` is written for a new Claude session: give it that file and ask for the operators you need (chemistry, finance, geometry, ...), and it knows the design, the recipes, the traps and how to test the result.
+
 ## The C extension
 
 `calcext.c` is the complete Tcl module, written in C. It defines the same commands with the same names, arguments, error messages and generated assembly, so it is a drop-in replacement: replace `package require colon` with a `load` and nothing else changes. It provides `:`, `=`, `calc=`, `proc=`, `oo::define::method=`, `Calc::transformProcs`, `Calc::debug` and the compiler's own commands (`Calc::compile`, `Calc::compile0`, `Calc::transform=`, `Calc::tokenise` and so on), and it creates `Calc::cache` and `Calc::calc` as ordinary Tcl variables just as the module did.
@@ -365,11 +396,13 @@ There is no `rename` step and nothing else to configure: `:` and `=` are already
 
 ## Testing
 
+Three test files, `calc.test` (including the operator tests calc-57), `colon_test.tcl` and `calcvec.test`, run against the module or the C extension (see above). `calcvec.test` checks every operator of `calcvec` against plain Tcl reference procs, including random comparisons of the inline code with the command and with the loops of `polyhedra.tcl`.
+
 All tests verify `=` command results against `expr` to ensure correctness.
 
 The C extension is held to the Tcl module's results: both test files give the same results with either, a differential test of about 9,000 expressions and `transform=` bodies compared the two with no differences, and 6,000 randomly generated bodies produced identical `transform=` output. Statement coverage of `calcext.c` by the test files and those comparisons is about 89%; most of the rest is error cleanup for failures of Tcl's own API calls.
 
-The `mutation` folder holds a mutation-testing harness: it makes about a thousand small changes to
+The `mutation` folder holds a mutation-testing harness: it makes 1168 small changes to
 `colon-1.0.tm` and checks that the tests notice each one. See `mutation/README.md`. The tests it led to
 (precedence of every operator pair, `<=` and `>=`, native function arity, the exact output of
 `proc=`/`calc=`/`method=`, `Calc::transformProcs` options, the compile cache limit, and a fresh
