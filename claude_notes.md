@@ -27,12 +27,12 @@ new notation is a small module that calls `Calc::defineOperator`. Do not edit th
 |---|---|
 | `colon-1.0.tm` | The Tcl module: the whole compiler |
 | `calcext.c` | The same thing as a C extension (`load ./calcext.so`). Provides package `colon` by itself |
-| `calcvec-1.0.tm` | **The example operator set**: dot, cross, matrix and outer product. Copy this to make a new one |
+| `calcvec-1.0.tm` | **The example operator set**: dot, cross, matrix and outer product, and `:vadd:` `:vsub:` vector sum and difference (operators that are only a proc, at the level of + and -). Copy this to make a new one |
 | `calc.test` | Main test suite (tcltest). Operator tests are calc-57.* |
 | `colon_test.tcl` | Second suite (a `verify` harness), plus timing |
 | `calcvec.test` | Tests for calcvec. Use it as the model for the tests of a new set |
 | `UserGuide.md`, `readme.md` | Documentation. "Defining Operators" in the UserGuide is the reference |
-| `polyhedra.tcl`, `polyhedra-compare.html` | A larger converted program and its side by side page |
+| `polyhedra.tcl`, `polyhedra_ops.tcl`, `polyhedra-compare.html` | A larger converted program, the same program using the `calcvec` operators, and the side by side page (a button switches Calc / Calc+calcvec) |
 | `mutation/` | Mutation testing of `colon-1.0.tm` (see 7) |
 | `calc.c` | Old extension that only provided `::`; history only |
 
@@ -133,7 +133,7 @@ gcc -O2 -Wall -shared -fPIC -DUSE_TCL_STUBS -I<tcl9>/include -o calcext.so calce
 ```
 
 Expected: `calc.test` total 380, 378 passed, 2 skipped (constraint `stackProblem`), 0 failed; `calcvec.test`
-48 passed. `colon_test.tcl` reports one failure where the tcllib package `math` is missing. That is
+61 passed. `colon_test.tcl` reports one failure where the tcllib package `math` is missing. That is
 the baseline, not a bug. Use `LC_ALL=C.UTF-8` on Linux so the test files with symbols are read as UTF-8.
 
 ## 7. Mutation testing

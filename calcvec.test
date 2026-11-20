@@ -202,5 +202,54 @@ test vec-6.6 {Calc::inlineOps 0 gives the same answers for every operator} -body
     }
 } -result 1
 
+# ---- vector sum and difference ---------------------------------------------------------------------------
+test vec-7.1 {:vadd:} -body { $ip eval {: u :vadd: v} } -result {5 7 9}
+test vec-7.2 {:vsub:} -body { $ip eval {: u :vsub: v} } -result {-3 -3 -3}
+test vec-7.3 {left to right: (u - v) - u} -body { $ip eval {: u :vsub: v :vsub: u} } -result {-4 -5 -6}
+test vec-7.4 {mixed with :vadd: left to right: (u - v) + u} -body { $ip eval {: u :vsub: v :vadd: u} } -result {-2 -1 0}
+test vec-7.5 {a cross product is done before the sum: (u x v) + u} -body { $ip eval {: u × v :vadd: u} } -result {-2 8 0}
+test vec-7.6 {the same level as + and -, so a scalar sum is done in order with it} -body {
+    $ip eval {: 1 + 2 * 3 - (u ⊙ v) + 100}
+} -result 75
+test vec-7.7 {floating point and empty lists} -body {
+    $ip eval {set e {}; list [: (0.5, 1.5) :vadd: (0.25, 2)] [: e :vsub: e]}
+} -result {{0.75 3.5} {}}
+test vec-7.8 {tuples and parentheses on both sides, in a proc} -body {
+    $ip eval {proc p {a} {: ((a, a+1) :vsub: (1, 1)) :vadd: (10, 20)}; p 5}
+} -result {14 25}
+test vec-7.9 {lists of different length are an error} -body {
+    $ip eval {: u :vadd: (1, 2)}
+} -returnCodes error -result {vadd: the lists have different lengths, 3 and 2}
+test vec-7.10 {the same for :vsub:} -body {
+    $ip eval {: (1, 2) :vsub: u}
+} -returnCodes error -result {vsub: the lists have different lengths, 2 and 3}
+test vec-7.11 {a value that is not a number is an error} -body {
+    catch {$ip eval {: (1, x) :vadd: (1, 2)}} msg; set msg
+} -result {can't read "x": no such variable}
+test vec-7.12 {Calc::inlineOps 0 and the result of the compiled command agree} -body {
+    $ip eval {
+        set a [list [: u :vadd: v] [: u :vsub: v]]
+        set Calc::inlineOps 0
+        set b [list [: u :vadd: v] [: u :vsub: v]]
+        set Calc::inlineOps 1
+        expr {$a eq $b}
+    }
+} -result 1
+test vec-7.13 {random lists agree with plain Tcl} -body {
+    $ip eval {
+        expr {srand(7)}
+        set bad 0
+        for {set k 0} {$k < 200} {incr k} {
+            set n [expr {int(rand()*6)}]
+            set p {}; set q {}
+            for {set i 0} {$i < $n} {incr i} { lappend p [expr {int(rand()*100)-50}]; lappend q [expr {rand()*10}] }
+            set want_add [lmap a $p b $q {expr {$a + $b}}]
+            set want_sub [lmap a $p b $q {expr {$a - $b}}]
+            if {[: p :vadd: q] ne $want_add || [: p :vsub: q] ne $want_sub} {incr bad}
+        }
+        set bad
+    }
+} -result 0
+
 interp delete $ip
 cleanupTests

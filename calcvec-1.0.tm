@@ -2,6 +2,8 @@
 #   \u2299 / :dot:      dot product of lists of any length (compiled in place as a loop)
 #   :dot3:            dot product of 3 element lists, compiled in place with no loop
 #   \u00d7 / :cross:  cross product of two 3 element lists, compiled in place with no loop
+#   :vadd: :vsub:    sum and difference of two lists of the same length, at the level of + and -
+#   \u22a0 / :mmul:  matrix product      \u2297 / :outer:  outer product
 # The symbols are written as backslash-u escapes below, so this file is pure ASCII.
 package require colon
 package provide calcvec 1.0
@@ -90,3 +92,20 @@ proc ::tcl::mathop::outer {u v} {
 }
 Calc::defineOperator \u22a0 -name mmul -prec 11 -spelled :mmul:
 Calc::defineOperator \u2297 -name outer -prec 11 -spelled :outer:
+
+# Vector sum and difference, element by element.  They sit at the level of + and - (10), so
+# a :vadd: b :vsub: c is (a + b) - c, and a cross or dot product is done first.
+proc ::tcl::mathop::vadd {u v} {
+    if {[llength $u] != [llength $v]} {
+        error "vadd: the lists have different lengths, [llength $u] and [llength $v]"
+    }
+    lmap a $u b $v { expr {$a + $b} }
+}
+proc ::tcl::mathop::vsub {u v} {
+    if {[llength $u] != [llength $v]} {
+        error "vsub: the lists have different lengths, [llength $u] and [llength $v]"
+    }
+    lmap a $u b $v { expr {$a - $b} }
+}
+Calc::defineOperator :vadd: -name vadd -prec 10
+Calc::defineOperator :vsub: -name vsub -prec 10

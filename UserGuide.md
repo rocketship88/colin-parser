@@ -115,7 +115,7 @@ Calc supports standard operators with C-like precedence:
 - `->` takes a list apart into a pattern of variables (see Tuples)
 - `=>` the same, but the sizes must match exactly (see Tuples)
 
-More operators can be added without changing Calc: see [Defining Operators](#defining-operators). The optional `calcvec` module uses that to add vector and matrix operators (`⊙`, `×`, `⊠`, `⊗`).
+More operators can be added without changing Calc: see [Defining Operators](#defining-operators). The optional `calcvec` module uses that to add vector and matrix operators (`⊙`, `×`, `⊠`, `⊗`, `:vadd:`, `:vsub:`).
 
 ### Operator Precedence (lowest to highest)
 
@@ -703,8 +703,12 @@ When you write inline code, test it against the proc: compare the results on a f
 | `a × b` | `:cross:` | cross product of two 3 element lists | inline, no loop |
 | `A ⊠ B` | `:mmul:` | matrix product, matrices as lists of rows of any sizes that fit | proc `tcl::mathop::mmul` |
 | `u ⊗ v` | `:outer:` | outer product: row i holds `u[i]*v[j]` | proc `tcl::mathop::outer` |
+| `u :vadd: v` | | sum of two lists of the same length, element by element (an error if the lengths differ) | proc `tcl::mathop::vadd` |
+| `u :vsub: v` | | difference, element by element | proc `tcl::mathop::vsub` |
 
-All five are at the level of `*`, so `1 + u ⊙ v * 2` is `1 + ((u ⊙ v) * 2)`. `2 * u ⊙ v` is `(2 * u) ⊙ v`, which is an error, because `2 * u` is a number times a list; write `2 * (u ⊙ v)`. A 1x1 matrix prints as a single number (`14`, not `{14}`) because that is how Tcl writes a list of one list of one element.
+The first five are at the level of `*`; `:vadd:` and `:vsub:` are at the level of `+` and `-` and go left to right, so `u × v :vadd: u` is `(u × v) :vadd: u` and `u :vsub: v :vadd: w` is `(u - v) + w`. For the first five,  `1 + u ⊙ v * 2` is `1 + ((u ⊙ v) * 2)`. `2 * u ⊙ v` is `(2 * u) ⊙ v`, which is an error, because `2 * u` is a number times a list; write `2 * (u ⊙ v)`. A 1x1 matrix prints as a single number (`14`, not `{14}`) because that is how Tcl writes a list of one list of one element.
+
+`:vadd:` and `:vsub:` are written with a name between colons because `+` and `-` are built in and cannot be redefined; they are good examples of an operator that is just a proc, with no inline code.
 
 `:dot3:` and `×` do not check the length: a shorter list gives an error from `expr` about an empty value, and extra elements are ignored.
 
